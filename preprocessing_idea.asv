@@ -76,24 +76,23 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     % Hold the current plot to retain all subplots
     hold on;
     
-    processing_step = 1;
+    preprocessing_step = 1;
     % plot raw data in first row
-    for ith_channel = 1:num_channels    
-    % subplot(nr_of_preprocessing_steps, nr_channels, ith_channel + (ith_preprocessing_step - 1)* nr_channels);
-    subplot(num_preprocessing_steps, num_channels, ith_channel + (num_preprocessing_steps_array(processing_step) - 1)* num_channels);
+    for ith_channel = 1:num_channels
+    subplot(num_preprocessing_steps, num_channels, ith_channel + (num_preprocessing_steps_array(preprocessing_step) - 1)* num_channels);
             spectrogram(EEG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
             ylim(fpass);
             caxis([-40, 40]);
             colormap('jet');
             colorbar;
             title(EEG.chanlocs(ith_channel).labels, 'Interpreter', 'none');
-            %annotation('textbox', [0, row_positions(num_preprocessing_steps(1)), 1, 0.05], 'String', 'Raw data', ...
-            %'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
+            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'Raw data', ...
+            'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
     end
 
     %%%%% bandpass and detrend, to remove sweat and other artifacts
     fprintf('---bandpass detrend\n');
-    processing_step = 2;
+    preprocessing_step = 2;
     if size(EEG.data,1) > 0
         for chcha = 1:size(EEG.data,1)
             EEG.data(chcha,:) = detrend(EEG.data(chcha,:));
@@ -104,18 +103,18 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     % plot detrended data in second row
     for ith_channel = 1:num_channels
     
-    subplot(num_preprocessing_steps, num_channels, ith_channel + (num_preprocessing_steps_array(processing_step) - 1)* num_channels);
+    subplot(num_preprocessing_steps, num_channels, ith_channel + (num_preprocessing_steps_array(preprocessing_step) - 1)* num_channels);
             spectrogram(EEG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
             ylim(fpass);
             caxis([-40, 40]);
             colormap('jet');
             colorbar;
-            %annotation('textbox', [0, row_positions(1), 1, 0.05], 'String', 'Bandpass & Detrend', ...
-            %'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
+            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'Bandpass & Detrend', ...
+            'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
     end      
 
     %%%%% detect bad signal to remove from signal
-    processing_step = 3;
+    preprocessing_step = 3;
     [remove_channel_which, cut_chunks, rem_ind_all] = eeg_acrossfreq_artifact(EEG);
     
     % plotting after removal of bad signal
@@ -124,14 +123,14 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
             scutc = size(cut_chunks{ith_channel},1);
             ccunk = cut_chunks{ith_channel};
 
-    subplot(num_preprocessing_steps, num_channels, ith_channel + (num_preprocessing_steps_array(processing_step) - 1)* num_channels);
+    subplot(num_preprocessing_steps, num_channels, ith_channel + (num_preprocessing_steps_array(preprocessing_step) - 1)* num_channels);
             spectrogram(EEG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
             ylim(fpass);
             caxis([-40, 40]);
             colormap('jet');
             colorbar;
-            %annotation('textbox', [0, row_positions(1), 1, 0.05], 'String', 'Removal of bad signal', ...
-            %'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
+            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'Removal of bad signal', ...
+            'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
 
     %generate all the black boxes to overlay the bad signal
     for ccc = 1:length(ccunk)
@@ -142,19 +141,46 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     end
     end
 
-    % Release hold after plotting all subplots
-    hold off;
+   
 
     %%%%% remove electrical noise from sienna, and make sure to exclude the movement artifacts for calculation (output EEG still has all data, including the movments)
+    preprocessing_step = 4;
     EEG = eeg_electricalnoise_reducer(EEG, rem_ind_all);
+    % plotting after removal of electrical noise
+    for ith_channel = 1:length(EEG.chanlocs)
+    % cut chunks
+            scutc = size(cut_chunks{ith_channel},1);
+            ccunk = cut_chunks{ith_channel};
+
+    subplot(num_preprocessing_steps, num_channels, ith_channel + (num_preprocessing_steps_array(preprocessing_step) - 1)* num_channels);
+            spectrogram(EEG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
+            ylim(fpass);
+            caxis([-40, 40]);
+            colormap('jet');
+            colorbar;
+            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'Removal of bad signal', ...
+            'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
+
+    %generate all the black boxes to overlay the bad signal
+    for ccc = 1:length(ccunk)
+        x = [ccunk(ccc, 1)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 1)/divideby];
+                    % y = [ax.YLim(1), ax.YLim(1), ax.YLim(2), ax.YLim(2)];
+                    y = [fpass(1), fpass(1), fpass(2), fpass(2)];
+                    patch(x, y, 'black', 'FaceAlpha', 1);
+    end
+    end
+
+     % Release hold after plotting all subplots
+    hold off;
+
 
     %%%%% remove heart beat artifacts here again I require the movement artifacts to be excluded (eeg_jelena_ecg_removal will probably not yet run correctly, I will need to adjust it)
+    preprocessing_step = 5;
     EEG = eeg_jelena_ecg_removal(EEG, ECG, cut_chunks);
 
     %%%%% do some EOG removal here
-
+    preprocessing_step = 6;
     ...
-    prep_steps_plot(EEG);
 
     save('EEG_preprocessed.mat', 'EEG'); % later in another feature extraction script you could load('EEG_preprocessed.mat'), of course by including the edf_name in the name
 
