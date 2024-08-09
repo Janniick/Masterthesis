@@ -6,7 +6,7 @@ addpath('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\matlab_proce
 
 % eeglab path
 addpath('D:\Masterarbeit Jannick\scripts\2_Preprocessing\eeglab2024.0');
-eeglab; % Initialize EEGLAB (eeglab nogui; if you want no GUI)
+eeglab nogui; % Initialize EEGLAB (eeglab nogui; if you want no GUI)
 
 % plot Funktion
 addpath('D:\Masterarbeit Jannick\scripts\2_Preprocessing');
@@ -66,11 +66,11 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
 
     % start of plotting
     figure('visible', 'on');
+    % Hold the current plot to retain all subplots
+    hold on;
 
     % plot raw data in first row
     for ith_channel = 1:length(EEG.chanlocs)
-    % cut chunkss
-
     % subplot(nr_of_preprocessing_steps, nr_channels, ith_channel + (ith_preprocessing_step - 1)* nr_channels);
     subplot(6, length(EEG.chanlocs), ith_channel + (1 - 1)* length(EEG.chanlocs));
             spectrogram(EEG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
@@ -78,7 +78,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
             caxis([-40, 40]);
             colormap('jet');
             colorbar;
-
+            title(EEG.chanlocs(ith_channel).labels, 'Interpreter', 'none');
     end
 
     %%%%% bandpass and detrend, to remove sweat and other artifacts
@@ -92,21 +92,17 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     
     % plot detrended data in second row
     for ith_channel = 1:length(EEG.chanlocs)
-    % cut chunks
-            scutc = size(cut_chunks{ ith_channel},1);
-            ccunk = cut_chunks{ith_channel};
-
-    subplot(nr_of_preprocessing, nr_channels, ith_channel + (ith_preprocessing_step - 1)* nr_channels);
+    
+     subplot(6, length(EEG.chanlocs), ith_channel + (2 - 1)* length(EEG.chanlocs));
             spectrogram(EEG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
             ylim(fpass);
             caxis([-40, 40]);
             colormap('jet');
             colorbar;
+    end      
 
-    x = [ccunk(ccc, 1)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 1)/divideby];
-                    % y = [ax.YLim(1), ax.YLim(1), ax.YLim(2), ax.YLim(2)];
-                    y = [fpass(1), fpass(1), fpass(2), fpass(2)];
-                    patch(x, y, 'black', 'FaceAlpha', 1);
+    % Release hold after plotting all subplots
+    hold off;
 
     %%%%% detect bad signal to remove from signal
     [remove_channel_which, cut_chunks, rem_ind_all] = eeg_acrossfreq_artifact(EEG);
@@ -127,7 +123,24 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
 end
 
 
+   for ith_channel = 1:length(EEG.chanlocs)
+    % cut chunks
+            scutc = size(cut_chunks{ ith_channel},1);
+            ccunk = cut_chunks{ith_channel};
 
+    subplot(nr_of_preprocessing, nr_channels, ith_channel + (ith_preprocessing_step - 1)* nr_channels);
+            spectrogram(EEG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
+            ylim(fpass);
+            caxis([-40, 40]);
+            colormap('jet');
+            colorbar;
+
+    x = [ccunk(ccc, 1)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 1)/divideby];
+                    % y = [ax.YLim(1), ax.YLim(1), ax.YLim(2), ax.YLim(2)];
+                    y = [fpass(1), fpass(1), fpass(2), fpass(2)];
+                    patch(x, y, 'black', 'FaceAlpha', 1);
+
+   end
 
 
  
