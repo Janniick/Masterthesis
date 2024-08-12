@@ -68,7 +68,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     num_channels = length(EEG.chanlocs);
     num_preprocessing_steps = 6; % Adjust this as needed
     num_preprocessing_steps_array = 1:num_preprocessing_steps;
-    % Dynamic positioning
+    % Dynamic positioning of titles in plot
     row_positions = linspace(0.9, 0.1, num_preprocessing_steps + 1);
 
     % start of plotting
@@ -187,7 +187,36 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
             caxis([-40, 40]);
             colormap('jet');
             colorbar;
-            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'Removal of electrical noise', ...
+            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'ECG removal', ...
+            'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
+
+    %generate all the black boxes to overlay the bad signal
+    for ccc = 1:length(ccunk)
+        x = [ccunk(ccc, 1)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 1)/divideby];
+                    % y = [ax.YLim(1), ax.YLim(1), ax.YLim(2), ax.YLim(2)];
+                    y = [fpass(1), fpass(1), fpass(2), fpass(2)];
+                    patch(x, y, 'black', 'FaceAlpha', 1);
+    end
+    end
+
+
+    %%%%% do some EOG removal here
+    preprocessing_step = 6;
+    EEG = pop_dusk2dawn(EEG, cfg);
+    pop_d2d_plotValidation(EEG);
+    % plotting after removal of EOG
+    for ith_channel = 1:length(EEG.chanlocs)
+    % cut chunks
+            scutc = size(cut_chunks{ith_channel},1);
+            ccunk = cut_chunks{ith_channel};
+
+    subplot(num_preprocessing_steps, num_channels, ith_channel + (num_preprocessing_steps_array(preprocessing_step) - 1)* num_channels);
+            spectrogram(EEG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
+            ylim(fpass);
+            caxis([-40, 40]);
+            colormap('jet');
+            colorbar;
+            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'EOG removal', ...
             'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
 
     %generate all the black boxes to overlay the bad signal
@@ -201,37 +230,11 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
      % Release hold after plotting all subplots
     hold off;
 
-
-    %%%%% do some EOG removal here
-    preprocessing_step = 6;
-    ...
-
     save('EEG_preprocessed.mat', 'EEG'); % later in another feature extraction script you could load('EEG_preprocessed.mat'), of course by including the edf_name in the name
 
 end
 
 
-   for ith_channel = 1:length(EEG.chanlocs)
-    % cut chunks
-            scutc = size(cut_chunks{ ith_channel},1);
-            ccunk = cut_chunks{ith_channel};
-
-    subplot(nr_of_preprocessing, nr_channels, ith_channel + (ith_preprocessing_step - 1)* nr_channels);
-            spectrogram(EEG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
-            ylim(fpass);
-            caxis([-40, 40]);
-            colormap('jet');
-            colorbar;
-
-    x = [ccunk(ccc, 1)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 1)/divideby];
-                    % y = [ax.YLim(1), ax.YLim(1), ax.YLim(2), ax.YLim(2)];
-                    y = [fpass(1), fpass(1), fpass(2), fpass(2)];
-                    patch(x, y, 'black', 'FaceAlpha', 1);
-
-   end
-
-
- 
 
 
 
@@ -242,3 +245,11 @@ fig = gcf; % get current figure
         exportgraphics(fig, ...
             cfg.savenamepath, ...
             'Resolution',300)
+
+
+%%%%% CHECK HOW DUSK2DAWN WORKS
+EEG = pop_biosig('D:\Masterarbeit Jannick\Data\DEX-FX_v1\DEX-FX_v1_EEG\VP01\DEX-FX_1.3.edf');
+EEG = pop_resample( EEG, 256);
+EEG = eeg_checkset( EEG );
+EEG = pop_select( EEG, 'channel',{'F3'});
+EEG = pop_select( EEG, 'time',[0 1000] );
