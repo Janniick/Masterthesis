@@ -49,6 +49,30 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     EEG = pop_select(EEG, 'channel', {'F3', 'F4'});
     %EEG = pop_select(EEG, 'channel', {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'});
     newchannelLabels = {EEG.chanlocs.labels};
+    
+    % Define start and end times in minutes for the REM window
+    startTime_REM = 2 * 60 + 45;  % Start at 2 hours and 45 minutes
+    endTime_REM = startTime_REM + 16;  % End time 16 minutes later
+    % Convert times to seconds
+    startSecond_REM = startTime_REM * 60;
+    endSecond_REM = endTime_REM * 60;
+    % Calculate sample indices
+    startIndex_REM = round(startSecond_REM * EEG.srate) + 1;
+    endIndex_REM = round(endSecond_REM * EEG.srate);
+    % Extract EEG data for the REM window
+    selectedEEGData_REM = EEG.data(:, startIndex_REM:endIndex_REM);
+    % Create a new EEG structure for the REM window
+    EEG_REM = EEG;  % Copy the original structure
+    EEG_REM.data = selectedEEGData_REM;  % Replace data with the REM window
+    EEG_REM.pnts = size(selectedEEGData_REM, 2);  % Update the number of points
+    EEG_REM.xmax = EEG_REM.xmin + (EEG_REM.pnts - 1) / EEG.srate;  % Update xmax accordingly
+    % Extract ECG data for the REM window
+    selectedECGData = ECG.data(:, startIndex_REM:endIndex_REM);
+    % Create a new ECG structure for the selected window
+    ECG_REM = ECG;  % Copy the original structure
+    ECG_REM.data = selectedECGData;  % Replace data with the selected window
+    ECG_REM.pnts = size(selectedECGData, 2);  % Update the number of points
+    ECG_REM.xmax = ECG_REM.xmin + (ECG_REM.pnts - 1) / ECG.srate;  % Update xmax accordingly
 
     % define parameters for plotting
     srate = EEG.srate;
@@ -57,19 +81,19 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     nfft = []; % Use default NFFT
     fpass = [0.5 40];
     % how to divide seconds to get values in the plotting frame
-    if size(EEG.data(1,:),2) < srate*60 % less than a minute (in seconds)
+    if size(EEG_REM.data(1,:),2) < srate*60 % less than a minute (in seconds)
         divideby = 1;
-    elseif size(EEG.data(1,:),2) < srate*60*60 % less than an hour (in minutes)
+    elseif size(EEG_REM.data(1,:),2) < srate*60*60 % less than an hour (in minutes)
         divideby = 60;
     else % less than an hour (in hours)
         divideby = 60*60;
     end
     % Number of channels and preprocessing steps
-    num_channels = length(EEG.chanlocs);
+    num_channels = length(EEG_REM.chanlocs);
     num_preprocessing_steps = 6; % Adjust this as needed
     num_preprocessing_steps_array = 1:num_preprocessing_steps;
     % Dynamic positioning of titles in plot
-    row_positions = linspace(0.9, 0.1, num_preprocessing_steps);
+    row_positions = linspace(0.9, 0.1, num_preprocessing_steps+1);
 
     % start of plotting
     figure('visible', 'on');
@@ -80,23 +104,23 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     % plot raw data in first row
     for ith_channel = 1:num_channels
     subplot(num_preprocessing_steps, num_channels, ith_channel + (num_preprocessing_steps_array(preprocessing_step) - 1)* num_channels);
-            spectrogram(EEG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
+            spectrogram(EEG_REM.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
             ylim(fpass);
             caxis([-40, 40]);
             colormap('jet');
             colorbar;
             title(EEG.chanlocs(ith_channel).labels, 'Interpreter', 'none');
-            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'Raw data', ...
+            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'Raw data of REM sleep', ...
             'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
     end
 
     %%%%% bandpass and detrend, to remove sweat and other artifacts
     fprintf('---bandpass detrend\n');
     preprocessing_step = 2;
-    if size(EEG.data,1) > 0
-        for chcha = 1:size(EEG.data,1)
-            EEG.data(chcha,:) = detrend(EEG.data(chcha,:));
-            EEG.data(chcha,:) = bandpass(EEG.data(chcha,:), [0.5, 40], EEG.srate);
+    if size(EEG_REM.data,1) > 0
+        for chcha = 1:size(EEG_REM.data,1)
+            EEG_REM_detrend.data(chcha,:) = detrend(EEG_REM.data(chcha,:));
+            EEG_REM_detrend.data(chcha,:) = bandpass(EEG_REM.data(chcha,:), [0.5, 40], EEG.srate);
         end
     end
     
@@ -104,7 +128,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     for ith_channel = 1:num_channels
     
     subplot(num_preprocessing_steps, num_channels, ith_channel + (num_preprocessing_steps_array(preprocessing_step) - 1)* num_channels);
-            spectrogram(EEG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
+            spectrogram(EEG_REM_detrend.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
             ylim(fpass);
             caxis([-40, 40]);
             colormap('jet');
@@ -115,7 +139,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
 
     %%%%% detect bad signal to remove from signal
     preprocessing_step = 3;
-    [remove_channel_which, cut_chunks, rem_ind_all] = eeg_acrossfreq_artifact(EEG);
+    [remove_channel_which, cut_chunks, rem_ind_all] = eeg_acrossfreq_artifact(EEG_REM_detrend);
     
     % plotting after removal of bad signal
     for ith_channel = 1:length(EEG.chanlocs)
@@ -124,7 +148,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
             ccunk = cut_chunks{ith_channel};
 
     subplot(num_preprocessing_steps, num_channels, ith_channel + (num_preprocessing_steps_array(preprocessing_step) - 1)* num_channels);
-            spectrogram(EEG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
+            spectrogram(EEG_REM_detrend.data(ith_channel,:), hamming(window_length), noverlap, nfft, EEG.srate, 'yaxis')
             ylim(fpass);
             caxis([-40, 40]);
             colormap('jet');
@@ -145,7 +169,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
 
     %%%%% remove electrical noise from sienna, and make sure to exclude the movement artifacts for calculation (output EEG still has all data, including the movments)
     preprocessing_step = 4;
-    EEG = eeg_electricalnoise_reducer(EEG, rem_ind_all);
+    EEG_REM_noise = eeg_electricalnoise_reducer(EEG_REM_detrend, rem_ind_all);
     % plotting after removal of electrical noise
     for ith_channel = 1:length(EEG.chanlocs)
     % cut chunks
@@ -153,7 +177,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
             ccunk = cut_chunks{ith_channel};
 
     subplot(num_preprocessing_steps, num_channels, ith_channel + (num_preprocessing_steps_array(preprocessing_step) - 1)* num_channels);
-            spectrogram(EEG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
+            spectrogram(EEG_REM_noise.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
             ylim(fpass);
             caxis([-40, 40]);
             colormap('jet');
@@ -174,7 +198,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
 
     %%%%% remove heart beat artifacts here again I require the movement artifacts to be excluded (eeg_jelena_ecg_removal will probably not yet run correctly, I will need to adjust it)
     preprocessing_step = 5;
-    EEG = eeg_jelena_ecg_removal(EEG, ECG, cut_chunks);
+    EEG_REM_ECG = eeg_jelena_ecg_removal(EEG_REM_noise, ECG_REM, cut_chunks);
     % plotting after removal of ECG
     for ith_channel = 1:length(EEG.chanlocs)
     % cut chunks
@@ -182,7 +206,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
             ccunk = cut_chunks{ith_channel};
 
     subplot(num_preprocessing_steps, num_channels, ith_channel + (num_preprocessing_steps_array(preprocessing_step) - 1)* num_channels);
-            spectrogram(EEG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
+            spectrogram(EEG_REM_ECG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
             ylim(fpass);
             caxis([-40, 40]);
             colormap('jet');
@@ -202,7 +226,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
 
     %%%%% do some EOG removal here
     preprocessing_step = 6;
-    EEG = pop_dusk2dawn_clean(EEG);
+    EEG_REM_EOG = pop_dusk2dawn_clean(EEG_REM_ECG);
     
     % plotting after removal of EOG
     for ith_channel = 1:length(EEG.chanlocs)
@@ -211,7 +235,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
             ccunk = cut_chunks{ith_channel};
 
     subplot(num_preprocessing_steps, num_channels, ith_channel + (num_preprocessing_steps_array(preprocessing_step) - 1)* num_channels);
-            spectrogram(EEG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
+            spectrogram(EEG_REM_EOG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
             ylim(fpass);
             caxis([-40, 40]);
             colormap('jet');
@@ -237,25 +261,19 @@ end
 
 
 
-
-%%%%% save plot on disc
-fig = gcf; % get current figure
-        fig.Position(3) = nrchio*600;
-        fig.Position(4) = nmat*160;
-        exportgraphics(fig, ...
-            cfg.savenamepath, ...
-            'Resolution',300)
-
-
-%%%%% CHECK HOW DUSK2DAWN WORKS
-EEG = pop_biosig('D:\Masterarbeit Jannick\Data\DEX-FX_v1\DEX-FX_v1_EEG\VP01\DEX-FX_1.3.edf');
-EEG = pop_select( EEG, 'channel',{'F3', 'F4'});
-EEG = pop_select( EEG, 'time',[0 10000] );
-EEG = pop_resample( EEG, 256);
-EEG = eeg_checkset( EEG );
-[ALLEEG, EEG, CURRENTSET] = eeg_store(ALLEEG, EEG);
-eeglab redraw;
-
-
-EEG = pop_dusk2dawn_clean(EEG);
-pop_d2d_plotValidation(EEG);
+    % Define start and end times in minutes for the Non-REM window
+    startTime_nonREM = 1 * 60 + 30;  % Start at 1:30 hours
+    endTime_nonREM = startTime_nonREM + 16;  % End time 16 minutes later
+    % Convert times to seconds
+    startSecond_nonREM = startTime_nonREM * 60;
+    endSecond_nonREM = endTime_nonREM * 60;
+    % Calculate sample indices
+    startIndex_nonREM = round(startSecond_nonREM * EEG.srate) + 1;
+    endIndex_nonREM = round(endSecond_nonREM * EEG.srate);
+    % Extract EEG data for the Non-REM window
+    selectedEEGData_nonREM = EEG_REM.data(:, startIndex_nonREM:endIndex_nonREM);
+    % Create a new EEG structure for the Non-REM window
+    EEG_nonREM = EEG;  % Copy the original structure
+    EEG_nonREM.data = selectedEEGData_nonREM;  % Replace data with the Non-REM window
+    EEG_nonREM.pnts = size(selectedEEGData_nonREM, 2);  % Update the number of points
+    EEG_nonREM.xmax = EEG_nonREM.xmin + (EEG_nonREM.pnts - 1) / EEG.srate;  % Update xmax accordingly
