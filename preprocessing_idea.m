@@ -202,8 +202,8 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
 
     %%%%% do some EOG removal here
     preprocessing_step = 6;
-    EEG = pop_dusk2dawn(EEG, cfg);
-    pop_d2d_plotValidation(EEG);
+    EEG = pop_dusk2dawn_clean(EEG);
+    
     % plotting after removal of EOG
     for ith_channel = 1:length(EEG.chanlocs)
     % cut chunks
@@ -249,7 +249,13 @@ fig = gcf; % get current figure
 
 %%%%% CHECK HOW DUSK2DAWN WORKS
 EEG = pop_biosig('D:\Masterarbeit Jannick\Data\DEX-FX_v1\DEX-FX_v1_EEG\VP01\DEX-FX_1.3.edf');
+EEG = pop_select( EEG, 'channel',{'F3', 'F4'});
+EEG = pop_select( EEG, 'time',[0 10000] );
 EEG = pop_resample( EEG, 256);
 EEG = eeg_checkset( EEG );
-EEG = pop_select( EEG, 'channel',{'F3'});
-EEG = pop_select( EEG, 'time',[0 1000] );
+[ALLEEG, EEG, CURRENTSET] = eeg_store(ALLEEG, EEG);
+eeglab redraw;
+
+
+EEG = pop_dusk2dawn_clean(EEG);
+pop_d2d_plotValidation(EEG);

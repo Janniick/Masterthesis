@@ -187,7 +187,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
             caxis([-40, 40]);
             colormap('jet');
             colorbar;
-            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'Removal of electrical noise', ...
+            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'ECG removal', ...
             'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
 
     %generate all the black boxes to overlay the bad signal
@@ -202,7 +202,8 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
 
     %%%%% do some EOG removal here
     preprocessing_step = 6;
-    ...
+    EEG = pop_dusk2dawn(EEG, cfg);
+    pop_d2d_plotValidation(EEG);
     % plotting after removal of EOG
     for ith_channel = 1:length(EEG.chanlocs)
     % cut chunks
@@ -215,7 +216,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
             caxis([-40, 40]);
             colormap('jet');
             colorbar;
-            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'Removal of electrical noise', ...
+            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'EOG removal', ...
             'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
 
     %generate all the black boxes to overlay the bad signal
@@ -244,3 +245,17 @@ fig = gcf; % get current figure
         exportgraphics(fig, ...
             cfg.savenamepath, ...
             'Resolution',300)
+
+
+%%%%% CHECK HOW DUSK2DAWN WORKS
+EEG = pop_biosig('D:\Masterarbeit Jannick\Data\DEX-FX_v1\DEX-FX_v1_EEG\VP01\DEX-FX_1.3.edf');
+EEG = pop_select( EEG, 'channel',{'F3', 'F4'});
+EEG = pop_select( EEG, 'time',[0 10000] );
+EEG = pop_resample( EEG, 256);
+EEG = eeg_checkset( EEG );
+[ALLEEG, EEG, CURRENTSET] = eeg_store(ALLEEG, EEG);
+eeglab redraw;
+
+
+EEG = pop_dusk2dawn_clean(EEG);
+pop_d2d_plotValidation(EEG);
