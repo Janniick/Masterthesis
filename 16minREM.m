@@ -33,6 +33,12 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     edf_path = fullfile(edf_files(i).folder, edf_name);
     thename = split(edf_name, '.');
     thename = thename{1};
+    % Where to save the generated files
+    [pathtosave, ~, ~] = fileparts(edf_path);
+    % participant number
+    % Get the participant number
+    [parentPath, ~, ~] = fileparts(edf_path);
+    [~, participant, ~] = fileparts(parentPath);
 
     % Use eeglab biosig to load edf eeg file
     fprintf('---load data\n');
@@ -230,7 +236,14 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     %%%%% do some EOG removal here
     preprocessing_step = 6;
     EEG_REM_EOG = EEG_REM_ECG;
-    EEG_REM_EOG = pop_dusk2dawn_clean(EEG_REM_ECG);
+    % EEG_REM_EOG = pop_dusk2dawn_clean(EEG_REM_ECG);
+    [~,~,EEG_REM_EOG,removed_channels] = clean_artifacts(EEG_REM_EOG, ...
+        'Highpass','off', ...
+        'ChannelCriterion', 'off', ... % 0 or 0.3 correlation? high density EEG is different
+        'FlatlineCriterion', 'off', ...
+        'LineNoiseCriterion', 'off', ...
+        'BurstCriterion', 30, ... %burst criterion!!
+        'WindowCriterion', 0.25);
     
     % plotting after removal of EOG
     for ith_channel = 1:length(EEG.chanlocs)
@@ -257,9 +270,76 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     end
      % Release hold after plotting all subplots
     hold off;
+    % Saving the plot as png in pathtosave
+    filename = ['Spectrogram_REM_', participant, '.png'];
+    print(gcf, fullfile(pathtosave, filename ), '-dpng', '-r300');
 
-    % Saving the plot as png in a specific directory
-    print(gcf, 'D:\Masterarbeit Jannick\scripts\2_Preprocessing\16minREM.png', '-dpng', '-r300');
+    % Calculate spectrum for each step
+    % For EEG_REM (Raw data)
+    [spectra1, freqs1] = spectopo(EEG_REM.data, 0, EEG_REM.srate, 'plot', 'off');
+    % For EEG_REM_detrend
+    [spectra2, freqs2] = spectopo(EEG_REM_detrend.data, 0, EEG_REM_detrend.srate, 'plot', 'off');
+    % For EEG_REM_noise
+    [spectra3, freqs3] = spectopo(EEG_REM_noise.data, 0, EEG_REM_noise.srate, 'plot', 'off');
+    % For EEG_REM_ECG
+    [spectra4, freqs4] = spectopo(EEG_REM_ECG.data, 0, EEG_REM_ECG.srate, 'plot', 'off');
+    % For EEG_REM_EOG
+    [spectra5, freqs5] = spectopo(EEG_REM_EOG.data, 0, EEG_REM_EOG.srate, 'plot', 'off');
+   
+    % Create a figure for all spectrograms
+    figure;
+    % Plot the first spectrum 
+    plot(freqs1, spectra1(1,:), 'blue-o');
+    hold on; 
+    plot(freqs2, spectra2(1,:), 'cyan-*'); 
+    hold on; 
+    plot(freqs3, spectra3(1,:), 'magenta-o'); 
+    hold on; 
+    plot(freqs4, spectra4(1,:), 'red-*'); 
+    hold on; 
+    plot(freqs5, spectra5(1,:), 'green-o'); 
+    % Adding labels and title
+    xlabel('Frequency (Hz)');
+    xlim([0 40]);
+    ylabel('Power (dB)');
+    title('Comparison of EEG Power Spectra in REM');
+    % Add a legend to identify which line corresponds to which EEG data
+    legend({'Raw data', 'Detrend', 'Noise', 'ECG', 'EOG'});
+    % Enable grid for better visibility
+    grid on;
+    % Release the hold on the plot
+    hold off;
+
+    % Saving the plot as png in pathtosave
+    filename = ['Powerspectrum_individual_REM_', participant, '.png'];
+    print(gcf, fullfile(pathtosave, filename ), '-dpng', '-r300');
+    
+    % Create a figure for all spectrogram-differences
+    figure;
+    % Plot the first spectrum 
+    plot(freqs1, spectra1(1,:)-spectra2(1,:), 'blue-o');
+    hold on; 
+    plot(freqs2, spectra2(1,:)-spectra3(1,:), 'cyan-*'); 
+    hold on; 
+    plot(freqs3, spectra3(1,:)-spectra4(1,:), 'magenta-o'); 
+    hold on; 
+    plot(freqs3, spectra4(1,:)-spectra5(1,:), 'green-*'); 
+    % Adding labels and title
+    xlabel('Frequency (Hz)');
+    xlim([0 40]);
+    ylabel('Power (dB)');
+    title('Comparison of EEG Power Spectra in REM');
+    % Add a legend to identify which line corresponds to which EEG data
+    legend({'Raw data - Detrend', 'Detrend - Noise', 'Noise - ECG', 'ECG - EOG'});
+    % Enable grid for better visibility
+    grid on;
+    % Release the hold on the plot
+    hold off;
+
+    % Saving the plot as png in pathtosave
+    filename = ['Powerspectrum_differences_REM_', participant, '.png'];
+    print(gcf, fullfile(pathtosave, filename ), '-dpng', '-r300');
+    
 
     save('EEG_preprocessed.mat', 'EEG'); % later in another feature extraction script you could load('EEG_preprocessed.mat'), of course by including the edf_name in the name
 
