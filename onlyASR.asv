@@ -56,29 +56,30 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     %EEG = pop_select(EEG, 'channel', {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'});
     newchannelLabels = {EEG.chanlocs.labels};
     
-    % Define start and end times in minutes for the preffered window
-    startTime = 2 * 60 + 30;  % Start at 1 hours and 0 minutes
-    endTime = startTime + 16;  % End time 16 minutes later
-    % Convert times to seconds
-    startSecond = startTime * 60;
-    endSecond = endTime * 60;
-    % Calculate sample indices
-    startIndex = round(startSecond * EEG.srate) + 1;
-    endIndex = round(endSecond * EEG.srate);
-    % Extract EEG data for the REM window
-    selectedEEGData = EEG.data(:, startIndex:endIndex);
-    % Create a new EEG structure for the REM window
+    % % Define start and end times in minutes for the preffered window
+    condition = 'fullnight_onlyASR';
+    % startTime = 2 * 60 + 30;  % Start at 1 hours and 0 minutes
+    % endTime = startTime + 16;  % End time 16 minutes later
+    % % Convert times to seconds
+    % startSecond = startTime * 60;
+    % endSecond = endTime * 60;
+    % % Calculate sample indices
+    % startIndex = round(startSecond * EEG.srate) + 1;
+    % endIndex = round(endSecond * EEG.srate);
+    % % Extract EEG data for the REM window
+    % selectedEEGData = EEG.data(:, startIndex:endIndex);
+    % % Create a new EEG structure for the REM window
     EEG_raw = EEG;  % Copy the original structure
-    EEG_raw.data = selectedEEGData;  % Replace data with the REM window
-    EEG_raw.pnts = size(selectedEEGData, 2);  % Update the number of points
-    EEG_raw.xmax = EEG_raw.xmin + (EEG_raw.pnts - 1) / EEG.srate;  % Update xmax accordingly
-    % Extract ECG data for the REM window
-    selectedECGData = ECG.data(:, startIndex:endIndex);
-    % Create a new ECG structure for the selected window
-    ECG = ECG;  % Copy the original structure
-    ECG.data = selectedECGData;  % Replace data with the selected window
-    ECG.pnts = size(selectedECGData, 2);  % Update the number of points
-    ECG.xmax = ECG.xmin + (ECG.pnts - 1) / ECG.srate;  % Update xmax accordingly
+    % EEG_raw.data = selectedEEGData;  % Replace data with the REM window
+    % EEG_raw.pnts = size(selectedEEGData, 2);  % Update the number of points
+    % EEG_raw.xmax = EEG_raw.xmin + (EEG_raw.pnts - 1) / EEG.srate;  % Update xmax accordingly
+    % % Extract ECG data for the REM window
+    % selectedECGData = ECG.data(:, startIndex:endIndex);
+    % % Create a new ECG structure for the selected window
+    % ECG = ECG;  % Copy the original structure
+    % ECG.data = selectedECGData;  % Replace data with the selected window
+    % ECG.pnts = size(selectedECGData, 2);  % Update the number of points
+    % ECG.xmax = ECG.xmin + (ECG.pnts - 1) / ECG.srate;  % Update xmax accordingly
 
     % define parameters for plotting
     srate = EEG.srate;
@@ -96,7 +97,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     end
     % Number of channels and preprocessing steps
     num_channels = length(EEG_raw.chanlocs);
-    num_preprocessing_steps = 6; % Adjust this as needed
+    num_preprocessing_steps = 3; % Adjust this as needed
     num_preprocessing_steps_array = 1:num_preprocessing_steps;
     % Dynamic positioning of titles in plot
     row_positions = linspace(0.9, 0.1, num_preprocessing_steps+1);
@@ -142,100 +143,11 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
             colorbar;
             annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'Bandpass & Detrend', ...
             'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
-    end      
+    end    
 
-    %%%%% detect bad signal to remove from signal
+    %%%%% do some EOG removal here (ASR)
     preprocessing_step = 3;
-    [remove_channel_which, cut_chunks, rem_ind_all] = eeg_acrossfreq_artifact(EEG_detrend);
-    
-    % plotting after removal of bad signal
-    for ith_channel = 1:length(EEG.chanlocs)
-    % cut chunks
-            scutc = size(cut_chunks{ith_channel},1);
-            ccunk = cut_chunks{ith_channel};
-
-    subplot(num_preprocessing_steps, num_channels, ith_channel + (num_preprocessing_steps_array(preprocessing_step) - 1)* num_channels);
-            spectrogram(EEG_detrend.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
-            ylim(fpass);
-            caxis([-40, 40]);
-            colormap('jet');
-            colorbar;
-            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'Removal of bad signal', ...
-            'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
-
-    %generate all the black boxes to overlay the bad signal
-    for ccc = 1:size(ccunk, 1)
-        x = [ccunk(ccc, 1)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 1)/divideby];
-                    % y = [ax.YLim(1), ax.YLim(1), ax.YLim(2), ax.YLim(2)];
-                    y = [fpass(1), fpass(1), fpass(2), fpass(2)];
-                    patch(x, y, 'black', 'FaceAlpha', 1);
-    end
-    end
-
-   
-
-    %%%%% remove electrical noise from sienna, and make sure to exclude the movement artifacts for calculation (output EEG still has all data, including the movments)
-    preprocessing_step = 4;
-    EEG_noise = EEG_detrend;
-    EEG_noise = eeg_electricalnoise_reducer(EEG_detrend, rem_ind_all);
-    % plotting after removal of electrical noise
-    for ith_channel = 1:length(EEG.chanlocs)
-    % cut chunks
-            scutc = size(cut_chunks{ith_channel},1);
-            ccunk = cut_chunks{ith_channel};
-
-    subplot(num_preprocessing_steps, num_channels, ith_channel + (num_preprocessing_steps_array(preprocessing_step) - 1)* num_channels);
-            spectrogram(EEG_noise.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
-            ylim(fpass);
-            caxis([-40, 40]);
-            colormap('jet');
-            colorbar;
-            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'Removal of electrical noise', ...
-            'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
-
-    %generate all the black boxes to overlay the bad signal
-    for ccc = 1:size(ccunk, 1)
-        x = [ccunk(ccc, 1)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 1)/divideby];
-                    % y = [ax.YLim(1), ax.YLim(1), ax.YLim(2), ax.YLim(2)];
-                    y = [fpass(1), fpass(1), fpass(2), fpass(2)];
-                    patch(x, y, 'black', 'FaceAlpha', 1);
-    end
-    end
-
-    
-
-    %%%%% remove heart beat artifacts here again I require the movement artifacts to be excluded (eeg_jelena_ecg_removal will probably not yet run correctly, I will need to adjust it)
-    preprocessing_step = 5;
-    EEG_ECG = EEG_noise;
-    EEG_ECG = eeg_jelena_ecg_removal(EEG_noise, ECG, cut_chunks);
-    % plotting after removal of ECG
-    for ith_channel = 1:length(EEG.chanlocs)
-    % cut chunks
-            scutc = size(cut_chunks{ith_channel},1);
-            ccunk = cut_chunks{ith_channel};
-
-    subplot(num_preprocessing_steps, num_channels, ith_channel + (num_preprocessing_steps_array(preprocessing_step) - 1)* num_channels);
-            spectrogram(EEG_ECG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
-            ylim(fpass);
-            caxis([-40, 40]);
-            colormap('jet');
-            colorbar;
-            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'ECG removal', ...
-            'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
-
-    %generate all the black boxes to overlay the bad signal
-    for ccc = 1:size(ccunk, 1)
-        x = [ccunk(ccc, 1)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 1)/divideby];
-                    % y = [ax.YLim(1), ax.YLim(1), ax.YLim(2), ax.YLim(2)];
-                    y = [fpass(1), fpass(1), fpass(2), fpass(2)];
-                    patch(x, y, 'black', 'FaceAlpha', 1);
-    end
-    end
-
-
-    %%%%% do some EOG removal here
-    preprocessing_step = 6;
-    EEG_EOG = EEG_ECG;
+    EEG_EOG = EEG_detrend;
     % EEG_EOG = pop_dusk2dawn_clean(EEG_ECG);
     [~,~,EEG_EOG,removed_channels] = clean_artifacts(EEG_EOG, ...
         'Highpass','off', ...
@@ -247,9 +159,6 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     
     % plotting after removal of EOG
     for ith_channel = 1:length(EEG.chanlocs)
-    % cut chunks
-            scutc = size(cut_chunks{ith_channel},1);
-            ccunk = cut_chunks{ith_channel};
 
     subplot(num_preprocessing_steps, num_channels, ith_channel + (num_preprocessing_steps_array(preprocessing_step) - 1)* num_channels);
             spectrogram(EEG_EOG.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis')
@@ -257,21 +166,13 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
             caxis([-40, 40]);
             colormap('jet');
             colorbar;
-            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'EOG removal', ...
+            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'ASR', ...
             'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
-
-    %generate all the black boxes to overlay the bad signal
-    for ccc = 1:size(ccunk, 1)
-        x = [ccunk(ccc, 1)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 1)/divideby];
-                    % y = [ax.YLim(1), ax.YLim(1), ax.YLim(2), ax.YLim(2)];
-                    y = [fpass(1), fpass(1), fpass(2), fpass(2)];
-                    patch(x, y, 'black', 'FaceAlpha', 1);
-    end
     end
      % Release hold after plotting all subplots
     hold off;
     % Saving the plot as png in pathtosave
-    filename = ['Spectrogram_non-REM_', participant, '.png'];
+    filename = ['Spectrogram_fullnight_onlyASR_', participant, '.png'];
     print(gcf, fullfile(pathtosave, filename ), '-dpng', '-r300');
 
     % Calculate spectrum for each step
@@ -279,10 +180,10 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     [spectra1, freqs1] = spectopo(EEG_raw.data, 0, EEG_raw.srate, 'plot', 'off');
     % For EEG_detrend
     [spectra2, freqs2] = spectopo(EEG_detrend.data, 0, EEG_detrend.srate, 'plot', 'off');
-    % For EEG_noise
-    [spectra3, freqs3] = spectopo(EEG_noise.data, 0, EEG_noise.srate, 'plot', 'off');
-    % For EEG_ECG
-    [spectra4, freqs4] = spectopo(EEG_ECG.data, 0, EEG_ECG.srate, 'plot', 'off');
+    % % For EEG_noise
+    % [spectra3, freqs3] = spectopo(EEG_noise.data, 0, EEG_noise.srate, 'plot', 'off');
+    % % For EEG_ECG
+    % [spectra4, freqs4] = spectopo(EEG_ECG.data, 0, EEG_ECG.srate, 'plot', 'off');
     % For EEG_EOG
     [spectra5, freqs5] = spectopo(EEG_EOG.data, 0, EEG_EOG.srate, 'plot', 'off');
    
@@ -293,16 +194,17 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     hold on; 
     plot(freqs2, spectra2(1,:), 'cyan-*'); 
     hold on; 
-    plot(freqs3, spectra3(1,:), 'magenta-o'); 
-    hold on; 
-    plot(freqs4, spectra4(1,:), 'red-*'); 
-    hold on; 
+    % plot(freqs3, spectra3(1,:), 'magenta-o'); 
+    % hold on; 
+    % plot(freqs4, spectra4(1,:), 'red-*'); 
+    % hold on; 
     plot(freqs5, spectra5(1,:), 'green-o'); 
     % Adding labels and title
     xlabel('Frequency (Hz)');
     xlim([0 40]);
     ylabel('Power (dB)');
-    title('Comparison of EEG Power Spectra in non-REM');
+    title = ['Comparison of EEG Power Spectra in', cond
+    title('Comparison of EEG Power Spectra in full night only ASR');
     % Add a legend to identify which line corresponds to which EEG data
     legend({'Raw data', 'Detrend', 'Noise', 'ECG', 'EOG'});
     % Enable grid for better visibility
