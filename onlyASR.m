@@ -117,7 +117,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
             colormap('jet');
             colorbar;
             title(EEG.chanlocs(ith_channel).labels, 'Interpreter', 'none');
-            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'Raw data of non-REM sleep', ...
+            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', ['Raw data of ', condition], ...
             'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
     end
 
@@ -172,7 +172,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
      % Release hold after plotting all subplots
     hold off;
     % Saving the plot as png in pathtosave
-    filename = ['Spectrogram_', condition,'_', participant, '.png'];
+    filename = [participant, '_', condition, '_Spectrogram.png'];
     print(gcf, fullfile(pathtosave, filename ), '-dpng', '-r300');
 
     % Calculate spectrum for each step
@@ -213,7 +213,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     hold off;
 
     % Saving the plot as png in pathtosave
-    filename = [titleplot, '_', participant, '.png'];
+    filename = [participant, '_', condition, '_Powerspectrum_individual.png'];
     print(gcf, fullfile(pathtosave, filename ), '-dpng', '-r300');
     
     % Create a figure for all spectrogram-differences
@@ -236,7 +236,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     hold off;
 
     % Saving the plot as png in pathtosave
-    filename = [titleplot, '_', participant, '.png'];
+    filename = [participant, '_', condition, '_Powerspectrum_differences.png'];
     print(gcf, fullfile(pathtosave, filename ), '-dpng', '-r300');
     
 

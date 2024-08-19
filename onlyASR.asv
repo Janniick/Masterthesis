@@ -57,7 +57,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     newchannelLabels = {EEG.chanlocs.labels};
     
     % % Define start and end times in minutes for the preffered window
-    condition = 'fullnight_onlyASR';
+    condition = 'fullnight onlyASR';
     % startTime = 2 * 60 + 30;  % Start at 1 hours and 0 minutes
     % endTime = startTime + 16;  % End time 16 minutes later
     % % Convert times to seconds
@@ -117,7 +117,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
             colormap('jet');
             colorbar;
             title(EEG.chanlocs(ith_channel).labels, 'Interpreter', 'none');
-            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', 'Raw data of non-REM sleep', ...
+            annotation('textbox', [0, row_positions(num_preprocessing_steps_array(preprocessing_step)), 1, 0.05], 'String', ['Raw data of ', condition], ...
             'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12);
     end
 
@@ -172,7 +172,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
      % Release hold after plotting all subplots
     hold off;
     % Saving the plot as png in pathtosave
-    filename = ['Spectrogram_fullnight_onlyASR_', participant, '.png'];
+    filename = [participant, '_', condition, '_Spectrogram.png'];
     print(gcf, fullfile(pathtosave, filename ), '-dpng', '-r300');
 
     % Calculate spectrum for each step
@@ -203,17 +203,17 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     xlabel('Frequency (Hz)');
     xlim([0 40]);
     ylabel('Power (dB)');
-    title = ['Comparison of EEG Power Spectra in', cond
-    title('Comparison of EEG Power Spectra in full night only ASR');
+    titleplot = ['Comparison of EEG Power Spectra in ', condition]
+    title(titleplot);
     % Add a legend to identify which line corresponds to which EEG data
-    legend({'Raw data', 'Detrend', 'Noise', 'ECG', 'EOG'});
+    legend({'Raw data', 'Detrend', 'ASR'});
     % Enable grid for better visibility
     grid on;
     % Release the hold on the plot
     hold off;
 
     % Saving the plot as png in pathtosave
-    filename = ['Powerspectrum_individual_non-REM_', participant, '.png'];
+    filename = [participant, '_', condition, '_', participant, '.png'];
     print(gcf, fullfile(pathtosave, filename ), '-dpng', '-r300');
     
     % Create a figure for all spectrogram-differences
@@ -221,25 +221,22 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     % Plot the first spectrum 
     plot(freqs1, spectra1(1,:)-spectra2(1,:), 'blue-o');
     hold on; 
-    plot(freqs2, spectra2(1,:)-spectra3(1,:), 'cyan-*'); 
-    hold on; 
-    plot(freqs3, spectra3(1,:)-spectra4(1,:), 'magenta-o'); 
-    hold on; 
-    plot(freqs3, spectra4(1,:)-spectra5(1,:), 'green-*'); 
+    plot(freqs2, spectra2(1,:)-spectra5(1,:), 'cyan-*');
     % Adding labels and title
     xlabel('Frequency (Hz)');
     xlim([0 40]);
     ylabel('Power (dB)');
-    title('Comparison of EEG Power Spectra in non-REM');
+    titleplot = ['Difference of EEG Power Spectra in ', condition]
+    title(titleplot);
     % Add a legend to identify which line corresponds to which EEG data
-    legend({'Raw data - Detrend', 'Detrend - Noise', 'Noise - ECG', 'ECG - EOG'});
+    legend({'Raw data - Detrend', 'Detrend - ASR'});
     % Enable grid for better visibility
     grid on;
     % Release the hold on the plot
     hold off;
 
     % Saving the plot as png in pathtosave
-    filename = ['Powerspectrum_differences_non-REM_', participant, '.png'];
+    filename = [titleplot, '_', participant, '.png'];
     print(gcf, fullfile(pathtosave, filename ), '-dpng', '-r300');
     
 

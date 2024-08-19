@@ -59,7 +59,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     EEG_raw = pop_resample(EEG_raw, 256);
     
     % Define start and end times in minutes for the preffered window
-    condition = 'fullnight';
+    condition = 'nonREM';
     startTime = 2 * 60 + 0;  % Start at 1 hours and 0 minutes
     endTime = startTime + 16;  % End time 16 minutes later
     % Convert times to seconds
