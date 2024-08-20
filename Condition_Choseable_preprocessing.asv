@@ -12,7 +12,7 @@ eeglab nogui; % Initialize EEGLAB (eeglab nogui; if you want no GUI)
 addpath('D:\Masterarbeit Jannick\scripts\2_Preprocessing');
 
 % edf file directory
-folderpath = 'D:\Masterarbeit Jannick\Data\DEX-FX_v1\DEX-FX_v1_EEG';
+folderpath = 'D:\Masterarbeit Jannick\Data\GHB_TRA\GHB_TRA_EEG';
 edf_files = dir(fullfile(folderpath, '*\*.edf'));
 
 % omit bad files (if necessary)
@@ -57,32 +57,33 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     % downsample
     fprintf('---downsample\n');
     EEG_raw = pop_resample(EEG_raw, 256);
+    ECG = pop_resample(ECG, 256);
     
     % Define start and end times in minutes for the preffered window
     condition = 'fullnight';
-    startTime = 2 * 60 + 0;  % Start at 1 hours and 0 minutes
-    endTime = startTime + 16;  % End time 16 minutes later
-    % Convert times to seconds
-    startSecond = startTime * 60;
-    endSecond = endTime * 60;
-    % Calculate sample indices
-    startIndex = round(startSecond * EEG.srate) + 1;
-    endIndex = round(endSecond * EEG.srate);
-    % Extract EEG data for the REM window
-    selectedEEGData = EEG.data(:, startIndex:endIndex);
-    % Create a new EEG structure for the REM window
-    EEG_raw.data = selectedEEGData;  % Replace data with the REM window
-    EEG_raw.pnts = size(selectedEEGData, 2);  % Update the number of points
-    EEG_raw.xmax = EEG_raw.xmin + (EEG_raw.pnts - 1) / EEG.srate;  % Update xmax accordingly
-    % Extract ECG data for the REM window
-    selectedECGData = ECG.data(:, startIndex:endIndex);
-    % Create a new ECG structure for the selected window
-    ECG.data = selectedECGData;  % Replace data with the selected window
-    ECG.pnts = size(selectedECGData, 2);  % Update the number of points
-    ECG.xmax = ECG.xmin + (ECG.pnts - 1) / ECG.srate;  % Update xmax accordingly
+    % startTime = 2 * 60 + 0;  % Start at 1 hours and 0 minutes
+    % endTime = startTime + 16;  % End time 16 minutes later
+    % % Convert times to seconds
+    % startSecond = startTime * 60;
+    % endSecond = endTime * 60;
+    % % Calculate sample indices
+    % startIndex = round(startSecond * EEG_raw.srate) + 1;
+    % endIndex = round(endSecond * EEG_raw.srate);
+    % % Extract EEG data for the chosen window
+    % selectedEEGData = EEG_raw.data(:, startIndex:endIndex);
+    % % Create a new EEG structure for the chosen window
+    % EEG_raw.data = selectedEEGData;  % Replace data with the chosen window
+    % EEG_raw.pnts = size(selectedEEGData, 2);  % Update the number of points
+    % EEG_raw.xmax = EEG_raw.xmin + (EEG_raw.pnts - 1) / EEG_raw.srate;  % Update xmax accordingly
+    % % Extract ECG data for the chosen window
+    % selectedECGData = ECG.data(:, startIndex:endIndex);
+    % % Create a new ECG structure for the selected window
+    % ECG.data = selectedECGData;  % Replace data with the selected window
+    % ECG.pnts = size(selectedECGData, 2);  % Update the number of points
+    % ECG.xmax = ECG.xmin + (ECG.pnts - 1) / ECG.srate;  % Update xmax accordingly
 
     % define parameters for plotting
-    srate = EEG.srate;
+    srate = EEG_raw.srate;
     window_length = 4*srate;
     noverlap = window_length/2;
     nfft = []; % Use default NFFT
@@ -101,24 +102,21 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
 
     %%%%% bandpass and detrend, to remove sweat and other artifacts
     fprintf('---bandpass detrend\n');
-    preprocessing_step = 2;
     EEG_detrend = EEG_raw;
     if size(EEG_raw.data,1) > 0
         for chcha = 1:size(EEG_raw.data,1)
             EEG_detrend.data(chcha,:) = detrend(EEG_raw.data(chcha,:));
-            EEG_detrend.data(chcha,:) = bandpass(EEG_raw.data(chcha,:), [0.5, 40], EEG.srate);
+            EEG_detrend.data(chcha,:) = bandpass(EEG_detrend.data(chcha,:), [0.5, 40], EEG_raw.srate);
         end
     end
     
 
     %%%%% detect bad signal to remove from signal
-    preprocessing_step = 3;
     fprintf('---detecting bad signal\n');
     [remove_channel_which, cut_chunks, rem_ind_all] = eeg_acrossfreq_artifact(EEG_detrend);
     
    
     %%%%% remove electrical noise from sienna, and make sure to exclude the movement artifacts for calculation (output EEG still has all data, including the movments)
-    preprocessing_step = 4;
     fprintf('---removal electrical noise\n');
     EEG_noise = EEG_detrend;
     rem_ind_all = sum(rem_ind_all,1) > 0; % von matrix zu vektor, falls irgendwo eine 1 ist (bad signal) wird der ganze Zeitpunkt auf 1 gesetzt
@@ -126,14 +124,12 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     
 
     %%%%% remove heart beat artifacts here again I require the movement artifacts to be excluded (eeg_jelena_ecg_removal will probably not yet run correctly, I will need to adjust it)
-    preprocessing_step = 5;
     fprintf('---ECG removal\n');
     EEG_ECG = EEG_noise;
     EEG_ECG = eeg_jelena_ecg_removal(EEG_noise, ECG, cut_chunks);
 
 
     %%%%% do some EOG removal here
-    preprocessing_step = 6;
     fprintf('---ASR\n');
     EEG_EOG = EEG_ECG;
     [~,~,EEG_EOG,removed_channels] = clean_artifacts(EEG_EOG, ...
@@ -143,7 +139,9 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
         'LineNoiseCriterion', 'off', ...
         'BurstCriterion', 30, ... %burst criterion!!
         'WindowCriterion', 0.25);
-    
+    warning('off', 'MATLAB:colon:nonIntegerIndex');
+
+
     % Calculate spectrum for each step
     % For EEG_REM (Raw data)
     fprintf('---calculate the spectrum of every preprocessing step\n');
@@ -160,7 +158,10 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
    
   
 % Start of plotting the spectrogram
-figure('visible', 'on');
+fig = figure('visible', 'off', 'WindowStyle', 'normal');
+% Maximize the figure window
+screenSize = get(0, 'ScreenSize'); % Get the screen size from the root window
+set(fig, 'Position', [1 1 screenSize(3) screenSize(4)]); % Set the figure size to cover the whole screen
 hold on;
 % Array of EEG structures and labels
 EEG_steps = {EEG_raw, EEG_detrend, EEG_noise, EEG_ECG, EEG_EOG, EEG_EOG};
@@ -179,7 +180,7 @@ for step = 1:length(EEG_steps)
         colormap('jet');
         colorbar;
         % Title for each channel
-        title(EEG.chanlocs(ith_channel).labels, 'Interpreter', 'none');
+        title(EEG_raw.chanlocs(ith_channel).labels, 'Interpreter', 'none');
         % Add black bars if cut chunks are available for this step
         if ~isempty(cut_chunks_steps{step})
             ccunk = cut_chunks_steps{step}{ith_channel};
@@ -209,7 +210,7 @@ disp(['Saved ', filename, ' in ',  pathtosave]);
 
  % Create a figure for all power spectra
     fprintf('---plot the individual spectra\n');
-    figure;
+    figure; %('visible', 'on');
     % Plot the first spectrum 
     plot(freqs1, spectra1(1,:), 'blue-o');
     hold on; 
@@ -226,7 +227,8 @@ disp(['Saved ', filename, ' in ',  pathtosave]);
     ylabel('Power (dB)');
     title(['Individual Power Spectra during ', condition]);
     % Add a legend to identify which line corresponds to which EEG data
-    legend({'Raw data', 'Detrend', 'Noise', 'ECG', 'EOG'});
+    % legend({'Raw data', 'Detrend', 'Noise', 'ECG', 'EOG'});
+    legend({'M1', 'M2', 'A1', 'A2', 'C3'});
     % Enable grid for better visibility
     grid on;
     % Release the hold on the plot
@@ -240,7 +242,7 @@ disp(['Saved ', filename, ' in ',  pathtosave]);
 
      % Create a figure for all spectrogram-differences
     fprintf('---plot the differences of the spectra\n');
-    figure;
+    figure('visible', 'off');
     % Plot the first spectrum 
     plot(freqs1, spectra1(1,:)-spectra2(1,:), 'blue-o');
     hold on; 
@@ -271,3 +273,57 @@ disp(['Saved ', filename, ' in ',  pathtosave]);
     % Display the full path of the saved file in the command window
     disp(['Saved ', savename, ' in ',  pathtosave]);
 end
+
+
+% Find the index of 'M1' in the labels array
+indexM1 = find(strcmp({EEG_raw.chanlocs.labels},'M1'))
+indexM2 = find(strcmp({EEG_raw.chanlocs.labels},'M2'))
+indexA1 = find(strcmp({EEG_raw.chanlocs.labels},'A1'))
+indexA2 = find(strcmp({EEG_raw.chanlocs.labels},'A2'))
+indexC3 = find(strcmp({EEG_raw.chanlocs.labels},'C3'))
+
+figure;
+plot(EEG_raw.data(indexM1,65*60*512:70*60*512));
+title('M1');
+figure;
+plot(EEG_raw.data(indexM2,65*60*512:70*60*512));
+title('M2');
+figure;
+plot(EEG_raw.data(indexA1,65*60*512:70*60*512));
+title('A1');
+figure;
+plot(EEG_raw.data(indexA2,65*60*512:70*60*512));
+title('A2');
+figure;
+plot(EEG_raw.data(indexC3,65*60*512:70*60*512));
+title('C3');
+
+
+    [spectra1, freqs1] = spectopo(EEG_raw.data(indexM1,:), 0, EEG_raw.srate, 'plot', 'off');
+    % For EEG_detrend
+    [spectra2, freqs2] = spectopo(EEG_raw.data(indexM2,:), 0, EEG_raw.srate, 'plot', 'off');
+    % For EEG_noise
+    [spectra3, freqs3] = spectopo(EEG_raw.data(indexA1,:), 0, EEG_raw.srate, 'plot', 'off');
+    % For EEG_ECG
+    [spectra4, freqs4] = spectopo(EEG_raw.data(indexA2,:), 0, EEG_raw.srate, 'plot', 'off');
+    % For EEG_EOG
+    [spectra5, freqs5] = spectopo(EEG_raw.data(indexC3,:), 0, EEG_raw.srate, 'plot', 'off');
+
+    ith_channel = [8,12,36,37,20]
+    figure;
+    hold on;
+     for j = 1:5
+        % Define subplot position and get handle
+        ax = subplot(5, 1, j + (1 - 1) * 5);
+        % Plot spectrogram for current channel and step
+        spectrogram(EEG_raw.data(ith_channel(j),:), hamming(window_length), noverlap, nfft, srate, 'yaxis');
+        ylim(fpass);
+        caxis([-40, 40]);
+        colormap('jet');
+        colorbar;
+        % Title for each channel
+        title(EEG_raw.chanlocs(ith_channel(j)).labels, 'Interpreter', 'none');
+     end
+     % Set a title for the whole figure
+     sgtitle([participant, ' ', condition, ' spectrogram'], 'FontSize', 14);
+     hold off;
