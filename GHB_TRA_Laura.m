@@ -58,7 +58,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     ECG = pop_resample(ECG, 256);
     
     %%%%%%%%%%% Define start and end times in minutes for the preffered window
-    condition = 'N3PLAfullnight';
+    condition = 'N4TRAfullnight';
 
     % define parameters for plotting
     srate = EEG_raw.srate;
@@ -107,18 +107,88 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     EEG_ECG = eeg_jelena_ecg_removal(EEG_noise, ECG, cut_chunks);
 
 
-    %%%%% do some EOG removal here
+    %%%%% let the ASR run sequentially in windows of x minutes
     fprintf('---ASR\n');
-    EEG_EOG = EEG_ECG;
-    [~,~,EEG_EOG,removed_channels] = clean_artifacts(EEG_EOG, ...
-        'Highpass','off', ...
-        'ChannelCriterion', 'off', ... % 0 or 0.3 correlation? high density EEG is different
-        'FlatlineCriterion', 'off', ...
-        'LineNoiseCriterion', 'off', ...
-        'BurstCriterion', 30, ... %burst criterion!!
-        'WindowCriterion', 0.25);
-    warning('off', 'MATLAB:colon:nonIntegerIndex');
+        windowDuration = 8; % window length in minutes
+        overlapDuration = windowDuration / 2;
+        windowSamples = windowDuration * 60 * srate;  % convert window duration to samples
+        overlapSamples = overlapDuration * 60 * srate;  % convert overlap duration to samples
+        nSamples = size(EEG_ECG.data, 2);  % total number of samples in the EEG data
+        segmentStarts = 1:overlapSamples:(nSamples - windowSamples + 1);
+        segmentEnds = segmentStarts + windowSamples - 1;
+        % Adjust the last segment to end precisely at the end of the data
+        if segmentEnds(end) > nSamples
+            segmentEnds(end) = nSamples;
+        end
+        % Check if the last segment is less than the standard window duration
+        if (segmentEnds(end) - segmentStarts(end) + 1) < windowSamples
+            % If the last segment is too short, extend the previous segment
+            % Remove the last start and set the second-to-last end to the end of data
+            segmentStarts(end) = [];
+            segmentEnds(end-1) = nSamples;
+        end
+        % Adjust last segment's end again after modification to cover the end of data
+        if segmentEnds(end) < nSamples
+            segmentEnds(end) = nSamples;
+        end
+        
+        % Sequentially apply ASR (this takes a while)
+        EEG_segments = cell(1, numel(segmentStarts));
+        for i = 1:numel(segmentStarts)
+            segmentData = EEG_ECG.data(:, segmentStarts(i):segmentEnds(i));
+            % Create a temporary EEG structure for ASR
+            EEG_temp = EEG_ECG;
+            EEG_temp.data = segmentData;
+            EEG_temp.pnts = size(segmentData, 2);
+            EEG_temp.xmax = EEG_temp.xmin + (EEG_temp.pnts - 1) / EEG_temp.srate;
+            % Apply ASR
+            [~, ~, EEG_clean, ~] = clean_artifacts(EEG_temp, ...
+                'Highpass', 'off', ...
+                'ChannelCriterion', 'off', ...
+                'FlatlineCriterion', 'off', ...
+                'LineNoiseCriterion', 'off', ...
+                'BurstCriterion', 30, ...
+                'WindowCriterion', 0.25);
+            EEG_segments{i} = EEG_clean.data;
+        end
 
+        % Create the tapers to smoothen the overlaps of the data segments
+        EEG_segments_tapered = cell(1, numel(segmentStarts));
+        for i = 1:numel(EEG_segments)
+            segmentLength = size(EEG_segments{i}, 2);  % Current segment length
+            taperLength = overlapSamples;  % Length of the taper
+            if i == 1  % First segment
+                % Starts full, tapers down at the end
+                taper = [ones(1, segmentLength - taperLength), cos(linspace(0, pi/2, taperLength)).^2];
+            elseif i == numel(EEG_segments)  % Last segment
+                % Tapers up at the start, remains full for the rest
+                taper = [cos(linspace(pi/2, 0, taperLength)).^2, ones(1, segmentLength - taperLength)];
+            else  % Middle segments
+                % Tapers up at the start, full in the middle, tapers down at the end
+                taper = [cos(linspace(pi/2, 0, taperLength)).^2, ones(1, segmentLength - 2 * taperLength), cos(linspace(0, pi/2, taperLength)).^2];
+            end
+            % Apply the taper
+            EEG_segments_tapered{i} = EEG_segments{i} .* repmat(taper, size(EEG_segments{i}, 1), 1);
+        end
+
+        % Put the tapered segments back together
+        EEG_EOG = EEG_ECG;
+        EEG_EOG.data = zeros(size(EEG_EOG.data));  % Initialize with zeros for addition
+        currentSample = 1;
+        for i = 1:numel(EEG_segments_tapered)
+            segmentLength = size(EEG_segments_tapered{i}, 2);  % Determine the length of the current segment
+            % Calculate the end index for this segment
+            endIndex = currentSample + segmentLength - 1;
+            % Add the segment to the existing data in EEG_EOG, summing where segments overlap
+            if endIndex > size(EEG_EOG.data, 2)
+                endIndex = size(EEG_EOG.data, 2);  % Ensure not to exceed the bounds
+                segmentLength = endIndex - currentSample + 1;  % Adjust segment length accordingly
+            end
+            EEG_EOG.data(:, currentSample:endIndex) = ...
+                EEG_EOG.data(:, currentSample:endIndex) + EEG_segments_tapered{i}(:, 1:segmentLength);
+            % Update the currentSample index for the next segment, shifting by the overlap
+            currentSample = currentSample + overlapSamples;  % Move by the overlap amount
+        end
 
     % Calculate spectrum for each step
     % For EEG_raw (Raw data)
@@ -176,6 +246,7 @@ for step = 1:length(EEG_steps)
                'String', step_labels{step}, ...
                'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12, 'VerticalAlignment', 'bottom');
 end
+sgtitle([participant, ' ', condition, ' spectrogram'], 'FontSize', 14);
 % Release hold after plotting all subplots
 hold off;
 % Saving the plot as PNG in pathtosave
@@ -205,8 +276,7 @@ disp(['Saved ', filename, ' in ',  pathtosave]);
     ylabel('Power (dB)');
     title(['Individual Power Spectra during ', condition]);
     % Add a legend to identify which line corresponds to which EEG data
-    % legend({'Raw data', 'Detrend', 'Noise', 'ECG', 'EOG'});
-    legend({'M1', 'M2', 'A1', 'A2', 'C3'});
+    legend({'Raw data', 'Detrend', 'Noise', 'ECG', 'EOG'});
     % Enable grid for better visibility
     grid on;
     % Release the hold on the plot
@@ -249,12 +319,12 @@ end
 
 %%% Now check in the spectrogram from when till when the desired block of
 %%% REM is and fill the timestamps from TXT file in below accordingly
-    condition = 'N3PLAREM';
+    condition = 'N4TRAREM';
     % Start and Endtime of REM in seconds
-    startSecondREM = 16995;
-    endSecondREM = 20025;
-    startMinREM = startSecondREM/60;
-    endMinREM = endSecondREM/60;
+    startMinREM = 3 * 60 + 15;
+    endMinREM = 3 * 60 + 35;
+    startSecondREM = startMinREM * 60;
+    endSecondREM = endMinREM * 60;
     % Calculate sample indices
     startIndexREM = round(startSecondREM * EEG_raw.srate) + 1;
     endIndexREM = round(endSecondREM * EEG_raw.srate);
@@ -399,12 +469,13 @@ disp(['Saved ', filename, ' in ',  pathtosave]);
 
 
 %%%% same for nonREM
-    condition = 'N3PLAnonREM';
-    % Starttime in seconds
-    startSecondnonREM = 1875;
-    endSecondnonREM = 4635;
-    startMinnonREM = startSecondnonREM/60;
-    endMinnonREM = endSecondnonREM/60;
+    condition = 'N4TRAnonREM';
+    % Starttime 
+    startMinnonREM = 2 * 60;
+    endMinnonREM = 2 * 60 + 30;
+    startSecondnonREM = startMinnonREM * 60;
+    endSecondnonREM = endMinnonREM * 60;
+    
     % Calculate sample indices
     startIndexnonREM = round(startSecondnonREM * EEG_raw.srate) + 1;
     endIndexnonREM = round(endSecondnonREM * EEG_raw.srate);
