@@ -58,7 +58,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     ECG = pop_resample(ECG, 256);
     
     %%%%%%%%%%% Define start and end times in minutes for the preffered window
-    condition = 'N4TRAfullnight';
+    condition = 'N3GHBfullnight';
 
     % define parameters for plotting
     srate = EEG_raw.srate;
@@ -92,12 +92,15 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     %%%%% detect bad signal to remove from signal
     fprintf('---detecting bad signal\n');
     [remove_channel_which, cut_chunks, rem_ind_all] = eeg_acrossfreq_artifact(EEG_detrend);
+    rem_ind_all = sum(rem_ind_all,1) > 0; % von matrix zu vektor, falls irgendwo eine 1 ist (bad signal) wird der ganze Zeitpunkt auf 1 gesetzt
+    
+
+    %%%%% remove bad signal from signal
     
    
     %%%%% remove electrical noise from sienna, and make sure to exclude the movement artifacts for calculation (output EEG still has all data, including the movments)
     fprintf('---removal electrical noise\n');
     EEG_noise = EEG_detrend;
-    rem_ind_all = sum(rem_ind_all,1) > 0; % von matrix zu vektor, falls irgendwo eine 1 ist (bad signal) wird der ganze Zeitpunkt auf 1 gesetzt
     EEG_noise = eeg_electricalnoise_reducer(EEG_detrend, rem_ind_all);
     
 
@@ -170,7 +173,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
             % Apply the taper
             EEG_segments_tapered{i} = EEG_segments{i} .* repmat(taper, size(EEG_segments{i}, 1), 1);
         end
-
+        
         % Put the tapered segments back together
         EEG_EOG = EEG_ECG;
         EEG_EOG.data = zeros(size(EEG_EOG.data));  % Initialize with zeros for addition
@@ -319,10 +322,10 @@ end
 
 %%% Now check in the spectrogram from when till when the desired block of
 %%% REM is and fill the timestamps from TXT file in below accordingly
-    condition = 'N4TRAREM';
+    condition = 'N3GHBREM';
     % Start and Endtime of REM in seconds
-    startMinREM = 3 * 60 + 15;
-    endMinREM = 3 * 60 + 35;
+    startMinREM = 1 * 60 + 35;
+    endMinREM = 1 * 60 + 45;
     startSecondREM = startMinREM * 60;
     endSecondREM = endMinREM * 60;
     % Calculate sample indices
@@ -469,10 +472,10 @@ disp(['Saved ', filename, ' in ',  pathtosave]);
 
 
 %%%% same for nonREM
-    condition = 'N4TRAnonREM';
+    condition = 'N3GHBnonREM';
     % Starttime 
-    startMinnonREM = 2 * 60;
-    endMinnonREM = 2 * 60 + 30;
+    startMinnonREM = 4 * 60 + 15;
+    endMinnonREM = 4 * 60 + 45;
     startSecondnonREM = startMinnonREM * 60;
     endSecondnonREM = endMinnonREM * 60;
     
