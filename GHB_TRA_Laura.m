@@ -366,6 +366,13 @@ print(gcf, fullfile(pathtosave, filename ), '-dpng', '-r300');
 disp(['Saved ', filename, ' in ',  pathtosave]);
 
 
+
+
+filePath = fullfile(pathtosave, [participant, '_EEG_preprocessed.mat']);
+% Save the EEG_EOG variable in the specified path
+save(filePath, 'EEG_EOG');
+% Optionally display the path where the file was saved
+disp(['Saved EEG_EOG in ', filePath]);
 end
 
 

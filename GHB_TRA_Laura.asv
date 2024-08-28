@@ -334,43 +334,48 @@ hold off;
 
 
 
-     % Create a figure for all spectrogram-differences
-    fprintf('---plot the differences of the spectra\n');
-    figure('visible', 'off');
-    % Plot the first spectrum 
-    plot(freqs1, spectra1(1,:)-spectra2(1,:), 'Marker', 'o', 'LineStyle', '--', 'Color', '#003049');
-    hold on; 
-    plot(freqs2, spectra2(1,:)-spectra3(1,:), 'Marker', '.', 'LineStyle', '--', 'Color', '#16575C'); 
-    hold on; 
-    plot(freqs3, spectra3(1,:)-spectra4(1,:), 'Marker', '.', 'LineStyle', '--', 'Color', '#55CC95'); 
-    hold on; 
-    plot(freqs3, spectra4(1,:)-spectra5(1,:), 'Marker', '.', 'LineStyle', '--', 'Color', '#004A26'); 
-    % Adding labels and title
-    xlabel('Frequency (Hz)');
-    xlim([0 40]);
-    ylabel('Power (dB)');
-    title(['Comparison of EEG Power Spectra during ', condition]);
-    % Add a legend to identify which line corresponds to which EEG data
-    legend({'Raw data - Detrend', 'Detrend - Noise', 'Noise - ECG', 'ECG - ASR'});
-    % Enable grid for better visibility
-    grid on;
-    % Release the hold on the plot
-    hold off;
-    % Saving the plot as png in pathtosave
-    filename = [participant, '_', condition, '_Powerspectrum_difference.png'];
-    print(gcf, fullfile(pathtosave, filename ), '-dpng', '-r300');
-    % Display the full path of the saved file in the command window
-    disp(['Saved ', filename, ' in ',  pathtosave]);
+% Create a figure for all spectrogram-differences
+fprintf('---plot the differences of the spectra\n');
+figure('visible', 'off', 'Color', 'w');
+% Plot the first spectrum
+plot(freqs1, spectra1(1,:)-spectra2(1,:), 'Marker', 'o', 'LineStyle', '--', 'Color', '#003049');
+hold on;
+plot(freqs2, spectra2(1,:)-spectra3(1,:), 'Marker', '.', 'LineStyle', '--', 'Color', '#16575C');
+hold on;
+plot(freqs3, spectra3(1,:)-spectra4(1,:), 'Marker', '*', 'LineStyle', '--', 'Color', '#55CC95');
+hold on;
+plot(freqs3, spectra4(1,:)-spectra5(1,:), 'Marker', 'square', 'LineStyle', '--', 'Color', '#004A26');
+% Adding labels and title
+ax = gca;  % Gets handle to the current axes
+set(ax, 'XColor', 'k', 'YColor', 'k');  % Sets the x-axis and y-axis color to black
+set(ax, 'Color', 'w');  % Optional: Explicitly set axes background color if needed
+% Setting labels, title, and legend
+xlabel(ax, 'Frequency (Hz)', 'Color', 'k');  % Ensure text is black
+ylabel(ax, 'Power (dB)', 'Color', 'k');
+title(ax, 'Power Spectra difference of preprocessing steps', 'Color', 'k');
+legend(ax, {'Raw - Detrend', 'Detrend - Noise', 'Noise - ECG', 'ECG - ASR'}, 'TextColor', 'k', 'Color', 'w', 'Location', 'northwest');
+% Enable grid for better visibility
+grid on;
+xlim(ax, [0 40]);
+% Release the hold on the plot
+hold off;
+% Saving the plot as png in pathtosave
+filename = [participant, '_', condition, '_Powerspectrum_difference.png'];
+print(gcf, fullfile(pathtosave, filename ), '-dpng', '-r300');
+% Display the full path of the saved file in the command window
+disp(['Saved ', filename, ' in ',  pathtosave]);
+
+
+
+
+filePath = fullfile(pathtosave, [participant, '_EEG_preprocessed.mat']);
+% Save the EEG_EOG variable in the specified path
+save(filePath, 'EEG_EOG');
+% Optionally display the path where the file was saved
+disp(['Saved EEG_EOG in ', filePath]);
 end
 
-    ax = gca;  % Gets handle to the current axes
-    set(ax, 'XColor', 'k', 'YColor', 'k');  % Sets the x-axis and y-axis color to black
-    set(ax, 'Color', 'w');  % Optional: Explicitly set axes background color if needed
-    % Setting labels, title, and legend
-    xlabel(ax, 'Frequency (Hz)', 'Color', 'k');  % Ensure text is black
-    ylabel(ax, 'Power (dB)', 'Color', 'k');
-    title(ax, 'Power Spectra difference of preprocessing steps', 'Color', 'k');
-    legend(ax, {'Raw', 'Preprocessed'}, 'TextColor', 'k', 'Color', 'w');
+
 
 
 
