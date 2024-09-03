@@ -48,9 +48,24 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     % select channels
     channelLabels = {EEG_raw.chanlocs.labels};
     ECG = pop_select(EEG_raw, 'channel', {'ECG'});
-    EEG_raw = pop_select(EEG_raw, 'channel', {'E1', 'E2', 'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2', });
-    %EEG = pop_select(EEG_raw, 'channel', {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'});
+    EEG_raw = pop_select(EEG_raw, 'channel', {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'});
     newchannelLabels = {EEG_raw.chanlocs.labels};
+
+    % add channel location information
+    % on server: readlocs('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\2023_mesmart\eeglab_current\Standard-10-5-Cap385.sfp')
+    newlocs = readlocs('D:\Masterarbeit Jannick\scripts\2_Preprocessing\Standard-10-5-Cap385.sfp'); 
+    newlocl = {newlocs.labels};
+    chanlocsnew = struct();
+    fieldsn = fieldnames(newlocs);
+    for k = 1:numel(fieldsn)
+        chanlocsnew.(fieldsn{k}) = [];
+    end
+    for f = 1:length({EEG_raw.chanlocs.labels})
+        whichrow = find(ismember(newlocl, EEG_raw.chanlocs(f).labels));
+        chanlocsnew(f) = newlocs(whichrow);
+    end
+    EEG_raw.chanlocs = chanlocsnew;
+
 
     % downsample
     fprintf('---downsample\n');
@@ -91,8 +106,28 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
 
     %%%%% detect bad signal to remove from signal
     fprintf('---detecting bad signal\n');
-    [remove_channel_which, cut_chunks, rem_ind_all] = eeg_acrossfreq_artifact(EEG_detrend);
-    rem_ind_all = sum(rem_ind_all,1) > 0; % von matrix zu vektor, falls irgendwo eine 1 ist (bad signal) wird der ganze Zeitpunkt auf 1 gesetzt
+    [remove_channel_which, cut_chunks, rem_ind_all_matrix] = eeg_acrossfreq_artifact(EEG_detrend);
+    rem_ind_all = sum(rem_ind_all_matrix,1) > 0; % von matrix zu vektor, falls irgendwo eine 1 ist (bad signal) wird der ganze Zeitpunkt auf 1 gesetzt
+
+
+    %%%% detect bad channels without bad signal
+    labels = {EEG_ECG.chanlocs.labels};
+    labels = labels(ismember(labels, {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'}));
+    bad_channels = labels(eeg_badchannel_detect(pop_select(EEG_ECG, 'channel', {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'}), zeros(1,size(EEG_ECG.data,2)), 0.55))
+    disp(['Bad channels: ', bad_channels]);
+    
+   
+    %%%% interpolate bad channels
+    % Check if bad_channels is empty
+    if ~isempty(bad_channels)
+        % Perform interpolation only if there are bad channels
+        bad_channel_indices = eeg_chaninds(EEG_ECG, bad_channels);
+        EEG_interp = pop_interp(EEG_ECG, bad_channel_indices);
+    else
+        % If bad_channels is empty, skip interpolation and keep EEG data unchanged
+        EEG_interp = EEG_ECG;
+    end
+
     
 
     %%%%% remove bad signal from signal
@@ -121,13 +156,16 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     EEG_ECG = eeg_jelena_ecg_removal(EEG_noise, ECG, cut_chunks);
 
 
-    %%%%% let the ASR run sequentially in windows of x minutes
+  
+
+
+    %%%%% let ASR run sequentially in windows of 8 minutes
     fprintf('---ASR\n');
         windowDuration = 8; % window length in minutes
         overlapDuration = windowDuration / 2;
         windowSamples = windowDuration * 60 * srate;  % convert window duration to samples
         overlapSamples = overlapDuration * 60 * srate;  % convert overlap duration to samples
-        nSamples = size(EEG_ECG.data, 2);  % total number of samples in the EEG data
+        nSamples = size(EEG_interp.data, 2);  % total number of samples in the EEG data
         segmentStarts = 1:overlapSamples:(nSamples - windowSamples + 1);
         segmentEnds = segmentStarts + windowSamples - 1;
         % Adjust the last segment to end precisely at the end of the data
@@ -152,9 +190,9 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
         % Sequentially apply ASR (this takes a while)
         EEG_segments = cell(1, numel(segmentStarts));
         parfor i = 1:numel(segmentStarts)
-            segmentData = EEG_ECG.data(:, segmentStarts(i):segmentEnds(i));
+            segmentData = EEG_interp.data(:, segmentStarts(i):segmentEnds(i));
             % Create a temporary EEG structure for ASR
-            EEG_temp = EEG_ECG;
+            EEG_temp = EEG_interp;
             EEG_temp.data = segmentData;
             EEG_temp.pnts = size(segmentData, 2);
             EEG_temp.xmax = EEG_temp.xmin + (EEG_temp.pnts - 1) / EEG_temp.srate;
@@ -194,7 +232,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
         end
         
         % Put the tapered segments back together
-        EEG_EOG = EEG_ECG;
+        EEG_EOG = EEG_interp;
         EEG_EOG.data = zeros(size(EEG_EOG.data));  % Initialize with zeros for addition
         currentSample = 1;
         for i = 1:numel(EEG_segments_tapered)
@@ -229,7 +267,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
 
 
 % Start of plotting the spectrogram
-fig = figure('visible', 'on', 'WindowStyle', 'normal', 'Color', 'w');
+fig = figure('visible', 'off', 'WindowStyle', 'normal', 'Color', 'w');
 % Maximize the figure window
 screenSize = get(0, 'ScreenSize'); % Get the screen size from the root window
 set(fig, 'Position', [1 1 screenSize(3) screenSize(4)]); % Set the figure size to cover the whole screen
@@ -295,6 +333,8 @@ filename = [participant, '_', condition, '_Spectrogram.png'];
 print(gcf, fullfile(pathtosave, filename), '-dpng', '-r300');
 % Display the full path of the saved file in the command window
 disp(['Saved ', filename, ' in ',  pathtosave]);
+close all hidden;
+
 
 
 
@@ -329,6 +369,7 @@ print(fig, fullfile(pathtosave, filename), '-dpng', '-r300');
 disp(['Saved ', filename, ' in ', pathtosave]);
 % Release the hold on the plot
 hold off;
+close all hidden;
 
 
 
@@ -364,6 +405,7 @@ filename = [participant, '_', condition, '_Powerspectrum_difference.png'];
 print(gcf, fullfile(pathtosave, filename ), '-dpng', '-r300');
 % Display the full path of the saved file in the command window
 disp(['Saved ', filename, ' in ',  pathtosave]);
+close all hidden;
 
 
 
@@ -373,6 +415,8 @@ filePath = fullfile(pathtosave, [participant, '_EEG_preprocessed.mat']);
 save(filePath, 'EEG_EOG');
 % Optionally display the path where the file was saved
 disp(['Saved EEG_EOG in ', filePath]);
+
+clearvars -except folderpath i edf_files web_files 
 end
 
 
@@ -424,3 +468,4 @@ end
 % 
 % % Visualize the new EEG structure
 % pop_eegplot(selectedEEG, 1, 1, 0);
+
