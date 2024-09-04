@@ -1,20 +1,29 @@
+%%% All these functions need to be loaded first
 % other functions (maybe here not needed, but for feature extraction at least they are needed
 addpath(genpath('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\2023_mesmart\scripts'));
-
 % preprocessing Funktionen
 addpath('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\matlab_processing_benji\');
 
-% eeglab path
+
+%%% Add the path to your EEGLAB folder
 addpath('D:\Masterarbeit Jannick\scripts\2_Preprocessing\eeglab2024.0');
 eeglab nogui; % Initialize EEGLAB (eeglab nogui; if you want no GUI)
 
-% plot Funktion
-addpath('D:\Masterarbeit Jannick\scripts\2_Preprocessing');
-
-% edf & web file directory
+%%% Add the path to your .edf files (if will find all .edf files in all
+%%% subfolders)
 folderpath = 'D:\Masterarbeit Jannick\Data\GHB_TRA\GHB_TRA_EEG';
 edf_files = dir(fullfile(folderpath, '*\*.edf'));
 web_files = dir(fullfile(folderpath, '*\*.web'));
+
+%%% define study name (avoid "/" and "_")
+study = 'GHBTRA';
+%%% define which channels to look at
+selected_channels = {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'};
+%%% define ASR window length in minutes (default = 8)
+windowDuration = 8; 
+%%% define ASR SD-Cutoff (default = 30)
+SDCutoff = 30;
+
 
 % loop through all files
 for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
@@ -48,7 +57,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     % select channels
     channelLabels = {EEG_raw.chanlocs.labels};
     ECG = pop_select(EEG_raw, 'channel', {'ECG'});
-    EEG_raw = pop_select(EEG_raw, 'channel', {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'});
+    EEG_raw = pop_select(EEG_raw, 'channel', selected_channels);
     newchannelLabels = {EEG_raw.chanlocs.labels};
 
     % add channel location information
@@ -72,8 +81,6 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     EEG_raw = pop_resample(EEG_raw, 256);
     ECG = pop_resample(ECG, 256);
     
-    %%%%%%%%%%% Define start and end times in minutes for the preffered window
-    condition = 'fullnightremoved';
 
     % define parameters for plotting
     srate = EEG_raw.srate;
@@ -113,7 +120,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     %%%% detect bad channels without bad signal
     labels = {EEG_detrend.chanlocs.labels};
     labels = labels(ismember(labels, {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'}));
-    bad_channels = labels(eeg_badchannel_detect(pop_select(EEG_detrend, 'channel', {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'}), zeros(1,size(EEG_ECG.data,2)), 0.55))
+    bad_channels = labels(eeg_badchannel_detect(pop_select(EEG_detrend, 'channel', {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'}), zeros(1,size(EEG_detrend.data,2)), 0.55))
     disp(['Bad channels: ', bad_channels]);
     
    
@@ -131,18 +138,88 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
 
     %%%%% detect bad signal again to interpolate or exclude
     fprintf('---detecting bad signal\n');
-    [remove_channel_which, cut_chunks, rem_ind_all] = eeg_acrossfreq_artifact(EEG_detrend);
+    [remove_channel_which, cut_chunks, rem_ind_all_matrix] = eeg_acrossfreq_artifact(EEG_interp);
+    rem_ind_all = sum(rem_ind_all_matrix,1) > 0; % von matrix zu vektor, falls irgendwo eine 1 ist (bad signal) wird der ganze Zeitpunkt auf 1 gesetzt
 
-    
+   
+    %%%% Calculate and plot summary of bad signal
+    % Calculate the percentage of bad segments
+    perc_bad = sum(rem_ind_all) / length(rem_ind_all) * 100;
+    dur_bad = perc_bad / 100 * length(rem_ind_all) / EEG_detrend.srate / 60;
+    % Create a new figure for the combined plot
+    screenSize = get(0, 'ScreenSize');  % Returns a vector [left, bottom, width, height]
+    fig = figure('visible', 'off', 'WindowStyle', 'normal', 'Color', 'w', 'OuterPosition', screenSize);
+    % Calculate segment durations
+    diff_vec = [0, diff(rem_ind_all), 0];  % Take the diff and pad with zeros at both ends
+    segment_starts = find(diff_vec == 1);  % Start of each segment is where diff is 1
+    segment_ends = find(diff_vec == -1) - 1;  % End of each segment is where diff is -1
+    % Step 3: Handle case where the last element is a 1 (extra start without end)
+    if length(segment_starts) > length(segment_ends)
+        % Add the last index as the end of the last segment if it ends with 1
+        segment_ends = [segment_ends, length(rem_ind_all)];
+    end
+    segment_lengths = segment_ends - segment_starts + 1;  % Calculate lengths of each segment in samples
+    segment_durations = segment_lengths / EEG_detrend.srate;  % Calculate duration of each segment in seconds
+    % Left subplot: Histogram of segment durations
+    subplot(1, 2, 1);
+    histogram(segment_durations);
+    title('Histogram of Segment Durations');
+    xlabel('Duration (seconds)');
+    ylabel('Count');
+    % Calculate the total number of electrodes containing bad data at a given timepoint
+    column_sums = sum(rem_ind_all_matrix);  % Sum across rows for each column (timepoint)
+    nonzero_sums = column_sums(column_sums > 0);  % Filter out zero sums
+    % Right subplot: Histogram of number of electrodes with bad data
+    subplot(1, 2, 2);
+    histogram(nonzero_sums, 'Normalization', 'count');
+    title('Histogram of Bad Electrode Counts');
+    xlabel('Number of Bad Electrodes');
+    ylabel('Count');
+    % Add a super title with the percentage and duration of bad segments
+    % Add a big title (super title) with the overall summary
+    big_title = sprintf([study, ' ', participant, ' Summary of bad data']);
+    sgtitle(big_title, 'FontSize', 16, 'FontWeight', 'bold', 'Color', 'k');  % Big title
+    % Add an additional annotation for the summary information
+    annotation_text = sprintf('The percentage of bad segments is %.2f%%, which equals to %.2f minutes.', perc_bad, dur_bad);
+    annotation('textbox', [0.5, 0.05, 0, 0], 'String', annotation_text, 'FitBoxToText', 'on', ...
+    'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', 'FontSize', 12, 'EdgeColor', 'none', 'Color', 'k');
+    axs = findobj(fig, 'Type', 'axes');
+    for ax = axs'
+        set(ax, 'XColor', 'k', 'YColor', 'k', 'ZColor', 'k');
+        set(ax.Title, 'Color', 'k');
+    end
+    txts = findobj(fig, 'Type', 'text');
+    for txt = txts'
+        set(txt, 'Color', 'k');
+    end
+    % Saving the plot as PNG in pathtosave
+    filename = [study, '_', participant, '_Summary_of_bad_data.png'];
+    print(gcf, fullfile(pathtosave, filename), '-dpng', '-r300');
+    % Display the full path of the saved file in the command window
+    disp(['Saved ', filename, ' in ',  pathtosave]);
+    close all hidden;
+
+    % Generate and save the bad data
+    EEG_bad = EEG_interp;
+    EEG_bad.data = [];
+    EEG_bad.times = [];
+    EEG_bad.data = EEG_interp.data(:, rem_ind_all);
+    EEG_bad.times = EEG_interp.times(:, rem_ind_all);
+    filePath = fullfile(pathtosave, [study, '_', participant, '_EEG_bad_data.mat']);
+    % Save the EEG_EOG variable in the specified path
+    save(filePath, 'EEG_bad');
+    % Optionally display the path where the file was saved
+    disp(['Saved bad data in ', filePath]);
+
 
     %%%%% remove bad signal from signal
-    EEG_detrend_removed = EEG_detrend;
+    EEG_detrend_removed = EEG_interp;
     % Create a logical index for good data (where rem_ind_all is 0)
     good_data_indices = ~rem_ind_all;  % The tilde (~) operator negates the logical array
     % Filter the entire EEG_detrend_removed.data and .times matrix to remove bad data points
     % This keeps only the columns (time points) where rem_ind_all is 0 (or false for good_data_indices)
-    EEG_detrend_removed.data = EEG_detrend.data(:, good_data_indices);
-    EEG_detrend_removed.times = EEG_detrend.times(:, good_data_indices);
+    EEG_detrend_removed.data = EEG_interp.data(:, good_data_indices);
+    EEG_detrend_removed.times = EEG_interp.times(:, good_data_indices);
     ECG.data = ECG.data(:,good_data_indices);
     ECG.times = ECG.times(:,good_data_indices);
 
@@ -161,12 +238,8 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     EEG_ECG = eeg_jelena_ecg_removal(EEG_noise, ECG, cut_chunks);
 
 
-  
-
-
-    %%%%% let ASR run sequentially in windows of 8 minutes
+    %%%%% let ASR run sequentially in windows
     fprintf('---ASR\n');
-        windowDuration = 8; % window length in minutes
         overlapDuration = windowDuration / 2;
         windowSamples = windowDuration * 60 * srate;  % convert window duration to samples
         overlapSamples = overlapDuration * 60 * srate;  % convert overlap duration to samples
@@ -194,8 +267,8 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
         end
         % Sequentially apply ASR (this takes a while)
         EEG_segments = cell(1, numel(segmentStarts));
-        parfor i = 1:numel(segmentStarts)
-            segmentData = EEG_interp.data(:, segmentStarts(i):segmentEnds(i));
+        parfor j = 1:numel(segmentStarts)
+            segmentData = EEG_interp.data(:, segmentStarts(j):segmentEnds(j));
             % Create a temporary EEG structure for ASR
             EEG_temp = EEG_interp;
             EEG_temp.data = segmentData;
@@ -207,9 +280,9 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
                 'ChannelCriterion', 'off', ...
                 'FlatlineCriterion', 'off', ...
                 'LineNoiseCriterion', 'off', ...
-                'BurstCriterion', 30, ...
+                'BurstCriterion', SDCutoff, ...
                 'WindowCriterion', 0.25);
-            EEG_segments{i} = EEG_clean.data;
+            EEG_segments{j} = EEG_clean.data;
         end
         
         poolobj = gcp('nocreate');
@@ -219,13 +292,13 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
 
         % Create the tapers to smoothen the overlaps of the data segments
         EEG_segments_tapered = cell(1, numel(segmentStarts));
-        for i = 1:numel(EEG_segments)
-            segmentLength = size(EEG_segments{i}, 2);  % Current segment length
+        for j = 1:numel(EEG_segments)
+            segmentLength = size(EEG_segments{j}, 2);  % Current segment length
             taperLength = overlapSamples;  % Length of the taper
-            if i == 1  % First segment
+            if j == 1  % First segment
                 % Starts full, tapers down at the end
                 taper = [ones(1, segmentLength - taperLength), cos(linspace(0, pi/2, taperLength)).^2];
-            elseif i == numel(EEG_segments)  % Last segment
+            elseif j == numel(EEG_segments)  % Last segment
                 % Tapers up at the start, remains full for the rest
                 taper = [cos(linspace(pi/2, 0, taperLength)).^2, ones(1, segmentLength - taperLength)];
             else  % Middle segments
@@ -233,15 +306,15 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
                 taper = [cos(linspace(pi/2, 0, taperLength)).^2, ones(1, segmentLength - 2 * taperLength), cos(linspace(0, pi/2, taperLength)).^2];
             end
             % Apply the taper
-            EEG_segments_tapered{i} = EEG_segments{i} .* repmat(taper, size(EEG_segments{i}, 1), 1);
+            EEG_segments_tapered{j} = EEG_segments{j} .* repmat(taper, size(EEG_segments{j}, 1), 1);
         end
         
         % Put the tapered segments back together
         EEG_EOG = EEG_interp;
         EEG_EOG.data = zeros(size(EEG_EOG.data));  % Initialize with zeros for addition
         currentSample = 1;
-        for i = 1:numel(EEG_segments_tapered)
-            segmentLength = size(EEG_segments_tapered{i}, 2);  % Determine the length of the current segment
+        for j = 1:numel(EEG_segments_tapered)
+            segmentLength = size(EEG_segments_tapered{j}, 2);  % Determine the length of the current segment
             % Calculate the end index for this segment
             endIndex = currentSample + segmentLength - 1;
             % Add the segment to the existing data in EEG_EOG, summing where segments overlap
@@ -250,7 +323,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
                 segmentLength = endIndex - currentSample + 1;  % Adjust segment length accordingly
             end
             EEG_EOG.data(:, currentSample:endIndex) = ...
-                EEG_EOG.data(:, currentSample:endIndex) + EEG_segments_tapered{i}(:, 1:segmentLength);
+                EEG_EOG.data(:, currentSample:endIndex) + EEG_segments_tapered{j}(:, 1:segmentLength);
             % Update the currentSample index for the next segment, shifting by the overlap
             currentSample = currentSample + overlapSamples;  % Move by the overlap amount
         end
@@ -272,7 +345,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
 
 
 % Start of plotting the spectrogram
-fig = figure('visible', 'off', 'WindowStyle', 'normal', 'Color', 'w');
+fig = figure('visible', 'off', 'WindowStyle', 'normal', 'Color', 'w', 'OuterPosition', screenSize);
 % Maximize the figure window
 screenSize = get(0, 'ScreenSize'); % Get the screen size from the root window
 set(fig, 'Position', [1 1 screenSize(3) screenSize(4)]); % Set the figure size to cover the whole screen
@@ -316,10 +389,9 @@ for step = 1:length(EEG_steps)
                'String', step_labels{step}, ...
                'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12, 'VerticalAlignment', 'bottom', 'Color', 'k');
 end
-% sgtitle([participant, ' ', condition, ' spectrogram'], 'FontSize', 14);
 % Add custom super title adjusted for better positioning
 annotation(fig, 'textbox', [0, 0.95, 1, 0.05], ...
-           'String', [participant, ' ', condition, ' spectrogram'], ...
+           'String', [study, ' ', participant, ' spectrogram'], ...
            'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
            'FontSize', 14, 'FontWeight', 'bold', 'Color', 'k');
 % Set text and axes colors to black and adjust title positions
@@ -334,7 +406,7 @@ for txt = txts'
 end
 hold off;
 % Saving the plot as PNG in pathtosave
-filename = [participant, '_', condition, '_Spectrogram.png'];
+filename = [study, '_', participant, '_Spectrogram.png'];
 print(gcf, fullfile(pathtosave, filename), '-dpng', '-r300');
 % Display the full path of the saved file in the command window
 disp(['Saved ', filename, ' in ',  pathtosave]);
@@ -348,7 +420,7 @@ close all hidden;
 
 % Create a figure for all power spectra
 fprintf('---plot the individual spectra\n');
-fig = figure('visible', 'off', 'Color', 'w');
+fig = figure('visible', 'off', 'Color', 'w', 'OuterPosition', screenSize);
 % Plot the spectra
 plot(freqs1, spectra1(1,:), 'Marker', 'o', 'LineStyle', '--', 'Color', '#003049');
 hold on;
@@ -369,7 +441,7 @@ legend(ax, {'Raw', 'Preprocessed'}, 'TextColor', 'k', 'Color', 'w');
 grid on;
 xlim(ax, [0 40]);
 % Save the plot
-filename = [participant, '_', condition, '_Powerspectrum_individual.png'];
+filename = [study, '_', participant, '_Powerspectrum_individual.png'];
 print(fig, fullfile(pathtosave, filename), '-dpng', '-r300');
 disp(['Saved ', filename, ' in ', pathtosave]);
 % Release the hold on the plot
@@ -382,7 +454,7 @@ close all hidden;
 
 % Create a figure for all spectrogram-differences
 fprintf('---plot the differences of the spectra\n');
-figure('visible', 'off', 'Color', 'w');
+figure('visible', 'off', 'Color', 'w', 'OuterPosition', screenSize);
 % Plot the first spectrum
 plot(freqs1, spectra1(1,:)-spectra2(1,:), 'Marker', 'o', 'LineStyle', '--', 'Color', '#003049');
 hold on;
@@ -406,7 +478,7 @@ xlim(ax, [0 40]);
 % Release the hold on the plot
 hold off;
 % Saving the plot as png in pathtosave
-filename = [participant, '_', condition, '_Powerspectrum_difference.png'];
+filename = [study, '_', participant, '_Powerspectrum_difference.png'];
 print(gcf, fullfile(pathtosave, filename ), '-dpng', '-r300');
 % Display the full path of the saved file in the command window
 disp(['Saved ', filename, ' in ',  pathtosave]);
@@ -415,13 +487,13 @@ close all hidden;
 
 
 
-filePath = fullfile(pathtosave, [participant, '_EEG_preprocessed.mat']);
+filePath = fullfile(pathtosave, [study, '_', participant, '_EEG_preprocessed.mat']);
 % Save the EEG_EOG variable in the specified path
 save(filePath, 'EEG_EOG');
 % Optionally display the path where the file was saved
 disp(['Saved EEG_EOG in ', filePath]);
 
-clearvars -except folderpath i edf_files web_files 
+clearvars -except folderpath i edf_files web_files study selected_channels windowDuration SDCutoff
 end
 
 
