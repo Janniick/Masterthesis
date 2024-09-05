@@ -11,12 +11,12 @@ eeglab nogui; % Initialize EEGLAB (eeglab nogui; if you want no GUI)
 
 %%% Add the path to your .edf files (if will find all .edf files in all
 %%% subfolders)
-folderpath = 'D:\Masterarbeit Jannick\Data\GHB_TRA\GHB_TRA_EEG';
+folderpath = 'D:\Masterarbeit Jannick\Data\DEX-FX_v1\DEX-FX_v1_EEG';
 edf_files = dir(fullfile(folderpath, '*\*.edf'));
 web_files = dir(fullfile(folderpath, '*\*.web'));
 
 %%% define study name (avoid "/" and "_")
-study = 'GHBTRA';
+study = 'DEX-FXv1';
 %%% define which channels to look at
 selected_channels = {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'};
 %%% define ASR window length in minutes (default = 8)
@@ -26,7 +26,7 @@ SDCutoff = 30;
 
 
 % loop through all files
-for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
+for i = 2:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     fprintf('********************************************%s****************************************\n', repmat('*', 1, length(edf_files(i).name)));
     fprintf('---------------------------------------File:%s----------------------------------------\n', edf_files(i).name);
     fprintf('                                  Iteration: %s\n', string(i));
@@ -36,8 +36,8 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     % which filepath
     edf_name = edf_files(i).name;
     edf_path = fullfile(edf_files(i).folder, edf_name);
-    web_name = web_files(i).name;
-    web_path = fullfile(web_files(i).folder, web_name);
+    % web_name = web_files(i).name;
+    % web_path = fullfile(web_files(i).folder, web_name);
     thename = split(edf_name, '.');
     thename = thename{1};
     % Use fileparts to extract the filename without the extension
@@ -56,6 +56,22 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
 
     % select channels
     channelLabels = {EEG_raw.chanlocs.labels};
+    % Define the pairs of mastoids to check
+    pair1 = {'A1', 'A2'};
+    pair2 = {'M1', 'M2'};
+    % Check if either pair1 or pair2 is present in channelLabels
+    isPair1Present = all(ismember(pair1, channelLabels));
+    isPair2Present = all(ismember(pair2, channelLabels));
+    % Select the channels based on which pair is present
+    if isPair1Present
+        % If A1 and A2 are present, select them
+        Mastoids = pop_select(EEG_raw, 'channel', pair1);
+    elseif isPair2Present
+        % If M1 and M2 are present, select them
+        Mastoids = pop_select(EEG_raw, 'channel', pair2);
+    else
+        error('Neither A1/A2 nor M1/M2 channels are present in the data.');
+    end
     ECG = pop_select(EEG_raw, 'channel', {'ECG'});
     EEG_raw = pop_select(EEG_raw, 'channel', selected_channels);
     newchannelLabels = {EEG_raw.chanlocs.labels};
@@ -81,6 +97,12 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     EEG_raw = pop_resample(EEG_raw, 256);
     ECG = pop_resample(ECG, 256);
     
+    % Save ECG file
+    filePath = fullfile(pathtosave, [study, '_', participant, '_ECG.mat']);
+    % Save the ECG variable in the specified path
+    save(filePath, 'ECG');
+    % Optionally display the path where the file was saved
+    disp(['Saved ECG in ', filePath]);
 
     % define parameters for plotting
     srate = EEG_raw.srate;
@@ -115,7 +137,15 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     fprintf('---detecting bad signal\n');
     [remove_channel_which, cut_chunks, rem_ind_all_matrix] = eeg_acrossfreq_artifact(EEG_detrend);
     rem_ind_all = sum(rem_ind_all_matrix,1) > 0; % von matrix zu vektor, falls irgendwo eine 1 ist (bad signal) wird der ganze Zeitpunkt auf 1 gesetzt
-
+    
+    % %%%% remove bad signal from signal
+    % EEG_detrend_removed = EEG_detrend;
+    % % Create a logical index for good data (where rem_ind_all is 0)
+    % good_data_indices = ~rem_ind_all;  % The tilde (~) operator negates the logical array
+    % % Filter the entire EEG_detrend_removed.data and .times matrix to remove bad data points
+    % % This keeps only the columns (time points) where rem_ind_all is 0 (or false for good_data_indices)
+    % EEG_detrend_removed.data = EEG_detrend.data(:, good_data_indices);
+    % EEG_detrend_removed.times = EEG_detrend.times(:, good_data_indices);
 
     %%%% detect bad channels without bad signal
     labels = {EEG_detrend.chanlocs.labels};
@@ -123,7 +153,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     bad_channels = labels(eeg_badchannel_detect(pop_select(EEG_detrend, 'channel', {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'}), zeros(1,size(EEG_detrend.data,2)), 0.55))
     disp(['Bad channels: ', bad_channels]);
     
-   
+
     %%%% interpolate bad channels
     % Check if bad_channels is empty
     if ~isempty(bad_channels)
@@ -136,7 +166,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     end
 
 
-    %%%%% detect bad signal again to interpolate or exclude
+    %%%%% detect bad signal again to exclude
     fprintf('---detecting bad signal\n');
     [remove_channel_which, cut_chunks, rem_ind_all_matrix] = eeg_acrossfreq_artifact(EEG_interp);
     rem_ind_all = sum(rem_ind_all_matrix,1) > 0; % von matrix zu vektor, falls irgendwo eine 1 ist (bad signal) wird der ganze Zeitpunkt auf 1 gesetzt
@@ -153,13 +183,18 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     diff_vec = [0, diff(rem_ind_all), 0];  % Take the diff and pad with zeros at both ends
     segment_starts = find(diff_vec == 1);  % Start of each segment is where diff is 1
     segment_ends = find(diff_vec == -1) - 1;  % End of each segment is where diff is -1
-    % Step 3: Handle case where the last element is a 1 (extra start without end)
+    % Handle case where the last element is a 1 (extra start without end)
     if length(segment_starts) > length(segment_ends)
         % Add the last index as the end of the last segment if it ends with 1
         segment_ends = [segment_ends, length(rem_ind_all)];
     end
+    % Handle case where the first element is a 1 
+    if length(segment_starts) < length(segment_ends)
+        % Add the first index as the beginnning 
+        segment_starts = [1, segment_starts];
+    end
     segment_lengths = segment_ends - segment_starts + 1;  % Calculate lengths of each segment in samples
-    segment_durations = segment_lengths / EEG_detrend.srate;  % Calculate duration of each segment in seconds
+    segment_durations = segment_lengths / EEG_interp.srate;  % Calculate duration of each segment in seconds
     % Left subplot: Histogram of segment durations
     subplot(1, 2, 1);
     histogram(segment_durations);
@@ -213,20 +248,20 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
 
 
     %%%%% remove bad signal from signal
-    EEG_detrend_removed = EEG_interp;
+    EEG_interp_removed = EEG_interp;
     % Create a logical index for good data (where rem_ind_all is 0)
     good_data_indices = ~rem_ind_all;  % The tilde (~) operator negates the logical array
     % Filter the entire EEG_detrend_removed.data and .times matrix to remove bad data points
     % This keeps only the columns (time points) where rem_ind_all is 0 (or false for good_data_indices)
-    EEG_detrend_removed.data = EEG_interp.data(:, good_data_indices);
-    EEG_detrend_removed.times = EEG_interp.times(:, good_data_indices);
+    EEG_interp_removed.data = EEG_interp.data(:, good_data_indices);
+    EEG_interp_removed.times = EEG_interp.times(:, good_data_indices);
     ECG.data = ECG.data(:,good_data_indices);
     ECG.times = ECG.times(:,good_data_indices);
 
    
-    %%%%% remove electrical noise from sienna, and make sure to exclude the movement artifacts for calculation (output EEG still has all data, including the movments)
+    %%%%% remove electrical noise from sienna, and make sure to exclude the movement artifacts for calculation
     fprintf('---removal electrical noise\n');
-    EEG_noise = EEG_detrend;
+    EEG_noise = EEG_interp_removed;
     EEG_noise = eeg_electricalnoise_reducer(EEG_detrend, rem_ind_all);
     EEG_noise.data = EEG_noise.data(:, good_data_indices);
     EEG_noise.times = EEG_noise.times(:, good_data_indices);
@@ -243,7 +278,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
         overlapDuration = windowDuration / 2;
         windowSamples = windowDuration * 60 * srate;  % convert window duration to samples
         overlapSamples = overlapDuration * 60 * srate;  % convert overlap duration to samples
-        nSamples = size(EEG_interp.data, 2);  % total number of samples in the EEG data
+        nSamples = size(EEG_ECG.data, 2);  % total number of samples in the EEG data
         segmentStarts = 1:overlapSamples:(nSamples - windowSamples + 1);
         segmentEnds = segmentStarts + windowSamples - 1;
         % Adjust the last segment to end precisely at the end of the data
@@ -261,6 +296,9 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
         if segmentEnds(end) < nSamples
             segmentEnds(end) = nSamples;
         end
+        % delete possibly existing jobs in parallel pool
+        myCluster = parcluster('Processes');
+        delete(myCluster.Jobs);
         % Open a parallel pool if it isn't already open
         if isempty(gcp('nocreate'))
             parpool;  % This opens a parallel pool with the default number of workers
@@ -268,9 +306,9 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
         % Sequentially apply ASR (this takes a while)
         EEG_segments = cell(1, numel(segmentStarts));
         parfor j = 1:numel(segmentStarts)
-            segmentData = EEG_interp.data(:, segmentStarts(j):segmentEnds(j));
+            segmentData = EEG_ECG.data(:, segmentStarts(j):segmentEnds(j));
             % Create a temporary EEG structure for ASR
-            EEG_temp = EEG_interp;
+            EEG_temp = EEG_ECG;
             EEG_temp.data = segmentData;
             EEG_temp.pnts = size(segmentData, 2);
             EEG_temp.xmax = EEG_temp.xmin + (EEG_temp.pnts - 1) / EEG_temp.srate;
@@ -310,7 +348,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
         end
         
         % Put the tapered segments back together
-        EEG_EOG = EEG_interp;
+        EEG_EOG = EEG_ECG;
         EEG_EOG.data = zeros(size(EEG_EOG.data));  % Initialize with zeros for addition
         currentSample = 1;
         for j = 1:numel(EEG_segments_tapered)
@@ -351,7 +389,7 @@ screenSize = get(0, 'ScreenSize'); % Get the screen size from the root window
 set(fig, 'Position', [1 1 screenSize(3) screenSize(4)]); % Set the figure size to cover the whole screen
 hold on;
 % Array of EEG structures and labels
-EEG_steps = {EEG_raw, EEG_detrend, EEG_detrend_removed, EEG_noise, EEG_ECG, EEG_EOG};
+EEG_steps = {EEG_raw, EEG_detrend, EEG_interp_removed, EEG_noise, EEG_ECG, EEG_EOG};
 step_labels = {'Raw data', 'Bandpass & Detrend & bad signal', 'Bad signal removal', 'Electrical noise removal', 'ECG removal', 'ASR'};
 % Define the array of cut chunks for each step if applicable
 cut_chunks_steps = {[], cut_chunks, [], [], [], []};  % Adjust according to when chunks are used
@@ -495,54 +533,3 @@ disp(['Saved EEG_EOG in ', filePath]);
 
 clearvars -except folderpath i edf_files web_files study selected_channels windowDuration SDCutoff
 end
-
-
-
-
-
-
-
-
-    % Initialize a new EEG structure
-% selectedEEG = EEG_ECG;
-% 
-% % Identify the indices of the channels you need
-% pre_channels = {'E1', 'E2', 'F3', 'F4'};
-% diff_channels = {'F3', 'F4'};
-% pre_idx = find(ismember({EEG_ECG.chanlocs.labels}, pre_channels));
-% diff_idx = find(ismember({EEG_ECG.chanlocs.labels}, diff_channels));
-% 
-% % Calculate the difference data for the specified channels
-% difference_data = EEG_EOG.data(diff_idx, :) - EEG_ECG.data(diff_idx, :);
-% 
-% % Combine the selected pre-processed data with the difference data
-% selectedEEG.data = [EEG_ECG.data(pre_idx, :); difference_data];
-% 
-% % Correct number of channels to include
-% num_pre_channels = length(pre_idx);
-% num_diff_channels = length(diff_idx);  % This will be less or equal to num_pre_channels depending on overlap
-% 
-% % Initialize a new chanlocs array with the correct number of entries
-% new_chanlocs(num_pre_channels + num_diff_channels) = EEG_ECG.chanlocs(1);  % Copy the structure template
-% 
-% % Fill in the new chanlocs array
-% idx = 1;
-% for i = 1:num_pre_channels
-%     new_chanlocs(idx) = EEG_ECG.chanlocs(pre_idx(i));
-%     idx = idx + 1;
-% end
-% for i = 1:num_diff_channels
-%     new_chanlocs(idx) = EEG_ECG.chanlocs(diff_idx(i));
-%     new_chanlocs(idx).labels = [new_chanlocs(idx).labels '_diff'];  % Append '_diff' to the label
-%     idx = idx + 1;
-% end
-% 
-% % Assign the newly created chanlocs to selectedEEG
-% selectedEEG.chanlocs = new_chanlocs;
-% 
-% % Update the number of channels in selectedEEG
-% selectedEEG.nbchan = length(new_chanlocs);  % Should now reflect the correct count
-% 
-% % Visualize the new EEG structure
-% pop_eegplot(selectedEEG, 1, 1, 0);
-
