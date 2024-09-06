@@ -26,7 +26,7 @@ SDCutoff = 30;
 
 
 % loop through all files
-for i = 2:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
+for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     fprintf('********************************************%s****************************************\n', repmat('*', 1, length(edf_files(i).name)));
     fprintf('---------------------------------------File:%s----------------------------------------\n', edf_files(i).name);
     fprintf('                                  Iteration: %s\n', string(i));
@@ -65,10 +65,10 @@ for i = 2:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     % Select the channels based on which pair is present
     if isPair1Present
         % If A1 and A2 are present, select them
-        Mastoids = pop_select(EEG_raw, 'channel', pair1);
+        EEG_mastoids = pop_select(EEG_raw, 'channel', pair1);
     elseif isPair2Present
         % If M1 and M2 are present, select them
-        Mastoids = pop_select(EEG_raw, 'channel', pair2);
+        EEG_mastoids = pop_select(EEG_raw, 'channel', pair2);
     else
         error('Neither A1/A2 nor M1/M2 channels are present in the data.');
     end
@@ -96,6 +96,7 @@ for i = 2:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     fprintf('---downsample\n');
     EEG_raw = pop_resample(EEG_raw, 256);
     ECG = pop_resample(ECG, 256);
+    EEG_mastoids = pop_resample(EEG_mastoids, 256);
     
     % Save ECG file
     filePath = fullfile(pathtosave, [study, '_', participant, '_ECG.mat']);
@@ -120,6 +121,66 @@ for i = 2:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     end
     % Number of channels
     num_channels = length(EEG_raw.chanlocs);
+
+    %%%%% Check the reference mastoid channels for their signal quality
+    % Step 1: Check for flatline signals (variance close to zero)
+    flatline_threshold = 1e-6;  % Threshold for detecting flatline channels
+    mastoid_variance = var(EEG_mastoids.data, 0, 2);  % Variance of each mastoid channel
+    flatline_channels = mastoid_variance < flatline_threshold;
+    if any(flatline_channels)
+        warning('One or more mastoid channels have a flatline signal.');
+    end
+    % Check their correlation
+    cor_mastoids = abs(corrcoef(EEG_mastoids.data(:,:)'));
+    correlation_value = cor_mastoids(1, 2); 
+    % Plot mastoids
+    % Start of plotting the spectrogram
+    fig = figure('visible', 'off', 'WindowStyle', 'normal', 'Color', 'w', 'OuterPosition', screenSize);
+    % Maximize the figure window
+    screenSize = get(0, 'ScreenSize'); % Get the screen size from the root window
+    set(fig, 'Position', [1 1 screenSize(3) screenSize(4)]); % Set the figure size to cover the whole screen
+    hold on;
+    % Extract mastoid channel indices from EEG_mastoids
+    channel_indices = 1:size(EEG_mastoids.data, 1);  % Assuming EEG_mastoids contains only the mastoid channels
+        for ith_channel_idx = 1:length(channel_indices)
+            ith_channel = channel_indices(ith_channel_idx);  % Use the specific channel index
+            ax = subplot(2, 1, ith_channel_idx);
+            spectrogram(EEG_mastoids.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis');
+            ylim(fpass);
+            caxis([-40, 40]);
+            colormap('jet');
+            cbar = colorbar;  % Create or get handle to the colorbar
+            cbar.Color = 'k';  % Set the color of the colorbar's text and ticks to black
+            cbar.TickDirection = 'out';  % Optionally set the ticks to point outwards
+            title(EEG_mastoids.chanlocs(ith_channel).labels, 'Interpreter', 'none');
+    end
+    % Add custom super title adjusted for better positioning
+    annotation(fig, 'textbox', [0, 0.95, 1, 0.05], ...
+        'String', [study, ' ', participant, ' Mastoids, Correlation of ', num2str(correlation_value)], ...
+        'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
+        'FontSize', 14, 'FontWeight', 'bold', 'Color', 'k');
+    % Set text and axes colors to black and adjust title positions
+    axs = findobj(fig, 'Type', 'axes');
+    for ax = axs'
+        set(ax, 'XColor', 'k', 'YColor', 'k', 'ZColor', 'k');
+        set(ax.Title, 'Color', 'k');
+    end
+    txts = findobj(fig, 'Type', 'text');
+    for txt = txts'
+        set(txt, 'Color', 'k');
+    end
+    hold off;
+    % Saving the plot as PNG in pathtosave
+    filename = [study, '_', participant, '_Mastoids.png'];
+    print(gcf, fullfile(pathtosave, filename), '-dpng', '-r300');
+    % Display the full path of the saved file in the command window
+    disp(['Saved ', filename, ' in ',  pathtosave]);
+    close all hidden;
+
+    
+    
+
+
 
 
     %%%%% bandpass and detrend, to remove sweat and other artifacts

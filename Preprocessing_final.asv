@@ -26,7 +26,7 @@ SDCutoff = 30;
 
 
 % loop through all files
-for i = 2:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
+for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     fprintf('********************************************%s****************************************\n', repmat('*', 1, length(edf_files(i).name)));
     fprintf('---------------------------------------File:%s----------------------------------------\n', edf_files(i).name);
     fprintf('                                  Iteration: %s\n', string(i));
@@ -56,25 +56,22 @@ for i = 2:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
 
     % select channels
     channelLabels = {EEG_raw.chanlocs.labels};
-% Define the pairs of channels to check
-pair1 = {'A1', 'A2'};
-pair2 = {'M1', 'M2'};
-
-% Check if either pair1 or pair2 is present in channelLabels
-isPair1Present = all(ismember(pair1, channelLabels));
-isPair2Present = all(ismember(pair2, channelLabels));
-
-% Select the channels based on which pair is present
-if isPair1Present
-    % If A1 and A2 are present, select them
-    Mastoids = pop_select(EEG_raw, 'channel', pair1);
-elseif isPair2Present
-    % If M1 and M2 are present, select them
-    Mastoids = pop_select(EEG_raw, 'channel', pair2);
-else
-    error('Neither A1/A2 nor M1/M2 channels are present in the data.');
-end
-    Mastoids = pop_select(EEG_raw, 'channel', {})
+    % Define the pairs of mastoids to check
+    pair1 = {'A1', 'A2'};
+    pair2 = {'M1', 'M2'};
+    % Check if either pair1 or pair2 is present in channelLabels
+    isPair1Present = all(ismember(pair1, channelLabels));
+    isPair2Present = all(ismember(pair2, channelLabels));
+    % Select the channels based on which pair is present
+    if isPair1Present
+        % If A1 and A2 are present, select them
+        EEG_mastoids = pop_select(EEG_raw, 'channel', pair1);
+    elseif isPair2Present
+        % If M1 and M2 are present, select them
+        EEG_mastoids = pop_select(EEG_raw, 'channel', pair2);
+    else
+        error('Neither A1/A2 nor M1/M2 channels are present in the data.');
+    end
     ECG = pop_select(EEG_raw, 'channel', {'ECG'});
     EEG_raw = pop_select(EEG_raw, 'channel', selected_channels);
     newchannelLabels = {EEG_raw.chanlocs.labels};
@@ -99,10 +96,11 @@ end
     fprintf('---downsample\n');
     EEG_raw = pop_resample(EEG_raw, 256);
     ECG = pop_resample(ECG, 256);
+    EEG_mastoids = pop_resample(EEG_mastoids, 256);
     
     % Save ECG file
     filePath = fullfile(pathtosave, [study, '_', participant, '_ECG.mat']);
-    % Save the EEG_EOG variable in the specified path
+    % Save the ECG variable in the specified path
     save(filePath, 'ECG');
     % Optionally display the path where the file was saved
     disp(['Saved ECG in ', filePath]);
