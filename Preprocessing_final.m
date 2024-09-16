@@ -1,4 +1,4 @@
-%%% All these functions need to be loaded first
+%% All these functions need to be loaded first
 % other functions (maybe here not needed, but for feature extraction at least they are needed
 addpath(genpath('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\2023_mesmart\scripts'));
 % preprocessing Funktionen
@@ -11,12 +11,12 @@ eeglab nogui; % Initialize EEGLAB (eeglab nogui; if you want no GUI)
 
 %%% Add the path to your .edf files (if will find all .edf files in all
 %%% subfolders)
-folderpath = 'D:\Masterarbeit Jannick\Data\DEX-FX_v1\DEX-FX_v1_EEG';
+folderpath = 'D:\Masterarbeit Jannick\Data\GHB_TRA\GHB_TRA_EEG';
 edf_files = dir(fullfile(folderpath, '*\*.edf'));
 web_files = dir(fullfile(folderpath, '*\*.web'));
 
 %%% define study name (avoid "/" and "_")
-study = 'DEX-FXv1';
+study = 'GHBTRA';
 %%% define which channels to look at
 selected_channels = {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'};
 %%% define ASR window length in minutes (default = 8)
@@ -25,8 +25,9 @@ windowDuration = 8;
 SDCutoff = 30;
 
 
-% loop through all files
+%% loop through all files
 for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
+    %% import 
     fprintf('********************************************%s****************************************\n', repmat('*', 1, length(edf_files(i).name)));
     fprintf('---------------------------------------File:%s----------------------------------------\n', edf_files(i).name);
     fprintf('                                  Iteration: %s\n', string(i));
@@ -106,6 +107,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     disp(['Saved ECG in ', filePath]);
 
     % define parameters for plotting
+    screenSize = get(0, 'ScreenSize');
     srate = EEG_raw.srate;
     window_length = 4*srate;
     noverlap = window_length/2;
@@ -122,68 +124,183 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     % Number of channels
     num_channels = length(EEG_raw.chanlocs);
 
-    %%%%% Check the reference mastoid channels for their signal quality
-    % Step 1: Check for flatline signals (variance close to zero)
-    flatline_threshold = 1e-6;  % Threshold for detecting flatline channels
-    mastoid_variance = var(EEG_mastoids.data, 0, 2);  % Variance of each mastoid channel
-    flatline_channels = mastoid_variance < flatline_threshold;
-    if any(flatline_channels)
-        warning('One or more mastoid channels have a flatline signal.');
-    end
-    % Check their correlation
-    cor_mastoids = abs(corrcoef(EEG_mastoids.data(:,:)'));
-    correlation_value = cor_mastoids(1, 2); 
-    % Plot mastoids
-    % Start of plotting the spectrogram
-    fig = figure('visible', 'off', 'WindowStyle', 'normal', 'Color', 'w', 'OuterPosition', screenSize);
-    % Maximize the figure window
-    screenSize = get(0, 'ScreenSize'); % Get the screen size from the root window
-    set(fig, 'Position', [1 1 screenSize(3) screenSize(4)]); % Set the figure size to cover the whole screen
-    hold on;
-    % Extract mastoid channel indices from EEG_mastoids
-    channel_indices = 1:size(EEG_mastoids.data, 1);  % Assuming EEG_mastoids contains only the mastoid channels
-        for ith_channel_idx = 1:length(channel_indices)
-            ith_channel = channel_indices(ith_channel_idx);  % Use the specific channel index
-            ax = subplot(2, 1, ith_channel_idx);
-            spectrogram(EEG_mastoids.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis');
-            ylim(fpass);
-            caxis([-40, 40]);
-            colormap('jet');
-            cbar = colorbar;  % Create or get handle to the colorbar
-            cbar.Color = 'k';  % Set the color of the colorbar's text and ticks to black
-            cbar.TickDirection = 'out';  % Optionally set the ticks to point outwards
-            title(EEG_mastoids.chanlocs(ith_channel).labels, 'Interpreter', 'none');
-    end
-    % Add custom super title adjusted for better positioning
-    annotation(fig, 'textbox', [0, 0.95, 1, 0.05], ...
-        'String', [study, ' ', participant, ' Mastoids, Correlation of ', num2str(correlation_value)], ...
-        'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
-        'FontSize', 14, 'FontWeight', 'bold', 'Color', 'k');
-    % Set text and axes colors to black and adjust title positions
-    axs = findobj(fig, 'Type', 'axes');
-    for ax = axs'
-        set(ax, 'XColor', 'k', 'YColor', 'k', 'ZColor', 'k');
-        set(ax.Title, 'Color', 'k');
-    end
-    txts = findobj(fig, 'Type', 'text');
-    for txt = txts'
-        set(txt, 'Color', 'k');
-    end
-    hold off;
-    % Saving the plot as PNG in pathtosave
-    filename = [study, '_', participant, '_Mastoids.png'];
-    print(gcf, fullfile(pathtosave, filename), '-dpng', '-r300');
-    % Display the full path of the saved file in the command window
-    disp(['Saved ', filename, ' in ',  pathtosave]);
-    close all hidden;
+%     %%%%% Check the reference mastoid channels for their signal quality
+%     % Step 1: Check for flatline signals (variance close to zero)
+%     flatline_threshold = 1e-6;  % Threshold for detecting flatline channels
+%     mastoid_variance = var(EEG_mastoids.data, 0, 2);  % Variance of each mastoid channel
+%     flatline_channels = mastoid_variance < flatline_threshold;
+%     if any(flatline_channels)
+%         warning('One or more mastoid channels have a flatline signal.');
+%     end
+%     % Check their inter-mastoid-correlation
+%     cor_mastoids = abs(corrcoef(EEG_mastoids.data(:,:)'));
+%     correlation_value = cor_mastoids(1, 2); 
+%     disp(['Correlation of Mastoid 1 with Mastoid 2: ', num2str(correlation_value)]);
+%     % Check their individual correlation to the average of C3 and C4
+%     % Find indices of C3 and C4 by their labels in EEG_raw
+%     C3_index = find(strcmp({EEG_raw.chanlocs.labels}, 'C3'));
+%     C4_index = find(strcmp({EEG_raw.chanlocs.labels}, 'C4'));
+%     % Extract mastoid channels from EEG_mastoids (assuming they are channels 1 and 2)
+%     mastoid1 = EEG_mastoids.data(1, :);
+%     mastoid2 = EEG_raw.data(C3_index, :);
+%     % Extract C3 and C4 channels using their labels
+%     C3 = EEG_raw.data(C3_index, :);
+%     C4 = EEG_raw.data(C4_index, :);
+%     % Calculate the average of C3 and C4
+%     avg_C3_C4 = mean([C3; C4]);
+%     % Compute correlation between mastoid channels and the average of C3 and C4
+%     corr_mastoid1 = corr(mastoid1', mastoid2');
+%     corr_mastoid2 = corr(mastoid2', avg_C3_C4');
+%     % Display the results
+%     disp(['Correlation of Mastoid 1 with C3 : ', num2str(corr_mastoid1)]);
+%     disp(['Correlation of Mastoid 2 with C3 & C4 average: ', num2str(corr_mastoid2)]);
+% 
+%     % Extract mastoid channels from EEG_mastoids (assuming they are channels 1 and 2)
+%     mastoid1 = EEG_mastoids_nonoise.data(2, :);
+%     mastoid2 = EEG_raw_nonoise.data(C3_index, :);
+%     % Compute correlation between mastoid channels and the average of C3 and C4
+%     corr_mastoid1 = corr(mastoid1', mastoid2');
+%     disp(['Correlation of Mastoid 1 with C3 : ', num2str(corr_mastoid1)]);
+% 
+% 
+%     % % Plot mastoids
+%     % % Start of plotting the spectrogram
+%     % fig = figure('visible', 'off', 'WindowStyle', 'normal', 'Color', 'w', 'OuterPosition', screenSize);
+%     % % Maximize the figure window
+%     % screenSize = get(0, 'ScreenSize'); % Get the screen size from the root window
+%     % set(fig, 'Position', [1 1 screenSize(3) screenSize(4)]); % Set the figure size to cover the whole screen
+%     % hold on;
+%     % % Extract mastoid channel indices from EEG_mastoids
+%     % channel_indices = 1:size(EEG_mastoids.data, 1);  % Assuming EEG_mastoids contains only the mastoid channels
+%     %     for ith_channel_idx = 1:length(channel_indices)
+%     %         ith_channel = channel_indices(ith_channel_idx);  % Use the specific channel index
+%     %         ax = subplot(2, 1, ith_channel_idx);
+%     %         spectrogram(EEG_mastoids.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis');
+%     %         ylim(fpass);
+%     %         caxis([-40, 40]);
+%     %         colormap('jet');
+%     %         cbar = colorbar;  % Create or get handle to the colorbar
+%     %         cbar.Color = 'k';  % Set the color of the colorbar's text and ticks to black
+%     %         cbar.TickDirection = 'out';  % Optionally set the ticks to point outwards
+%     %         title(EEG_mastoids.chanlocs(ith_channel).labels, 'Interpreter', 'none');
+%     % end
+%     % % Add custom super title adjusted for better positioning
+%     % annotation(fig, 'textbox', [0, 0.95, 1, 0.05], ...
+%     %     'String', [study, ' ', participant, ' Mastoids, Correlation of ', num2str(correlation_value)], ...
+%     %     'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
+%     %     'FontSize', 14, 'FontWeight', 'bold', 'Color', 'k');
+%     % % Set text and axes colors to black and adjust title positions
+%     % axs = findobj(fig, 'Type', 'axes');
+%     % for ax = axs'
+%     %     set(ax, 'XColor', 'k', 'YColor', 'k', 'ZColor', 'k');
+%     %     set(ax.Title, 'Color', 'k');
+%     % end
+%     % txts = findobj(fig, 'Type', 'text');
+%     % for txt = txts'
+%     %     set(txt, 'Color', 'k');
+%     % end
+%     % hold off;
+%     % % Saving the plot as PNG in pathtosave
+%     % filename = [study, '_', participant, '_Mastoids.png'];
+%     % print(gcf, fullfile(pathtosave, filename), '-dpng', '-r300');
+%     % % Display the full path of the saved file in the command window
+%     % disp(['Saved ', filename, ' in ',  pathtosave]);
+%     % close all hidden;
+% 
+% 
+% 
+% 
+% 
+% 
+% % Combine mastoid channels from EEG_mastoids with C3 and C4 channels from EEG_raw
+% channel_indices_mastoids = 1:size(EEG_mastoids.data, 1);  % Assuming EEG_mastoids has only the mastoid channels
+% channel_indices_C3_C4 = [C3_index, C4_index];  % Indices of C3 and C4 in EEG_raw
+% 
+% % Plotting both mastoid and C3/C4 channels
+% fig = figure('visible', 'off', 'WindowStyle', 'normal', 'Color', 'w', 'OuterPosition', screenSize);
+% screenSize = get(0, 'ScreenSize'); % Get the screen size from the root window
+% set(fig, 'Position', [1 1 screenSize(3) screenSize(4)]); % Set the figure size to cover the whole screen
+% hold on;
+% 
+% % Plotting mastoid channels
+% for ith_channel_idx = 1:length(channel_indices_mastoids)
+%     ith_channel = channel_indices_mastoids(ith_channel_idx);  % Use the specific mastoid channel index
+%     ax = subplot(4, 1, ith_channel_idx);  % Adjusted to 4 rows for both mastoids and C3/C4
+%     spectrogram(EEG_mastoids.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis');
+%     ylim(fpass);
+%     caxis([-40, 40]);
+%     colormap('jet');
+%     cbar = colorbar;  % Create or get handle to the colorbar
+%     cbar.Color = 'k';  % Set the color of the colorbar's text and ticks to black
+%     cbar.TickDirection = 'out';  % Optionally set the ticks to point outwards
+%     title(EEG_mastoids.chanlocs(ith_channel).labels, 'Interpreter', 'none');
+% end
+% 
+% % Plotting C3 and C4 channels
+% for ith_channel_idx = 1:length(channel_indices_C3_C4)
+%     ith_channel = channel_indices_C3_C4(ith_channel_idx);  % Use the specific C3 or C4 channel index
+%     ax = subplot(4, 1, ith_channel_idx + 2);  % Continue subplot from the next row (adjusting for 4 rows)
+%     spectrogram(EEG_raw.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis');
+%     ylim(fpass);
+%     caxis([-40, 40]);
+%     colormap('jet');
+%     cbar = colorbar;  % Create or get handle to the colorbar
+%     cbar.Color = 'k';  % Set the color of the colorbar's text and ticks to black
+%     cbar.TickDirection = 'out';  % Optionally set the ticks to point outwards
+%     title(EEG_raw.chanlocs(ith_channel).labels, 'Interpreter', 'none');
+% end
+% 
+% % Add custom super title adjusted for better positioning
+% annotation(fig, 'textbox', [0, 0.95, 1, 0.05], ...
+%     'String', [study, ' ', participant, ' Mastoids CorrM1,M2 = ', num2str(correlation_value), ...
+%     ', CorrM1,C3&C4 = ', num2str(corr_mastoid1), ', CorrM2,C3&C4 = ', num2str(corr_mastoid2)],...
+%     'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
+%     'FontSize', 14, 'FontWeight', 'bold', 'Color', 'k');
+% 
+% % Set text and axes colors to black and adjust title positions
+% axs = findobj(fig, 'Type', 'axes');
+% for ax = axs'
+%     set(ax, 'XColor', 'k', 'YColor', 'k', 'ZColor', 'k');
+%     set(ax.Title, 'Color', 'k');
+% end
+% txts = findobj(fig, 'Type', 'text');
+% for txt = txts'
+%     set(txt, 'Color', 'k');
+% end
+% 
+% hold off;
+% 
+% % Saving the plot as PNG in pathtosave
+% filename = [study, '_', participant, '_Mastoids_C3_C4.png'];
+% print(gcf, fullfile(pathtosave, filename), '-dpng', '-r300');
+% disp(['Saved ', filename, ' in ', pathtosave]);
+% close all hidden;
 
-    
-    
 
 
 
 
-    %%%%% bandpass and detrend, to remove sweat and other artifacts
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    %% bandpass and detrend, to remove sweat and other artifacts
     fprintf('---bandpass detrend\n');
     EEG_detrend = EEG_raw;
     if size(EEG_raw.data,1) > 0
@@ -194,46 +311,44 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     end
     
 
-    %%%%% detect bad signal to remove for bad channel detection
+    %% detect bad signal to remove for bad channel detection
     fprintf('---detecting bad signal\n');
     [remove_channel_which, cut_chunks, rem_ind_all_matrix] = eeg_acrossfreq_artifact(EEG_detrend);
     rem_ind_all = sum(rem_ind_all_matrix,1) > 0; % von matrix zu vektor, falls irgendwo eine 1 ist (bad signal) wird der ganze Zeitpunkt auf 1 gesetzt
     
-    % %%%% remove bad signal from signal
-    % EEG_detrend_removed = EEG_detrend;
-    % % Create a logical index for good data (where rem_ind_all is 0)
-    % good_data_indices = ~rem_ind_all;  % The tilde (~) operator negates the logical array
-    % % Filter the entire EEG_detrend_removed.data and .times matrix to remove bad data points
-    % % This keeps only the columns (time points) where rem_ind_all is 0 (or false for good_data_indices)
-    % EEG_detrend_removed.data = EEG_detrend.data(:, good_data_indices);
-    % EEG_detrend_removed.times = EEG_detrend.times(:, good_data_indices);
 
-    %%%% detect bad channels without bad signal
+    %% remove electrical noise from sienna
+    fprintf('---removal electrical noise\n');
+    EEG_noise = EEG_detrend;
+    EEG_noise = eeg_electricalnoise_reducer(EEG_detrend, rem_ind_all);
+
+
+    %% detect bad channels without bad signal
     labels = {EEG_detrend.chanlocs.labels};
     labels = labels(ismember(labels, {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'}));
-    bad_channels = labels(eeg_badchannel_detect(pop_select(EEG_detrend, 'channel', {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'}), zeros(1,size(EEG_detrend.data,2)), 0.55))
+    bad_channels = labels(eeg_badchannel_detect(pop_select(EEG_noise, 'channel', {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'}), zeros(1,size(EEG_detrend.data,2)), 0.5))
     disp(['Bad channels: ', bad_channels]);
-    
 
-    %%%% interpolate bad channels
+
+    %% interpolate bad channels
     % Check if bad_channels is empty
     if ~isempty(bad_channels)
         % Perform interpolation only if there are bad channels
-        bad_channel_indices = eeg_chaninds(EEG_detrend, bad_channels);
-        EEG_interp = pop_interp(EEG_detrend, bad_channel_indices);
+        bad_channel_indices = eeg_chaninds(EEG_noise, bad_channels);
+        EEG_interp = pop_interp(EEG_noise, bad_channel_indices);
     else
         % If bad_channels is empty, skip interpolation and keep EEG data unchanged
-        EEG_interp = EEG_detrend;
+        EEG_interp = EEG_noise;
     end
 
 
-    %%%%% detect bad signal again to exclude
+    %% detect bad signal again to exclude
     fprintf('---detecting bad signal\n');
     [remove_channel_which, cut_chunks, rem_ind_all_matrix] = eeg_acrossfreq_artifact(EEG_interp);
     rem_ind_all = sum(rem_ind_all_matrix,1) > 0; % von matrix zu vektor, falls irgendwo eine 1 ist (bad signal) wird der ganze Zeitpunkt auf 1 gesetzt
 
    
-    %%%% Calculate and plot summary of bad signal
+    %% Calculate and plot summary of bad signal
     % Calculate the percentage of bad segments
     perc_bad = sum(rem_ind_all) / length(rem_ind_all) * 100;
     dur_bad = perc_bad / 100 * length(rem_ind_all) / EEG_detrend.srate / 60;
@@ -308,7 +423,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     disp(['Saved bad data in ', filePath]);
 
 
-    %%%%% remove bad signal from signal
+    %% remove bad signal from signal
     EEG_interp_removed = EEG_interp;
     % Create a logical index for good data (where rem_ind_all is 0)
     good_data_indices = ~rem_ind_all;  % The tilde (~) operator negates the logical array
@@ -319,22 +434,20 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     ECG.data = ECG.data(:,good_data_indices);
     ECG.times = ECG.times(:,good_data_indices);
 
-   
-    %%%%% remove electrical noise from sienna, and make sure to exclude the movement artifacts for calculation
-    fprintf('---removal electrical noise\n');
-    EEG_noise = EEG_interp_removed;
-    EEG_noise = eeg_electricalnoise_reducer(EEG_detrend, rem_ind_all);
-    EEG_noise.data = EEG_noise.data(:, good_data_indices);
-    EEG_noise.times = EEG_noise.times(:, good_data_indices);
+    
+    %% Rereference using the REST algorithm
+    EEG = EEG_interp_removed;
+    eeglab redraw;
+
     
 
-    %%%%% remove heart beat artifacts here again I require the movement artifacts to be excluded (eeg_jelena_ecg_removal will probably not yet run correctly, I will need to adjust it)
+    %% remove heart beat artifacts here again I require the movement artifacts to be excluded (eeg_jelena_ecg_removal will probably not yet run correctly, I will need to adjust it)
     fprintf('---ECG removal\n');
     EEG_ECG = EEG_noise;
     EEG_ECG = eeg_jelena_ecg_removal(EEG_noise, ECG, cut_chunks);
 
 
-    %%%%% let ASR run sequentially in windows
+    %% let ASR run sequentially in windows
     fprintf('---ASR\n');
         overlapDuration = windowDuration / 2;
         windowSamples = windowDuration * 60 * srate;  % convert window duration to samples
@@ -427,7 +540,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
             currentSample = currentSample + overlapSamples;  % Move by the overlap amount
         end
 
-    % Calculate spectrum for each step
+    %% Calculate spectrum for each step
     % For EEG_raw (Raw data)
     fprintf('---calculate the spectrum of every preprocessing step\n');
     [spectra1, freqs1] = spectopo(EEG_raw.data, 0, EEG_raw.srate, 'plot', 'off');
@@ -443,7 +556,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
   
 
 
-% Start of plotting the spectrogram
+%% Start of plotting the spectrogram
 fig = figure('visible', 'off', 'WindowStyle', 'normal', 'Color', 'w', 'OuterPosition', screenSize);
 % Maximize the figure window
 screenSize = get(0, 'ScreenSize'); % Get the screen size from the root window
