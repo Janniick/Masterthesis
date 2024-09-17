@@ -434,9 +434,10 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     ECG.data = ECG.data(:,good_data_indices);
     ECG.times = ECG.times(:,good_data_indices);
 
-    
+    %% Rereference to AR (average reference)
+    EEG_reref = pop_reref(EEG_raw, []);
     %% Rereference using the REST algorithm
-    EEG = EEG_interp_removed;
+    EEG = EEG_raw;
     eeglab redraw;
 
     

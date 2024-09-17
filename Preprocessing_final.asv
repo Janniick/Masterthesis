@@ -434,9 +434,14 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     ECG.data = ECG.data(:,good_data_indices);
     ECG.times = ECG.times(:,good_data_indices);
 
-    
+    %% Rereference to AR (average reference)
+    EEG = EEG_raw;
+    eeglab redraw;
+    EEG_reref = pop_reref(EEG_raw, []);
     %% Rereference using the REST algorithm
-    
+    EEG = EEG_interp_removed;
+    eeglab redraw;
+
     
 
     %% remove heart beat artifacts here again I require the movement artifacts to be excluded (eeg_jelena_ecg_removal will probably not yet run correctly, I will need to adjust it)
