@@ -1,20 +1,21 @@
-%% All these functions need to be loaded first
+%% Load funtions
 % other functions (maybe here not needed, but for feature extraction at least they are needed
 addpath(genpath('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\2023_mesmart\scripts'));
 % preprocessing Funktionen
 addpath('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\matlab_processing_benji\');
 
-
 %%% Add the path to your EEGLAB folder
 addpath('D:\Masterarbeit Jannick\scripts\2_Preprocessing\eeglab2024.0');
 eeglab nogui; % Initialize EEGLAB (eeglab nogui; if you want no GUI)
 
+%% Define path to data files
 %%% Add the path to your .edf files (if will find all .edf files in all
 %%% subfolders)
 folderpath = 'D:\Masterarbeit Jannick\Data\GHB_TRA\GHB_TRA_EEG';
 edf_files = dir(fullfile(folderpath, '*\*.edf'));
 web_files = dir(fullfile(folderpath, '*\*.web'));
 
+%% Define parameters
 %%% define study name (avoid "/" and "_")
 study = 'GHBTRA';
 %%% define which channels to look at
@@ -23,7 +24,10 @@ selected_channels = {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'};
 windowDuration = 8; 
 %%% define ASR SD-Cutoff (default = 30)
 SDCutoff = 30;
-
+% Initialize an empty cell array to store bad channels from all files
+all_bad_channels = {};
+% Initialize an empty cell array to store info about bad data from all files
+all_bad_data = {};
 
 %% loop through all files
 for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
@@ -124,182 +128,6 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     % Number of channels
     num_channels = length(EEG_raw.chanlocs);
 
-%     %%%%% Check the reference mastoid channels for their signal quality
-%     % Step 1: Check for flatline signals (variance close to zero)
-%     flatline_threshold = 1e-6;  % Threshold for detecting flatline channels
-%     mastoid_variance = var(EEG_mastoids.data, 0, 2);  % Variance of each mastoid channel
-%     flatline_channels = mastoid_variance < flatline_threshold;
-%     if any(flatline_channels)
-%         warning('One or more mastoid channels have a flatline signal.');
-%     end
-%     % Check their inter-mastoid-correlation
-%     cor_mastoids = abs(corrcoef(EEG_mastoids.data(:,:)'));
-%     correlation_value = cor_mastoids(1, 2); 
-%     disp(['Correlation of Mastoid 1 with Mastoid 2: ', num2str(correlation_value)]);
-%     % Check their individual correlation to the average of C3 and C4
-%     % Find indices of C3 and C4 by their labels in EEG_raw
-%     C3_index = find(strcmp({EEG_raw.chanlocs.labels}, 'C3'));
-%     C4_index = find(strcmp({EEG_raw.chanlocs.labels}, 'C4'));
-%     % Extract mastoid channels from EEG_mastoids (assuming they are channels 1 and 2)
-%     mastoid1 = EEG_mastoids.data(1, :);
-%     mastoid2 = EEG_raw.data(C3_index, :);
-%     % Extract C3 and C4 channels using their labels
-%     C3 = EEG_raw.data(C3_index, :);
-%     C4 = EEG_raw.data(C4_index, :);
-%     % Calculate the average of C3 and C4
-%     avg_C3_C4 = mean([C3; C4]);
-%     % Compute correlation between mastoid channels and the average of C3 and C4
-%     corr_mastoid1 = corr(mastoid1', mastoid2');
-%     corr_mastoid2 = corr(mastoid2', avg_C3_C4');
-%     % Display the results
-%     disp(['Correlation of Mastoid 1 with C3 : ', num2str(corr_mastoid1)]);
-%     disp(['Correlation of Mastoid 2 with C3 & C4 average: ', num2str(corr_mastoid2)]);
-% 
-%     % Extract mastoid channels from EEG_mastoids (assuming they are channels 1 and 2)
-%     mastoid1 = EEG_mastoids_nonoise.data(2, :);
-%     mastoid2 = EEG_raw_nonoise.data(C3_index, :);
-%     % Compute correlation between mastoid channels and the average of C3 and C4
-%     corr_mastoid1 = corr(mastoid1', mastoid2');
-%     disp(['Correlation of Mastoid 1 with C3 : ', num2str(corr_mastoid1)]);
-% 
-% 
-%     % % Plot mastoids
-%     % % Start of plotting the spectrogram
-%     % fig = figure('visible', 'off', 'WindowStyle', 'normal', 'Color', 'w', 'OuterPosition', screenSize);
-%     % % Maximize the figure window
-%     % screenSize = get(0, 'ScreenSize'); % Get the screen size from the root window
-%     % set(fig, 'Position', [1 1 screenSize(3) screenSize(4)]); % Set the figure size to cover the whole screen
-%     % hold on;
-%     % % Extract mastoid channel indices from EEG_mastoids
-%     % channel_indices = 1:size(EEG_mastoids.data, 1);  % Assuming EEG_mastoids contains only the mastoid channels
-%     %     for ith_channel_idx = 1:length(channel_indices)
-%     %         ith_channel = channel_indices(ith_channel_idx);  % Use the specific channel index
-%     %         ax = subplot(2, 1, ith_channel_idx);
-%     %         spectrogram(EEG_mastoids.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis');
-%     %         ylim(fpass);
-%     %         caxis([-40, 40]);
-%     %         colormap('jet');
-%     %         cbar = colorbar;  % Create or get handle to the colorbar
-%     %         cbar.Color = 'k';  % Set the color of the colorbar's text and ticks to black
-%     %         cbar.TickDirection = 'out';  % Optionally set the ticks to point outwards
-%     %         title(EEG_mastoids.chanlocs(ith_channel).labels, 'Interpreter', 'none');
-%     % end
-%     % % Add custom super title adjusted for better positioning
-%     % annotation(fig, 'textbox', [0, 0.95, 1, 0.05], ...
-%     %     'String', [study, ' ', participant, ' Mastoids, Correlation of ', num2str(correlation_value)], ...
-%     %     'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
-%     %     'FontSize', 14, 'FontWeight', 'bold', 'Color', 'k');
-%     % % Set text and axes colors to black and adjust title positions
-%     % axs = findobj(fig, 'Type', 'axes');
-%     % for ax = axs'
-%     %     set(ax, 'XColor', 'k', 'YColor', 'k', 'ZColor', 'k');
-%     %     set(ax.Title, 'Color', 'k');
-%     % end
-%     % txts = findobj(fig, 'Type', 'text');
-%     % for txt = txts'
-%     %     set(txt, 'Color', 'k');
-%     % end
-%     % hold off;
-%     % % Saving the plot as PNG in pathtosave
-%     % filename = [study, '_', participant, '_Mastoids.png'];
-%     % print(gcf, fullfile(pathtosave, filename), '-dpng', '-r300');
-%     % % Display the full path of the saved file in the command window
-%     % disp(['Saved ', filename, ' in ',  pathtosave]);
-%     % close all hidden;
-% 
-% 
-% 
-% 
-% 
-% 
-% % Combine mastoid channels from EEG_mastoids with C3 and C4 channels from EEG_raw
-% channel_indices_mastoids = 1:size(EEG_mastoids.data, 1);  % Assuming EEG_mastoids has only the mastoid channels
-% channel_indices_C3_C4 = [C3_index, C4_index];  % Indices of C3 and C4 in EEG_raw
-% 
-% % Plotting both mastoid and C3/C4 channels
-% fig = figure('visible', 'off', 'WindowStyle', 'normal', 'Color', 'w', 'OuterPosition', screenSize);
-% screenSize = get(0, 'ScreenSize'); % Get the screen size from the root window
-% set(fig, 'Position', [1 1 screenSize(3) screenSize(4)]); % Set the figure size to cover the whole screen
-% hold on;
-% 
-% % Plotting mastoid channels
-% for ith_channel_idx = 1:length(channel_indices_mastoids)
-%     ith_channel = channel_indices_mastoids(ith_channel_idx);  % Use the specific mastoid channel index
-%     ax = subplot(4, 1, ith_channel_idx);  % Adjusted to 4 rows for both mastoids and C3/C4
-%     spectrogram(EEG_mastoids.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis');
-%     ylim(fpass);
-%     caxis([-40, 40]);
-%     colormap('jet');
-%     cbar = colorbar;  % Create or get handle to the colorbar
-%     cbar.Color = 'k';  % Set the color of the colorbar's text and ticks to black
-%     cbar.TickDirection = 'out';  % Optionally set the ticks to point outwards
-%     title(EEG_mastoids.chanlocs(ith_channel).labels, 'Interpreter', 'none');
-% end
-% 
-% % Plotting C3 and C4 channels
-% for ith_channel_idx = 1:length(channel_indices_C3_C4)
-%     ith_channel = channel_indices_C3_C4(ith_channel_idx);  % Use the specific C3 or C4 channel index
-%     ax = subplot(4, 1, ith_channel_idx + 2);  % Continue subplot from the next row (adjusting for 4 rows)
-%     spectrogram(EEG_raw.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis');
-%     ylim(fpass);
-%     caxis([-40, 40]);
-%     colormap('jet');
-%     cbar = colorbar;  % Create or get handle to the colorbar
-%     cbar.Color = 'k';  % Set the color of the colorbar's text and ticks to black
-%     cbar.TickDirection = 'out';  % Optionally set the ticks to point outwards
-%     title(EEG_raw.chanlocs(ith_channel).labels, 'Interpreter', 'none');
-% end
-% 
-% % Add custom super title adjusted for better positioning
-% annotation(fig, 'textbox', [0, 0.95, 1, 0.05], ...
-%     'String', [study, ' ', participant, ' Mastoids CorrM1,M2 = ', num2str(correlation_value), ...
-%     ', CorrM1,C3&C4 = ', num2str(corr_mastoid1), ', CorrM2,C3&C4 = ', num2str(corr_mastoid2)],...
-%     'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
-%     'FontSize', 14, 'FontWeight', 'bold', 'Color', 'k');
-% 
-% % Set text and axes colors to black and adjust title positions
-% axs = findobj(fig, 'Type', 'axes');
-% for ax = axs'
-%     set(ax, 'XColor', 'k', 'YColor', 'k', 'ZColor', 'k');
-%     set(ax.Title, 'Color', 'k');
-% end
-% txts = findobj(fig, 'Type', 'text');
-% for txt = txts'
-%     set(txt, 'Color', 'k');
-% end
-% 
-% hold off;
-% 
-% % Saving the plot as PNG in pathtosave
-% filename = [study, '_', participant, '_Mastoids_C3_C4.png'];
-% print(gcf, fullfile(pathtosave, filename), '-dpng', '-r300');
-% disp(['Saved ', filename, ' in ', pathtosave]);
-% close all hidden;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     %% bandpass and detrend, to remove sweat and other artifacts
     fprintf('---bandpass detrend\n');
     EEG_detrend = EEG_raw;
@@ -326,9 +154,22 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     %% detect bad channels without bad signal
     labels = {EEG_detrend.chanlocs.labels};
     labels = labels(ismember(labels, {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'}));
-    bad_channels = labels(eeg_badchannel_detect(pop_select(EEG_noise, 'channel', {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'}), zeros(1,size(EEG_detrend.data,2)), 0.5))
+    [bad_channels_idx, value_chan] = eeg_badchannel_detect(pop_select(EEG_noise, 'channel', labels), zeros(1, size(EEG_detrend.data, 2)), 0.5);
     disp(['Bad channels: ', bad_channels]);
-
+    % Extract the indices of the bad channels
+    bad_channel_indices = find(bad_channels_idx);  % Find the index positions of bad channels
+    % Extract bad channel names and corresponding values
+    bad_channels = labels(bad_channel_indices);
+    % Prepare results as a cell array or table
+    results = cell(length(bad_channels), 3);  % Create a cell array with 3 columns
+    % Loop through bad channels and save them with 'thename' and the corresponding value_chan
+    for i = 1:length(bad_channels)
+        results{i, 1} = thename;                         % First column: 'thename'
+        results{i, 2} = bad_channels{i};                 % Second column: bad channel name
+        results{i, 3} = value_chan(bad_channel_indices(i)); % Third column: corresponding value
+    end
+    % Append current results to the master results array
+    all_bad_channels = [all_bad_channels; results];  % Append results for the current file
 
     %% interpolate bad channels
     % Check if bad_channels is empty
@@ -347,7 +188,6 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     [remove_channel_which, cut_chunks, rem_ind_all_matrix] = eeg_acrossfreq_artifact(EEG_interp);
     rem_ind_all = sum(rem_ind_all_matrix,1) > 0; % von matrix zu vektor, falls irgendwo eine 1 ist (bad signal) wird der ganze Zeitpunkt auf 1 gesetzt
 
-   
     %% Calculate and plot summary of bad signal
     % Calculate the percentage of bad segments
     perc_bad = sum(rem_ind_all) / length(rem_ind_all) * 100;
@@ -417,7 +257,7 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     EEG_bad.data = EEG_interp.data(:, rem_ind_all);
     EEG_bad.times = EEG_interp.times(:, rem_ind_all);
     filePath = fullfile(pathtosave, [study, '_', participant, '_EEG_bad_data.mat']);
-    % Save the EEG_EOG variable in the specified path
+    % Save the EEG_bad variable in the specified path
     save(filePath, 'EEG_bad');
     % Optionally display the path where the file was saved
     disp(['Saved bad data in ', filePath]);
@@ -434,20 +274,31 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     ECG.data = ECG.data(:,good_data_indices);
     ECG.times = ECG.times(:,good_data_indices);
 
+    % Prepare results as a cell array or table
+    bad_data = cell(1, 4);
+    bad_data{1,1} = thename;
+    bad_data{1,2} = size(EEG_interp.times)/(EEG_interp.srate*60);
+    bad_data{1,3} = size(EEG_interp_removed.times)/(EEG_interp.srate*60);
+    bad_data{1,4} = 100/size(EEG_interp.times)*size(EEG_interp_removed.times);
+    % Append current bad_data to the master all_bad_data array
+    all_bad_data = [all_bad_data; bad_data];  % Append results for the current file
+   
+
     %% Rereference to AR (average reference)
-    EEG = EEG_raw;
-    eeglab redraw;
-    EEG_reref = pop_reref(EEG_raw, []);
-    %% Rereference using the REST algorithm
-    EEG = EEG_interp_removed;
-    eeglab redraw;
-
-    
-
+    % [] indicates referencing to AR
+    EEG_reref = pop_reref(EEG_interp_removed, []);
+    %% Rereference to REST (Reference electrode standardization technique)
+    fprintf('---Rereferencing to REST\n');
+    % Use the REST function for calculating or loading the lead field
+    % matrix (spatial relationship between electrodes)
+    chanlist = find(ismember({EEG_reref.chanlocs.labels}, selected_channels));
+    G = dong_getleadfield(EEG_reref, chanlist);
+    % Rereference the data to REST 
+    EEG_reref.data = dong_rest_refer(EEG_reref.data, G);
     %% remove heart beat artifacts here again I require the movement artifacts to be excluded (eeg_jelena_ecg_removal will probably not yet run correctly, I will need to adjust it)
     fprintf('---ECG removal\n');
-    EEG_ECG = EEG_noise;
-    EEG_ECG = eeg_jelena_ecg_removal(EEG_noise, ECG, cut_chunks);
+    EEG_ECG = EEG_reref;
+    EEG_ECG = eeg_jelena_ecg_removal(EEG_reref, ECG, cut_chunks);
 
 
     %% let ASR run sequentially in windows
@@ -525,20 +376,20 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
         end
         
         % Put the tapered segments back together
-        EEG_EOG = EEG_ECG;
-        EEG_EOG.data = zeros(size(EEG_EOG.data));  % Initialize with zeros for addition
+        EEG_ASR = EEG_ECG;
+        EEG_ASR.data = zeros(size(EEG_ASR.data));  % Initialize with zeros for addition
         currentSample = 1;
         for j = 1:numel(EEG_segments_tapered)
             segmentLength = size(EEG_segments_tapered{j}, 2);  % Determine the length of the current segment
             % Calculate the end index for this segment
             endIndex = currentSample + segmentLength - 1;
-            % Add the segment to the existing data in EEG_EOG, summing where segments overlap
-            if endIndex > size(EEG_EOG.data, 2)
-                endIndex = size(EEG_EOG.data, 2);  % Ensure not to exceed the bounds
+            % Add the segment to the existing data in EEG_ASR, summing where segments overlap
+            if endIndex > size(EEG_ASR.data, 2)
+                endIndex = size(EEG_ASR.data, 2);  % Ensure not to exceed the bounds
                 segmentLength = endIndex - currentSample + 1;  % Adjust segment length accordingly
             end
-            EEG_EOG.data(:, currentSample:endIndex) = ...
-                EEG_EOG.data(:, currentSample:endIndex) + EEG_segments_tapered{j}(:, 1:segmentLength);
+            EEG_ASR.data(:, currentSample:endIndex) = ...
+                EEG_ASR.data(:, currentSample:endIndex) + EEG_segments_tapered{j}(:, 1:segmentLength);
             % Update the currentSample index for the next segment, shifting by the overlap
             currentSample = currentSample + overlapSamples;  % Move by the overlap amount
         end
@@ -553,160 +404,175 @@ for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
     [spectra3, freqs3] = spectopo(EEG_noise.data, 0, EEG_noise.srate, 'plot', 'off');
     % For EEG_ECG
     [spectra4, freqs4] = spectopo(EEG_ECG.data, 0, EEG_ECG.srate, 'plot', 'off');
-    % For EEG_EOG
-    [spectra5, freqs5] = spectopo(EEG_EOG.data, 0, EEG_EOG.srate, 'plot', 'off');
+    % For EEG_ASR
+    [spectra5, freqs5] = spectopo(EEG_ASR.data, 0, EEG_ASR.srate, 'plot', 'off');
    
   
 
 
-%% Start of plotting the spectrogram
-fig = figure('visible', 'off', 'WindowStyle', 'normal', 'Color', 'w', 'OuterPosition', screenSize);
-% Maximize the figure window
-screenSize = get(0, 'ScreenSize'); % Get the screen size from the root window
-set(fig, 'Position', [1 1 screenSize(3) screenSize(4)]); % Set the figure size to cover the whole screen
-hold on;
-% Array of EEG structures and labels
-EEG_steps = {EEG_raw, EEG_detrend, EEG_interp_removed, EEG_noise, EEG_ECG, EEG_EOG};
-step_labels = {'Raw data', 'Bandpass & Detrend & bad signal', 'Bad signal removal', 'Electrical noise removal', 'ECG removal', 'ASR'};
-% Define the array of cut chunks for each step if applicable
-cut_chunks_steps = {[], cut_chunks, [], [], [], []};  % Adjust according to when chunks are used
-% List of specific channels to display
-specific_channels = {'F3', 'C3', 'P3', 'O1'};
-% Find indices of these channels in the EEG data
-channel_indices = find(ismember({EEG_raw.chanlocs.labels}, specific_channels));
-% Iterate through each preprocessing step
-for step = 1:length(EEG_steps)
-    for ith_channel_idx = 1:length(channel_indices)
-        ith_channel = channel_indices(ith_channel_idx);  % Use the specific channel index
-        ax = subplot(length(EEG_steps), length(channel_indices), ith_channel_idx + (step - 1) * length(channel_indices));
-        spectrogram(EEG_steps{step}.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis');
-        ylim(fpass);
-        caxis([-40, 40]);
-        colormap('jet');
-        cbar = colorbar;  % Create or get handle to the colorbar
-        cbar.Color = 'k';  % Set the color of the colorbar's text and ticks to black
-        cbar.TickDirection = 'out';  % Optionally set the ticks to point outwards
-        title(EEG_steps{step}.chanlocs(ith_channel).labels, 'Interpreter', 'none');
-        % Add black bars if cut chunks are available for this step
-        if ~isempty(cut_chunks_steps{step}) && ~isempty(cut_chunks_steps{step}{ith_channel})
-            ccunk = cut_chunks_steps{step}{ith_channel};
-            for ccc = 1:size(ccunk, 1)
-                x = [ccunk(ccc, 1)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 1)/divideby];
-                y = [fpass(1), fpass(1), fpass(2), fpass(2)];
-                patch(x, y, 'black', 'FaceAlpha', 1);
+    %% Start of plotting the spectrogram
+    fig = figure('visible', 'off', 'WindowStyle', 'normal', 'Color', 'w', 'OuterPosition', screenSize);
+    % Maximize the figure window
+    screenSize = get(0, 'ScreenSize'); % Get the screen size from the root window
+    set(fig, 'Position', [1 1 screenSize(3) screenSize(4)]); % Set the figure size to cover the whole screen
+    hold on;
+    % Array of EEG structures and labels
+    EEG_steps = {EEG_raw, EEG_noise, EEG_interp_removed, EEG_reref, EEG_ASR};
+    step_labels = {'Raw data', 'Bandpass, Detrend, Line noise removal', 'Interpolation', 'REST rereferencing', 'ECG removal & ASR'};
+    % Define the array of cut chunks for each step if applicable
+    cut_chunks_steps = {[], cut_chunks, [], [], [], []};  % Adjust according to when chunks are used
+    % List of specific channels to display
+    specific_channels = {'F3', 'C3', 'P3', 'O1'};
+    % Find indices of these channels in the EEG data
+    channel_indices = find(ismember({EEG_raw.chanlocs.labels}, specific_channels));
+    % Iterate through each preprocessing step
+    for step = 1:length(EEG_steps)
+        for ith_channel_idx = 1:length(channel_indices)
+            ith_channel = channel_indices(ith_channel_idx);  % Use the specific channel index
+            ax = subplot(length(EEG_steps), length(channel_indices), ith_channel_idx + (step - 1) * length(channel_indices));
+            spectrogram(EEG_steps{step}.data(ith_channel,:), hamming(window_length), noverlap, nfft, srate, 'yaxis');
+            ylim(fpass);
+            caxis([-40, 40]);
+            colormap('jet');
+            cbar = colorbar;  % Create or get handle to the colorbar
+            cbar.Color = 'k';  % Set the color of the colorbar's text and ticks to black
+            cbar.TickDirection = 'out';  % Optionally set the ticks to point outwards
+            title(EEG_steps{step}.chanlocs(ith_channel).labels, 'Interpreter', 'none');
+            % Add black bars if cut chunks are available for this step
+            if ~isempty(cut_chunks_steps{step}) && ~isempty(cut_chunks_steps{step}{ith_channel})
+                ccunk = cut_chunks_steps{step}{ith_channel};
+                for ccc = 1:size(ccunk, 1)
+                    x = [ccunk(ccc, 1)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 2)/divideby, ccunk(ccc, 1)/divideby];
+                    y = [fpass(1), fpass(1), fpass(2), fpass(2)];
+                    patch(x, y, 'black', 'FaceAlpha', 1);
+                end
             end
         end
+        % Position of the current axes
+        pos = get(ax, 'Position');
+        % Create an annotation that spans the full width of the figure
+        annotation('textbox', [0, pos(2) + pos(4), 1, 0.05], ...
+            'String', step_labels{step}, ...
+            'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12, 'VerticalAlignment', 'bottom', 'Color', 'k');
     end
-    % Position of the current axes
-    pos = get(ax, 'Position');
-    % Create an annotation that spans the full width of the figure
-    annotation('textbox', [0, pos(2) + pos(4), 1, 0.05], ...
-               'String', step_labels{step}, ...
-               'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 12, 'VerticalAlignment', 'bottom', 'Color', 'k');
+    % Add custom super title adjusted for better positioning
+    annotation(fig, 'textbox', [0, 0.95, 1, 0.05], ...
+        'String', [study, ' ', participant, ' spectrogram'], ...
+        'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
+        'FontSize', 14, 'FontWeight', 'bold', 'Color', 'k');
+    % Set text and axes colors to black and adjust title positions
+    axs = findobj(fig, 'Type', 'axes');
+    for ax = axs'
+        set(ax, 'XColor', 'k', 'YColor', 'k', 'ZColor', 'k');
+        set(ax.Title, 'Color', 'k');
+    end
+    txts = findobj(fig, 'Type', 'text');
+    for txt = txts'
+        set(txt, 'Color', 'k');
+    end
+    hold off;
+    % Saving the plot as PNG in pathtosave
+    filename = [study, '_', participant, '_Spectrogram.png'];
+    print(gcf, fullfile(pathtosave, filename), '-dpng', '-r300');
+    % Display the full path of the saved file in the command window
+    disp(['Saved ', filename, ' in ',  pathtosave]);
+    close all hidden;
+
+
+
+
+
+
+
+    % Create a figure for all power spectra
+    fprintf('---plot the individual spectra\n');
+    fig = figure('visible', 'off', 'Color', 'w', 'OuterPosition', screenSize);
+    % Plot the spectra
+    plot(freqs1, spectra1(1,:), 'Marker', 'o', 'LineStyle', '--', 'Color', '#003049');
+    hold on;
+    %plot(freqs2, spectra2(1,:), 'Marker', '*', 'LineStyle', '--', 'Color', '#369279');
+    %plot(freqs3, spectra3(1,:), 'Marker', '.', 'LineStyle', '--', 'Color', '#55CC95');
+    %plot(freqs4, spectra4(1,:), 'Marker', '<', 'LineStyle', '--', 'Color', '#2B8B5E');
+    plot(freqs5, spectra5(1,:), 'Marker', '*', 'LineStyle', '--', 'Color', '#2B8B5E');
+    ax = gca;  % Gets handle to the current axes
+    set(ax, 'XColor', 'k', 'YColor', 'k');  % Sets the x-axis and y-axis color to black
+    set(ax, 'Color', 'w');  % Optional: Explicitly set axes background color if needed
+    % Setting labels, title, and legend
+    xlabel(ax, 'Frequency (Hz)', 'Color', 'k');  % Ensure text is black
+    ylabel(ax, 'Power (dB)', 'Color', 'k');
+    title(ax, 'Power Spectra of raw and preprocessed data', 'Color', 'k');
+    legend(ax, {'Raw', 'Preprocessed'}, 'TextColor', 'k', 'Color', 'w');
+    %legend(ax, {'Raw data', 'Detrend', 'Noise', 'ECG', 'ASR'}, 'TextColor', 'k', 'Color', 'w');
+    % Set grid and limits
+    grid on;
+    xlim(ax, [0 40]);
+    % Save the plot
+    filename = [study, '_', participant, '_Powerspectrum_individual.png'];
+    print(fig, fullfile(pathtosave, filename), '-dpng', '-r300');
+    disp(['Saved ', filename, ' in ', pathtosave]);
+    % Release the hold on the plot
+    hold off;
+    close all hidden;
+
+
+
+
+
+    % Create a figure for all spectrogram-differences
+    fprintf('---plot the differences of the spectra\n');
+    figure('visible', 'off', 'Color', 'w', 'OuterPosition', screenSize);
+    % Plot the first spectrum
+    plot(freqs1, spectra1(1,:)-spectra2(1,:), 'Marker', 'o', 'LineStyle', '--', 'Color', '#003049');
+    hold on;
+    plot(freqs2, spectra2(1,:)-spectra3(1,:), 'Marker', '.', 'LineStyle', '--', 'Color', '#16575C');
+    hold on;
+    plot(freqs3, spectra3(1,:)-spectra4(1,:), 'Marker', '*', 'LineStyle', '--', 'Color', '#55CC95');
+    hold on;
+    plot(freqs3, spectra4(1,:)-spectra5(1,:), 'Marker', 'square', 'LineStyle', '--', 'Color', '#004A26');
+    % Adding labels and title
+    ax = gca;  % Gets handle to the current axes
+    set(ax, 'XColor', 'k', 'YColor', 'k');  % Sets the x-axis and y-axis color to black
+    set(ax, 'Color', 'w');  % Optional: Explicitly set axes background color if needed
+    % Setting labels, title, and legend
+    xlabel(ax, 'Frequency (Hz)', 'Color', 'k');  % Ensure text is black
+    ylabel(ax, 'Power (dB)', 'Color', 'k');
+    title(ax, 'Power Spectra difference of preprocessing steps', 'Color', 'k');
+    legend(ax, {'Raw - Detrend', 'Detrend - Noise', 'Noise - ECG', 'ECG - ASR'}, 'TextColor', 'k', 'Color', 'w', 'Location', 'northwest');
+    % Enable grid for better visibility
+    grid on;
+    xlim(ax, [0 40]);
+    % Release the hold on the plot
+    hold off;
+    % Saving the plot as png in pathtosave
+    filename = [study, '_', participant, '_Powerspectrum_difference.png'];
+    print(gcf, fullfile(pathtosave, filename ), '-dpng', '-r300');
+    % Display the full path of the saved file in the command window
+    disp(['Saved ', filename, ' in ',  pathtosave]);
+    close all hidden;
+
+    filePath = fullfile(pathtosave, [study, '_', participant, '_EEG_preprocessed.mat']);
+    % Save the EEG_ASR variable in the specified path
+    save(filePath, 'EEG_ASR');
+    % Optionally display the path where the file was saved
+    disp(['Saved EEG_ASR in ', filePath]);
+
+    %% clear most of the data
+    clearvars -except folderpath i edf_files web_files study selected_channels windowDuration SDCutoff
 end
-% Add custom super title adjusted for better positioning
-annotation(fig, 'textbox', [0, 0.95, 1, 0.05], ...
-           'String', [study, ' ', participant, ' spectrogram'], ...
-           'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
-           'FontSize', 14, 'FontWeight', 'bold', 'Color', 'k');
-% Set text and axes colors to black and adjust title positions
-axs = findobj(fig, 'Type', 'axes');
-for ax = axs'
-    set(ax, 'XColor', 'k', 'YColor', 'k', 'ZColor', 'k');
-    set(ax.Title, 'Color', 'k');
-end
-txts = findobj(fig, 'Type', 'text');
-for txt = txts'
-    set(txt, 'Color', 'k');
-end
-hold off;
-% Saving the plot as PNG in pathtosave
-filename = [study, '_', participant, '_Spectrogram.png'];
-print(gcf, fullfile(pathtosave, filename), '-dpng', '-r300');
-% Display the full path of the saved file in the command window
-disp(['Saved ', filename, ' in ',  pathtosave]);
-close all hidden;
+%% Save bad channel information
+% Convert the cell array to a table for better structure
+results_table = cell2table(all_results, 'VariableNames', {'Filename', 'Total recording duration in minutes', 'Usable recording duration in minutes', 'Usable recording duration percentage'});
+% Define the full path including the filename
+csv_file_path = fullfile(folderpath, [study, 'bad_channels.csv']);
+% Save the table as a CSV file in the specified folder
+writetable(results_table, csv_file_path);
+disp(['Bad channel info saved to: ', csv_file_path]);
 
-
-
-
-
-
-
-% Create a figure for all power spectra
-fprintf('---plot the individual spectra\n');
-fig = figure('visible', 'off', 'Color', 'w', 'OuterPosition', screenSize);
-% Plot the spectra
-plot(freqs1, spectra1(1,:), 'Marker', 'o', 'LineStyle', '--', 'Color', '#003049');
-hold on;
-%plot(freqs2, spectra2(1,:), 'Marker', '*', 'LineStyle', '--', 'Color', '#369279');
-%plot(freqs3, spectra3(1,:), 'Marker', '.', 'LineStyle', '--', 'Color', '#55CC95');
-%plot(freqs4, spectra4(1,:), 'Marker', '<', 'LineStyle', '--', 'Color', '#2B8B5E');
-plot(freqs5, spectra5(1,:), 'Marker', '*', 'LineStyle', '--', 'Color', '#2B8B5E');
-ax = gca;  % Gets handle to the current axes
-set(ax, 'XColor', 'k', 'YColor', 'k');  % Sets the x-axis and y-axis color to black
-set(ax, 'Color', 'w');  % Optional: Explicitly set axes background color if needed
-% Setting labels, title, and legend
-xlabel(ax, 'Frequency (Hz)', 'Color', 'k');  % Ensure text is black
-ylabel(ax, 'Power (dB)', 'Color', 'k');
-title(ax, 'Power Spectra of raw and preprocessed data', 'Color', 'k');
-legend(ax, {'Raw', 'Preprocessed'}, 'TextColor', 'k', 'Color', 'w');
-%legend(ax, {'Raw data', 'Detrend', 'Noise', 'ECG', 'ASR'}, 'TextColor', 'k', 'Color', 'w');
-% Set grid and limits
-grid on;
-xlim(ax, [0 40]);
-% Save the plot
-filename = [study, '_', participant, '_Powerspectrum_individual.png'];
-print(fig, fullfile(pathtosave, filename), '-dpng', '-r300');
-disp(['Saved ', filename, ' in ', pathtosave]);
-% Release the hold on the plot
-hold off;
-close all hidden;
-
-
-
-
-
-% Create a figure for all spectrogram-differences
-fprintf('---plot the differences of the spectra\n');
-figure('visible', 'off', 'Color', 'w', 'OuterPosition', screenSize);
-% Plot the first spectrum
-plot(freqs1, spectra1(1,:)-spectra2(1,:), 'Marker', 'o', 'LineStyle', '--', 'Color', '#003049');
-hold on;
-plot(freqs2, spectra2(1,:)-spectra3(1,:), 'Marker', '.', 'LineStyle', '--', 'Color', '#16575C');
-hold on;
-plot(freqs3, spectra3(1,:)-spectra4(1,:), 'Marker', '*', 'LineStyle', '--', 'Color', '#55CC95');
-hold on;
-plot(freqs3, spectra4(1,:)-spectra5(1,:), 'Marker', 'square', 'LineStyle', '--', 'Color', '#004A26');
-% Adding labels and title
-ax = gca;  % Gets handle to the current axes
-set(ax, 'XColor', 'k', 'YColor', 'k');  % Sets the x-axis and y-axis color to black
-set(ax, 'Color', 'w');  % Optional: Explicitly set axes background color if needed
-% Setting labels, title, and legend
-xlabel(ax, 'Frequency (Hz)', 'Color', 'k');  % Ensure text is black
-ylabel(ax, 'Power (dB)', 'Color', 'k');
-title(ax, 'Power Spectra difference of preprocessing steps', 'Color', 'k');
-legend(ax, {'Raw - Detrend', 'Detrend - Noise', 'Noise - ECG', 'ECG - ASR'}, 'TextColor', 'k', 'Color', 'w', 'Location', 'northwest');
-% Enable grid for better visibility
-grid on;
-xlim(ax, [0 40]);
-% Release the hold on the plot
-hold off;
-% Saving the plot as png in pathtosave
-filename = [study, '_', participant, '_Powerspectrum_difference.png'];
-print(gcf, fullfile(pathtosave, filename ), '-dpng', '-r300');
-% Display the full path of the saved file in the command window
-disp(['Saved ', filename, ' in ',  pathtosave]);
-close all hidden;
-
-
-
-
-filePath = fullfile(pathtosave, [study, '_', participant, '_EEG_preprocessed.mat']);
-% Save the EEG_EOG variable in the specified path
-save(filePath, 'EEG_EOG');
-% Optionally display the path where the file was saved
-disp(['Saved EEG_EOG in ', filePath]);
-
-clearvars -except folderpath i edf_files web_files study selected_channels windowDuration SDCutoff
-end
+%% Save bad data information
+% Convert the cell array to a table for better structure
+all_bad_data_table = cell2table(all_bad_data, 'VariableNames', {'Filename', 'BadChannel', 'Mean Correlation'});
+% Define the full path including the filename
+csv_file_path = fullfile(folderpath, [study, 'bad_channels.csv']);
+% Save the table as a CSV file in the specified folder
+writetable(results_table, csv_file_path);
+disp(['Bad channel info saved to: ', csv_file_path]);
