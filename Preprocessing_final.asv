@@ -1,8 +1,8 @@
     %% Load funtions
     % other functions (maybe here not needed, but for feature extraction at least they are needed
-    addpath(genpath('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\2023_mesmart\scripts'));
+    %addpath(genpath('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\2023_mesmart\scripts'));
     % preprocessing Funktionen
-    addpath('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\matlab_processing_benji\');
+    addpath('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\');
     % add the codes of Roland and dll C++ libraries (old mex files)
     addpath('O:\MATLAB\Rembrandt');
     
@@ -13,63 +13,98 @@
     %% Define path to data files
     %%% Add the path to your .edf files (if will find all .edf files in all
     %%% subfolders)
-    folderpath = 'D:\Masterarbeit Jannick\Data\GHB_TRA\GHB_TRA_EEG';
+    folderpath = 'D:\Masterarbeit Jannick\Data\ACJ\ACJ_EEG';
+    clear edf_files web_files txt_files mat_files;
     edf_files = dir(fullfile(folderpath, '*\*.edf'));
     web_files = dir(fullfile(folderpath, '*\*.web'));
-    txt_files = dir(fullfile(folderpath, '*\*SLEEP.TXT'));
-    
+    txt_files = dir(fullfile(folderpath, '*\*.TXT'));
+    mat_files = dir(fullfile(folderpath, '*\*.mat'));
+
+
+    % folderpath = 'D:\Masterarbeit Jannick\Data\ACJ\ACJ_EEG';
+    % mat_files = dir(fullfile(folderpath, '*\*\*.mat'));
     %% Define parameters
     %%% define study name (avoid "/" and "_")
-    study = 'GHBTRA';
+    study = 'ACJ';
     %%% define which channels to look at
-    selected_channels = {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'};
+    % selected_channels = {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'};
+    selected_channels = {'C3F3', 'C3F4', 'C3Cz', 'C3C4', 'C3P3', 'C3P4', 'C3O1', 'C3O2'};
     %%% define ASR window length in minutes (default = 8)
     windowDuration = 8; 
     %%% define ASR SD-Cutoff (default = 30)
     SDCutoff = 30;
-    % Initialize an empty cell array to store bad channels from all files
-    all_bad_channels = {};
-    % Initialize an empty cell array to store info about bad data from all files
-    all_bad_data = {};
-    % Initialize an empty cell array to store info about bad data from all files
-    all_bad_frequencies = {};
     
+    if ~isempty(edf_files)
+        files = numel(mat_files)
+    else
+
     %% loop through all files
-    for i = 1:2%numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
+    for i = 1:numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
         %% import 
-        fprintf('********************************************%s****************************************\n', repmat('*', 1, length(edf_files(i).name)));
-        fprintf('---------------------------------------File:%s----------------------------------------\n', edf_files(i).name);
-        fprintf('                                  Iteration: %s\n', string(i));
-        fprintf('                             Percentage run: %s\n', strcat(string(round(100*i/numel(edf_files),0)), '%'));
-        fprintf('********************************************%s****************************************\n', repmat('*', 1, length(edf_files(i).name)));
-        
-        % which filepath
-        edf_name = edf_files(i).name;
-        edf_path = fullfile(edf_files(i).folder, edf_name);
-        % web_name = web_files(i).name;
-        % web_path = fullfile(web_files(i).folder, web_name);
-        thename = split(edf_name, '.');
-        thename = thename{1};
-        % Use fileparts to extract the filename without the extension
-        [~, name, ~] = fileparts(edf_name);
-        % Where to save the generated files
-        [pathtosave, ~, ~] = fileparts(edf_path);
-        % participant number
-        % Get the participant number
-        [parentPath, ~, ~] = fileparts(edf_path);
-        [~, participant, ~] = fileparts(parentPath);
-    
-        % Use eeglab biosig to load edf eeg file
-        fprintf('---load data\n');
-        EEG_raw = pop_biosig(edf_path);
-        EEG_raw.name=edf_name;
-    
-        % select channels
-        channelLabels = {EEG_raw.chanlocs.labels};
-        ECG = pop_select(EEG_raw, 'channel', {'ECG'});
-        EEG_raw = pop_select(EEG_raw, 'channel', selected_channels);
-        newchannelLabels = {EEG_raw.chanlocs.labels};
-    
+        if ~isempty(edf_files)
+            fprintf('********************************************%s****************************************\n', repmat('*', 1, length(edf_files(i).name)));
+            fprintf('---------------------------------------File:%s----------------------------------------\n', edf_files(i).name);
+            fprintf('                                  Iteration: %s\n', string(i));
+            fprintf('                             Percentage run: %s\n', strcat(string(round(100*i/numel(edf_files),0)), '%'));
+            fprintf('********************************************%s****************************************\n', repmat('*', 1, length(edf_files(i).name)));
+
+            % which filepath
+            edf_name = edf_files(i).name;
+            edf_path = fullfile(edf_files(i).folder, edf_name);
+            % web_name = web_files(i).name;
+            % web_path = fullfile(web_files(i).folder, web_name);
+            thename = split(edf_name, '.');
+            thename = thename{1};
+            % Use fileparts to extract the filename without the extension
+            [~, name, ~] = fileparts(edf_name);
+            % Where to save the generated files
+            [pathtosave, ~, ~] = fileparts(edf_path);
+            % participant number
+            % Get the participant number
+            [parentPath, ~, ~] = fileparts(edf_path);
+            [~, participant, ~] = fileparts(parentPath);
+
+            % Use eeglab biosig to load edf eeg file
+            fprintf('---load data\n');
+            EEG_raw = pop_biosig(edf_path);
+            EEG_raw.name=edf_name;
+
+            % select channels
+            channelLabels = {EEG_raw.chanlocs.labels};
+            ECG = pop_select(EEG_raw, 'channel', {'ECG'});
+            EEG_raw = pop_select(EEG_raw, 'channel', selected_channels);
+            newchannelLabels = {EEG_raw.chanlocs.labels};
+        else
+            fprintf('********************************************%s****************************************\n', repmat('*', 1, length(mat_files(i).name)));
+            fprintf('---------------------------------------File:%s----------------------------------------\n', mat_files(i).name);
+            fprintf('                                  Iteration: %s\n', string(i));
+            fprintf('                             Percentage run: %s\n', strcat(string(round(100*i/numel(mat_files),0)), '%'));
+            fprintf('********************************************%s****************************************\n', repmat('*', 1, length(mat_files(i).name)));
+            
+            mat_name = mat_files(i).name;
+            mat_path = fullfile(mat_files(i).folder, mat_name);
+            % Use fileparts to extract the filename without the extension
+            [~, name, ~] = fileparts(mat_name);
+            % Where to save the generated files
+            [pathtosave, ~, ~] = fileparts(mat_path);
+
+            % load the mat file
+            load(mat_path);
+            EEG_raw = eeg_emptyset;
+            % Set the basic fields in the EEG structure
+            EEG_raw.setname = 'Converted Dataset';  % Dataset name
+            EEG_raw.data = outdata.data;            % EEG/EMG/EOG data
+            EEG_raw.srate = outdata.stages.sample_rate_hz(1);  % Sample rate (assuming it's the same across all stages)
+            EEG_raw.nbchan = size(outdata.data, 1);  % Number of channels (from the data field)
+            EEG_raw.pnts = size(outdata.data, 2);    % Number of data points per channel
+            EEG_raw.trials = 1;                      % Number of trials (set to 1 for continuous data)
+            EEG_raw.xmin = 0;                        % Minimum time point
+            EEG_raw.xmax = EEG.pnts / EEG.srate;     % Maximum time point (in seconds)
+            EEG_raw.chanlocs = struct('labels', cellstr(outdata.channel_names));  % Channel names
+            EEG_raw.times = (0:length(EEG_raw.data)-1) * 1000 / EEG_raw.srate; % Time stamps
+
+            load('D:\Masterarbeit Jannick\Data\GHB_TRA\GHB_TRA_EEG\H01\GHBTRA_H01_EEG_preprocessed.mat');
+        end
         % add channel location information
         % on server: readlocs('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\2023_mesmart\eeglab_current\Standard-10-5-Cap385.sfp')
         newlocs = readlocs('D:\Masterarbeit Jannick\scripts\2_Preprocessing\Standard-10-5-Cap385.sfp'); 
@@ -109,29 +144,29 @@
         num_channels = length(EEG_raw.chanlocs);
     
         %% extract scoring information from .txt file
-
-        txt = readlines([txt_files(i).folder, '\', txt_files(i).name]);
-        scoringi = cellstr(txt);
-        scorings = scoringi(cellfun(@(line) sum(line == ',') == 6, scoringi),:);
-        scorings = cellfun(@(line) strsplit(line, ','), scorings, 'UniformOutput', false);
-        scorings = vertcat(scorings{:});
-        ev_cols = {'nr', 'segment', 'epoch', 'starttime_s', 'duration_s', 'interval_s', 'stage'};
-        scorings = cell2table(scorings, 'VariableNames', ev_cols);
-
-        scorings = varfun(@(x)strtrim(x), scorings);
-        scorings.Properties.VariableNames = ev_cols;
-
-        scorings.starttime_s = str2double(scorings.starttime_s);
-        scorings.duration_s = str2double(scorings.duration_s);
-        scorings.interval_s = str2double(scorings.interval_s);
-        scorings.stage = str2double(scorings.stage);
-        scorings.nr = str2double(scorings.nr);
-        scorings.segment = str2double(scorings.segment);
-        scorings.epoch = str2double(scorings.epoch);
-        
-        % Append scoring information to EEG_raw
-        EEG_raw.scoring = scorings;
-        
+        if ~isempty(edf_files)
+            txt = readlines([txt_files(i).folder, '\', txt_files(i).name]);
+            scoringi = cellstr(txt);
+            scorings = scoringi(cellfun(@(line) sum(line == ',') == 6, scoringi),:);
+            scorings = cellfun(@(line) strsplit(line, ','), scorings, 'UniformOutput', false);
+            scorings = vertcat(scorings{:});
+            ev_cols = {'nr', 'segment', 'epoch', 'starttime_s', 'duration_s', 'interval_s', 'stage'};
+            scorings = cell2table(scorings, 'VariableNames', ev_cols);
+            scorings = varfun(@(x)strtrim(x), scorings);
+            scorings.Properties.VariableNames = ev_cols;
+            scorings.starttime_s = str2double(scorings.starttime_s);
+            scorings.duration_s = str2double(scorings.duration_s);
+            scorings.interval_s = str2double(scorings.interval_s);
+            scorings.stage = str2double(scorings.stage);
+            scorings.nr = str2double(scorings.nr);
+            scorings.segment = str2double(scorings.segment);
+            scorings.epoch = str2double(scorings.epoch);
+            % Append scoring information to EEG_raw from .txt file
+            EEG_raw.scoring = scorings;
+        else
+            % Append scoring information to EEG_raw from .mat file
+            EEG_raw.scoring = EEG.outdata.stages
+        end
         %% bandpass and detrend, to remove sweat and other artifacts
         fprintf('---bandpass detrend\n');
         EEG_detrend = EEG_raw;
@@ -183,14 +218,13 @@
                 frequencies = {};  % No frequencies
             end
             % Store the data in the results cell array
-       
-            results{i, 2} = channel;        % Channel name
-            results{i, 3} = n_peaks;        % Number of peaks
-            results{i, 4} = strjoin(frequencies, ', ');  % Frequencies as a string
+            results{i, 1} = channel;        % Channel name
+            results{i, 2} = n_peaks;        % Number of peaks
+            results{i, 3} = strjoin(frequencies, ', ');  % Frequencies as a string
         end
     
         % Append current results to EEG_detrend
-        EEG_detrend.bad_frequencies = results;
+        EEG_noise.bad_frequencies = results;
     
         %% detect bad channels without bad signal
         labels = {EEG_detrend.chanlocs.labels};
@@ -200,7 +234,7 @@
         bad_channel_indices = find(bad_channels_idx);  % Find the index positions of bad channels
         % Extract bad channel names and corresponding values
         bad_channels = labels(bad_channel_indices);
-        EEG_detrend.bad_channels = bad_channels;
+        EEG_noise.bad_channels = bad_channels;
     
         %% interpolate bad channels
         % Check if bad_channels is empty
@@ -222,78 +256,78 @@
         EEG_interp.rem_ind_all = rem_ind_all;
 
         %% Calculate and plot summary of bad signal
-        % Calculate the percentage of bad segments
-        perc_bad = sum(rem_ind_all) / length(rem_ind_all) * 100;
-        dur_bad = perc_bad / 100 * length(rem_ind_all) / EEG_detrend.srate / 60;
-        % Create a new figure for the combined plot
-        screenSize = get(0, 'ScreenSize');  % Returns a vector [left, bottom, width, height]
-        fig = figure('visible', 'off', 'WindowStyle', 'normal', 'Color', 'w', 'OuterPosition', screenSize);
-        % Calculate segment durations
-        diff_vec = [0, diff(rem_ind_all), 0];  % Take the diff and pad with zeros at both ends
-        segment_starts = find(diff_vec == 1);  % Start of each segment is where diff is 1
-        segment_ends = find(diff_vec == -1) - 1;  % End of each segment is where diff is -1
-        % Handle case where the last element is a 1 (extra start without end)
-        if length(segment_starts) > length(segment_ends)
-            % Add the last index as the end of the last segment if it ends with 1
-            segment_ends = [segment_ends, length(rem_ind_all)];
-        end
-        % Handle case where the first element is a 1 
-        if length(segment_starts) < length(segment_ends)
-            % Add the first index as the beginnning 
-            segment_starts = [1, segment_starts];
-        end
-        segment_lengths = segment_ends - segment_starts + 1;  % Calculate lengths of each segment in samples
-        segment_durations = segment_lengths / EEG_interp.srate;  % Calculate duration of each segment in seconds
-        % Left subplot: Histogram of segment durations
-        subplot(1, 2, 1);
-        histogram(segment_durations);
-        title('Histogram of Segment Durations');
-        xlabel('Duration (seconds)');
-        ylabel('Count');
-        % Calculate the total number of electrodes containing bad data at a given timepoint
-        column_sums = sum(rem_ind_all_matrix);  % Sum across rows for each column (timepoint)
-        nonzero_sums = column_sums(column_sums > 0);  % Filter out zero sums
-        % Right subplot: Histogram of number of electrodes with bad data
-        subplot(1, 2, 2);
-        histogram(nonzero_sums, 'Normalization', 'count');
-        title('Histogram of Bad Electrode Counts');
-        xlabel('Number of Bad Electrodes');
-        ylabel('Count');
-        % Add a super title with the percentage and duration of bad segments
-        % Add a big title (super title) with the overall summary
-        big_title = sprintf([study, ' ', participant, ' Summary of bad data']);
-        sgtitle(big_title, 'FontSize', 16, 'FontWeight', 'bold', 'Color', 'k');  % Big title
-        % Add an additional annotation for the summary information
-        annotation_text = sprintf('The percentage of bad segments is %.2f%%, which equals to %.2f minutes.', perc_bad, dur_bad);
-        annotation('textbox', [0.5, 0.05, 0, 0], 'String', annotation_text, 'FitBoxToText', 'on', ...
-        'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', 'FontSize', 12, 'EdgeColor', 'none', 'Color', 'k');
-        axs = findobj(fig, 'Type', 'axes');
-        for ax = axs'
-            set(ax, 'XColor', 'k', 'YColor', 'k', 'ZColor', 'k');
-            set(ax.Title, 'Color', 'k');
-        end
-        txts = findobj(fig, 'Type', 'text');
-        for txt = txts'
-            set(txt, 'Color', 'k');
-        end
-        % Saving the plot as PNG in pathtosave
-        filename = [study, '_', participant, '_Summary_of_bad_data.png'];
-        print(gcf, fullfile(pathtosave, filename), '-dpng', '-r300');
-        % Display the full path of the saved file in the command window
-        disp(['Saved ', filename, ' in ',  pathtosave]);
-        close all hidden;
-    
+        % % Calculate the percentage of bad segments
+        % perc_bad = sum(rem_ind_all) / length(rem_ind_all) * 100;
+        % dur_bad = perc_bad / 100 * length(rem_ind_all) / EEG_detrend.srate / 60;
+        % % Create a new figure for the combined plot
+        % screenSize = get(0, 'ScreenSize');  % Returns a vector [left, bottom, width, height]
+        % fig = figure('visible', 'off', 'WindowStyle', 'normal', 'Color', 'w', 'OuterPosition', screenSize);
+        % % Calculate segment durations
+        % diff_vec = [0, diff(rem_ind_all), 0];  % Take the diff and pad with zeros at both ends
+        % segment_starts = find(diff_vec == 1);  % Start of each segment is where diff is 1
+        % segment_ends = find(diff_vec == -1) - 1;  % End of each segment is where diff is -1
+        % % Handle case where the last element is a 1 (extra start without end)
+        % if length(segment_starts) > length(segment_ends)
+        %     % Add the last index as the end of the last segment if it ends with 1
+        %     segment_ends = [segment_ends, length(rem_ind_all)];
+        % end
+        % % Handle case where the first element is a 1 
+        % if length(segment_starts) < length(segment_ends)
+        %     % Add the first index as the beginnning 
+        %     segment_starts = [1, segment_starts];
+        % end
+        % segment_lengths = segment_ends - segment_starts + 1;  % Calculate lengths of each segment in samples
+        % segment_durations = segment_lengths / EEG_interp.srate;  % Calculate duration of each segment in seconds
+        % % Left subplot: Histogram of segment durations
+        % subplot(1, 2, 1);
+        % histogram(segment_durations);
+        % title('Histogram of Segment Durations');
+        % xlabel('Duration (seconds)');
+        % ylabel('Count');
+        % % Calculate the total number of electrodes containing bad data at a given timepoint
+        % column_sums = sum(rem_ind_all_matrix);  % Sum across rows for each column (timepoint)
+        % nonzero_sums = column_sums(column_sums > 0);  % Filter out zero sums
+        % % Right subplot: Histogram of number of electrodes with bad data
+        % subplot(1, 2, 2);
+        % histogram(nonzero_sums, 'Normalization', 'count');
+        % title('Histogram of Bad Electrode Counts');
+        % xlabel('Number of Bad Electrodes');
+        % ylabel('Count');
+        % % Add a super title with the percentage and duration of bad segments
+        % % Add a big title (super title) with the overall summary
+        % big_title = sprintf([study, ' ', participant, ' Summary of bad data']);
+        % sgtitle(big_title, 'FontSize', 16, 'FontWeight', 'bold', 'Color', 'k');  % Big title
+        % % Add an additional annotation for the summary information
+        % annotation_text = sprintf('The percentage of bad segments is %.2f%%, which equals to %.2f minutes.', perc_bad, dur_bad);
+        % annotation('textbox', [0.5, 0.05, 0, 0], 'String', annotation_text, 'FitBoxToText', 'on', ...
+        % 'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', 'FontSize', 12, 'EdgeColor', 'none', 'Color', 'k');
+        % axs = findobj(fig, 'Type', 'axes');
+        % for ax = axs'
+        %     set(ax, 'XColor', 'k', 'YColor', 'k', 'ZColor', 'k');
+        %     set(ax.Title, 'Color', 'k');
+        % end
+        % txts = findobj(fig, 'Type', 'text');
+        % for txt = txts'
+        %     set(txt, 'Color', 'k');
+        % end
+        % % Saving the plot as PNG in pathtosave
+        % filename = [study, '_', participant, '_Summary_of_bad_data.png'];
+        % print(gcf, fullfile(pathtosave, filename), '-dpng', '-r300');
+        % % Display the full path of the saved file in the command window
+        % disp(['Saved ', filename, ' in ',  pathtosave]);
+        % close all hidden;
+        % 
         % Generate and save the bad data
         EEG_bad = EEG_interp;
         EEG_bad.data = [];
         EEG_bad.times = [];
         EEG_bad.data = EEG_interp.data(:, rem_ind_all);
         EEG_bad.times = EEG_interp.times(:, rem_ind_all);
-        filePath = fullfile(pathtosave, [study, '_', participant, '_EEG_bad_data.mat']);
-        % Save the EEG_bad variable in the specified path
-        save(filePath, 'EEG_bad');
-        % Optionally display the path where the file was saved
-        disp(['Saved bad data in ', filePath]);
+        % filePath = fullfile(pathtosave, [study, '_', participant, '_EEG_bad_data.mat']);
+        % % Save the EEG_bad variable in the specified path
+        % save(filePath, 'EEG_bad');
+        % % Optionally display the path where the file was saved
+        % disp(['Saved bad data in ', filePath]);
     
     
         %% remove bad signal from signal
@@ -336,7 +370,7 @@
         %% remove heart beat artifacts here again I require the movement artifacts to be excluded (eeg_jelena_ecg_removal will probably not yet run correctly, I will need to adjust it)
         fprintf('---ECG removal\n');
         EEG_ECG = EEG_reref;
-        EEG_ECG = eeg_jelena_ecg_removal(EEG_reref, ECG, cut_chunks);
+        EEG_ECG = eeg_jelena_ecg_removal(EEG_reref, ECG_short, cut_chunks);
     
     
         %% let ASR run sequentially in windows
@@ -448,7 +482,7 @@
       
     
     
-        %% Start of plotting the spectrogram
+        %% Plotting the spectrogram
         fig = figure('visible', 'off', 'WindowStyle', 'normal', 'Color', 'w', 'OuterPosition', screenSize);
         % Maximize the figure window
         screenSize = get(0, 'ScreenSize'); % Get the screen size from the root window
@@ -588,7 +622,7 @@
         % disp(['Saved ', filename, ' in ',  pathtosave]);
         % close all hidden;
     
-        %% Fuse good and bad data again
+        %% Fuse good and bad data back together
         EEG_clean = EEG_ASR;
         dtemp = zeros(size(EEG_ASR.data,1),length(rem_ind_all));
         dtemp(:,~rem_ind_all) = EEG_ASR.data;
@@ -606,13 +640,5 @@
         disp(['Saved EEG_clean in ', filePath]);
     
         %% clear most of the data
-        %clearvars -except folderpath i edf_files web_files study selected_channels windowDuration SDCutoff all_results all_bad_data all_bad_frequencies
+        clearvars -except folderpath i edf_files web_files txt_files mat_files study selected_channels windowDuration SDCutoff 
     end
-    %% Save bad frequency information
-    % Convert the cell array to a table for better structure
-    all_bad_frequencies_table = cell2table(all_bad_frequencies, 'VariableNames', {'Filename', 'Channel', 'n_peaks', 'Bad frequencies'});
-    % Define the full path including the filename
-    csv_file_path = fullfile(folderpath, [study, '_bad_frequencies.csv']);
-    % Save the table as a CSV file in the specified folder
-    writetable(all_bad_frequencies_table, csv_file_path);
-    disp(['Bad frequencies info saved to: ', csv_file_path]);

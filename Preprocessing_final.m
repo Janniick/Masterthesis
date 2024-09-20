@@ -1,8 +1,8 @@
     %% Load funtions
     % other functions (maybe here not needed, but for feature extraction at least they are needed
-    addpath(genpath('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\2023_mesmart\scripts'));
+    %addpath(genpath('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\2023_mesmart\scripts'));
     % preprocessing Funktionen
-    addpath('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\matlab_processing_benji\');
+    addpath('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\');
     % add the codes of Roland and dll C++ libraries (old mex files)
     addpath('O:\MATLAB\Rembrandt');
     
@@ -13,63 +13,125 @@
     %% Define path to data files
     %%% Add the path to your .edf files (if will find all .edf files in all
     %%% subfolders)
-    folderpath = 'D:\Masterarbeit Jannick\Data\GHB_TRA\GHB_TRA_EEG';
+    folderpath = 'D:\Masterarbeit Jannick\Data\ACJ\ACJ_EEG';
+    clear edf_files web_files txt_files mat_files;
     edf_files = dir(fullfile(folderpath, '*\*.edf'));
     web_files = dir(fullfile(folderpath, '*\*.web'));
-    txt_files = dir(fullfile(folderpath, '*\*SLEEP.TXT'));
-    
+    txt_files = dir(fullfile(folderpath, '*\*.TXT'));
+    mat_files = dir(fullfile(folderpath, '*\*\*.mat'));
+
+
+    % folderpath = 'D:\Masterarbeit Jannick\Data\ACJ\ACJ_EEG';
+    % mat_files = dir(fullfile(folderpath, '*\*\*.mat'));
     %% Define parameters
     %%% define study name (avoid "/" and "_")
-    study = 'GHBTRA';
+    study = 'ACJ';
     %%% define which channels to look at
-    selected_channels = {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'};
+    % selected_channels = {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'};
+    selected_channels = {'C3F3', 'C3F4', 'C3Cz', 'C3C4', 'C3P3', 'C3P4', 'C3O1', 'C3O2'};
+    desired_channel_names = {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'};
     %%% define ASR window length in minutes (default = 8)
     windowDuration = 8; 
     %%% define ASR SD-Cutoff (default = 30)
     SDCutoff = 30;
-    % Initialize an empty cell array to store bad channels from all files
-    all_bad_channels = {};
-    % Initialize an empty cell array to store info about bad data from all files
-    all_bad_data = {};
-    % Initialize an empty cell array to store info about bad data from all files
-    all_bad_frequencies = {};
     
+    if isempty(edf_files)
+        files = numel(mat_files);
+    else
+        files = numel(edf_files);
+    end
+  
+
     %% loop through all files
-    for i = 2:3%numel(edf_files) %randperm(numel(edf_files)) % 1:numel(edf_files)
+    for i = 4:files %randperm(numel(edf_files)) % 1:numel(edf_files)
         %% import 
-        fprintf('********************************************%s****************************************\n', repmat('*', 1, length(edf_files(i).name)));
-        fprintf('---------------------------------------File:%s----------------------------------------\n', edf_files(i).name);
-        fprintf('                                  Iteration: %s\n', string(i));
-        fprintf('                             Percentage run: %s\n', strcat(string(round(100*i/numel(edf_files),0)), '%'));
-        fprintf('********************************************%s****************************************\n', repmat('*', 1, length(edf_files(i).name)));
+        if ~isempty(edf_files)
+            fprintf('********************************************%s****************************************\n', repmat('*', 1, length(edf_files(i).name)));
+            fprintf('---------------------------------------File:%s----------------------------------------\n', edf_files(i).name);
+            fprintf('                                  Iteration: %s\n', string(i));
+            fprintf('                             Percentage run: %s\n', strcat(string(round(100*i/numel(edf_files),0)), '%'));
+            fprintf('********************************************%s****************************************\n', repmat('*', 1, length(edf_files(i).name)));
+
+            % which filepath
+            edf_name = edf_files(i).name;
+            edf_path = fullfile(edf_files(i).folder, edf_name);
+            % web_name = web_files(i).name;
+            % web_path = fullfile(web_files(i).folder, web_name);
+            thename = split(edf_name, '.');
+            thename = thename{1};
+            % Use fileparts to extract the filename without the extension
+            [~, name, ~] = fileparts(edf_name);
+            % Where to save the generated files
+            [pathtosave, ~, ~] = fileparts(edf_path);
+            % participant number
+            % Get the participant number
+            [parentPath, ~, ~] = fileparts(edf_path);
+            [~, participant, ~] = fileparts(parentPath);
+
+            % Use eeglab biosig to load edf eeg file
+            fprintf('---load data\n');
+            EEG_raw = pop_biosig(edf_path);
+            EEG_raw.name=edf_name;
+
+            % select channels
+            channelLabels = {EEG_raw.chanlocs.labels};
+            ECG = pop_select(EEG_raw, 'channel', {'ECG'});
+            EEG_raw = pop_select(EEG_raw, 'channel', selected_channels);
+            newchannelLabels = {EEG_raw.chanlocs.labels};
+        else
+            fprintf('********************************************%s****************************************\n', repmat('*', 1, length(mat_files(i).name)));
+            fprintf('---------------------------------------File:%s----------------------------------------\n', mat_files(i).name);
+            fprintf('                                  Iteration: %s\n', string(i));
+            fprintf('                             Percentage run: %s\n', strcat(string(round(100*i/numel(mat_files),0)), '%'));
+            fprintf('********************************************%s****************************************\n', repmat('*', 1, length(mat_files(i).name)));
+            
+            mat_name = mat_files(i).name;
+            mat_path = fullfile(mat_files(i).folder, mat_name);
+            % Use fileparts to extract the filename without the extension
+            [~, name, ~] = fileparts(mat_name);
+            % Where to save the generated files
+            [pathtosave, ~, ~] = fileparts(mat_path);
+            % Extract the directory parts from the file path
+            path_parts = strsplit(mat_path, filesep);  % Split path by file separator
+            % Extract the relevant parts: "VP01" from the folder name and "b2" from the subfolder name
+            participant_folder = path_parts{end-2};  % This gets 'VP01'
+            subfolder = path_parts{end-1};  % This gets '1a_import_b2'
+            % Extract 'b2' from the subfolder name (assuming it's always the last two characters)
+            participant_suffix = subfolder(end-1:end);
+            % Concatenate the two parts to get 'VP01b2'
+            participant = [participant_folder, participant_suffix];
+
+
+            % load the mat file
+            load(mat_path);
+            EEG_raw = eeg_emptyset;
+            % Set the basic fields in the EEG structure
+            EEG_raw.setname = 'Converted Dataset';  % Dataset name
+            EEG_raw.data = outdata.data;            % EEG/EMG/EOG data
+            EEG_raw.srate = outdata.stages.sample_rate_hz(1);  % Sample rate (assuming it's the same across all stages)
+            EEG_raw.nbchan = size(outdata.data, 1);  % Number of channels (from the data field)
+            EEG_raw.pnts = size(outdata.data, 2);    % Number of data points per channel
+            EEG_raw.trials = 1;                      % Number of trials (set to 1 for continuous data)
+            EEG_raw.xmin = 0;                        % Minimum time point
+            EEG_raw.xmax = EEG_raw.pnts / EEG_raw.srate;     % Maximum time point (in seconds)
+            EEG_raw.chanlocs = struct('labels', cellstr(outdata.channel_names));  % Channel names
+            EEG_raw.times = (0:length(EEG_raw.data)-1) * 1000 / EEG_raw.srate; % Time stamps
         
-        % which filepath
-        edf_name = edf_files(i).name;
-        edf_path = fullfile(edf_files(i).folder, edf_name);
-        % web_name = web_files(i).name;
-        % web_path = fullfile(web_files(i).folder, web_name);
-        thename = split(edf_name, '.');
-        thename = thename{1};
-        % Use fileparts to extract the filename without the extension
-        [~, name, ~] = fileparts(edf_name);
-        % Where to save the generated files
-        [pathtosave, ~, ~] = fileparts(edf_path);
-        % participant number
-        % Get the participant number
-        [parentPath, ~, ~] = fileparts(edf_path);
-        [~, participant, ~] = fileparts(parentPath);
-    
-        % Use eeglab biosig to load edf eeg file
-        fprintf('---load data\n');
-        EEG_raw = pop_biosig(edf_path);
-        EEG_raw.name=edf_name;
-    
-        % select channels
-        channelLabels = {EEG_raw.chanlocs.labels};
-        ECG = pop_select(EEG_raw, 'channel', {'ECG'});
-        EEG_raw = pop_select(EEG_raw, 'channel', selected_channels);
-        newchannelLabels = {EEG_raw.chanlocs.labels};
-    
+            ECG = pop_select(EEG_raw, 'channel', {'ECG'});
+            EEG_raw = pop_select(EEG_raw, 'channel', selected_channels);
+            % renaming of the channels
+           % Loop through each channel in EEG_raw.chanlocs
+           for i = 1:length(EEG_raw.chanlocs)
+               label = EEG_raw.chanlocs(i).labels;  % Get the current label
+               % Check if the current label is 'C3Cz', if so, rename it to 'C3' (only if not already 'C3')
+               if strcmp(label, 'C3Cz') && ~strcmp(label, 'C3')
+                   EEG_raw.chanlocs(i).labels = 'C3';
+                   % Otherwise, if the label starts with 'C3' but is not 'C3' already, remove the 'C3' prefix
+               elseif startsWith(label, 'C3') && ~strcmp(label, 'C3')
+                   EEG_raw.chanlocs(i).labels = label(3:end);  % Remove the first two characters ('C3')
+               end
+           end
+        end
         % add channel location information
         % on server: readlocs('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\2023_mesmart\eeglab_current\Standard-10-5-Cap385.sfp')
         newlocs = readlocs('D:\Masterarbeit Jannick\scripts\2_Preprocessing\Standard-10-5-Cap385.sfp'); 
@@ -109,29 +171,29 @@
         num_channels = length(EEG_raw.chanlocs);
     
         %% extract scoring information from .txt file
-
-        txt = readlines([txt_files(i).folder, '\', txt_files(i).name]);
-        scoringi = cellstr(txt);
-        scorings = scoringi(cellfun(@(line) sum(line == ',') == 6, scoringi),:);
-        scorings = cellfun(@(line) strsplit(line, ','), scorings, 'UniformOutput', false);
-        scorings = vertcat(scorings{:});
-        ev_cols = {'nr', 'segment', 'epoch', 'starttime_s', 'duration_s', 'interval_s', 'stage'};
-        scorings = cell2table(scorings, 'VariableNames', ev_cols);
-
-        scorings = varfun(@(x)strtrim(x), scorings);
-        scorings.Properties.VariableNames = ev_cols;
-
-        scorings.starttime_s = str2double(scorings.starttime_s);
-        scorings.duration_s = str2double(scorings.duration_s);
-        scorings.interval_s = str2double(scorings.interval_s);
-        scorings.stage = str2double(scorings.stage);
-        scorings.nr = str2double(scorings.nr);
-        scorings.segment = str2double(scorings.segment);
-        scorings.epoch = str2double(scorings.epoch);
-        
-        % Append scoring information to EEG_raw
-        EEG_raw.scoring = scorings;
-        
+        if ~isempty(edf_files)
+            txt = readlines([txt_files(i).folder, '\', txt_files(i).name]);
+            scoringi = cellstr(txt);
+            scorings = scoringi(cellfun(@(line) sum(line == ',') == 6, scoringi),:);
+            scorings = cellfun(@(line) strsplit(line, ','), scorings, 'UniformOutput', false);
+            scorings = vertcat(scorings{:});
+            ev_cols = {'nr', 'segment', 'epoch', 'starttime_s', 'duration_s', 'interval_s', 'stage'};
+            scorings = cell2table(scorings, 'VariableNames', ev_cols);
+            scorings = varfun(@(x)strtrim(x), scorings);
+            scorings.Properties.VariableNames = ev_cols;
+            scorings.starttime_s = str2double(scorings.starttime_s);
+            scorings.duration_s = str2double(scorings.duration_s);
+            scorings.interval_s = str2double(scorings.interval_s);
+            scorings.stage = str2double(scorings.stage);
+            scorings.nr = str2double(scorings.nr);
+            scorings.segment = str2double(scorings.segment);
+            scorings.epoch = str2double(scorings.epoch);
+            % Append scoring information to EEG_raw from .txt file
+            EEG_raw.scoring = scorings;
+        else
+            % Append scoring information to EEG_raw from .mat file
+            EEG_raw.scoring = outdata.stages
+        end
         %% bandpass and detrend, to remove sweat and other artifacts
         fprintf('---bandpass detrend\n');
         EEG_detrend = EEG_raw;
@@ -282,12 +344,12 @@
         % disp(['Saved ', filename, ' in ',  pathtosave]);
         % close all hidden;
         % 
-        % % Generate and save the bad data
-        % EEG_bad = EEG_interp;
-        % EEG_bad.data = [];
-        % EEG_bad.times = [];
-        % EEG_bad.data = EEG_interp.data(:, rem_ind_all);
-        % EEG_bad.times = EEG_interp.times(:, rem_ind_all);
+        % Generate and save the bad data
+        EEG_bad = EEG_interp;
+        EEG_bad.data = [];
+        EEG_bad.times = [];
+        EEG_bad.data = EEG_interp.data(:, rem_ind_all);
+        EEG_bad.times = EEG_interp.times(:, rem_ind_all);
         % filePath = fullfile(pathtosave, [study, '_', participant, '_EEG_bad_data.mat']);
         % % Save the EEG_bad variable in the specified path
         % save(filePath, 'EEG_bad');
@@ -328,7 +390,7 @@
         fprintf('---Rereferencing to REST\n');
         % Use the REST function for calculating or loading the lead field
         % matrix (spatial relationship between electrodes)
-        chanlist = find(ismember({EEG_reref.chanlocs.labels}, selected_channels));
+        chanlist = find(ismember({EEG_reref.chanlocs.labels}, desired_channel_names));
         G = dong_getleadfield(EEG_reref, chanlist);
         % Rereference the data to REST 
         EEG_reref.data = dong_rest_refer(EEG_reref.data, G);
@@ -605,5 +667,5 @@
         disp(['Saved EEG_clean in ', filePath]);
     
         %% clear most of the data
-        %clearvars -except folderpath i edf_files web_files study selected_channels windowDuration SDCutoff all_results all_bad_data all_bad_frequencies
+        %clearvars -except folderpath i edf_files web_files txt_files mat_files study selected_channels desired_channel_names windowDuration SDCutoff files
     end

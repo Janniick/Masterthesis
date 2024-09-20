@@ -167,3 +167,1112 @@ O1  n_peaks 3;  18.3 27.4 36.6
 O2  n_peaks 3;  18.3 27.4 36.6
 ----end
 Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3  n_peaks 2;  27.4 36.6
+F3  n_peaks 2;  27.4 36.6
+C4  n_peaks 3;  18.3 27.4 36.6
+F4
+P4
+C3
+O2  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 4;  9.1 18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+P3
+P4
+C4
+C3
+F3  n_peaks 2;  27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'duration_fft' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of
+the parfor-loop. If 'magnitude_logy' is used before it is set, a runtime error will occur. For
+more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'xw' is used before it is set, a runtime error will occur. For more information,
+see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of
+the parfor-loop. If 'rolling_cutoff' is used before it is set, a runtime error will occur. For
+more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4  n_peaks 2;  27.4 36.6
+F4
+F3  n_peaks 2;  27.4 36.6
+C3  n_peaks 1;  36.6
+C4  n_peaks 2;  27.4 36.6
+P3  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3  n_peaks 3;  18.3 27.4 36.6
+C4  n_peaks 3;  18.3 27.4 36.6
+F3  n_peaks 3;  18.3 27.4 36.6
+P3  n_peaks 3;  18.3 27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+F4  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 4;  9.1 18.3 27.4 36.6
+O1  n_peaks 4;  9.1 18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+P4  n_peaks 2;  27.4 36.6
+C3
+P3  n_peaks 2;  27.4 36.6
+F4
+C4  n_peaks 2;  27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+F3  n_peaks 2;  27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+C4  n_peaks 3;  18.3 27.4 36.6
+P3  n_peaks 2;  27.4 36.6
+C3  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3  n_peaks 3;  18.3 27.4 36.6
+C3  n_peaks 1;  36.6
+C4  n_peaks 3;  18.3 27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+F4  n_peaks 2;  27.4 36.6
+P3  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4  n_peaks 2;  27.4 36.6
+C4  n_peaks 2;  27.4 36.6
+F3  n_peaks 1;  36.6
+F4  n_peaks 1;  36.6
+C3  n_peaks 2;  27.4 36.6
+P3  n_peaks 2;  27.4 36.6
+O2
+O1  n_peaks 2;  27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+P3
+C4
+C3
+F3
+F4
+O2  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 4;  9.1 18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4  n_peaks 4;  9.1 18.3 27.4 36.6
+F3  n_peaks 4;  9.1 18.3 27.4 36.6
+C3  n_peaks 9;  9.1 15.3 17.9 18.3 20.4 23.0 25.5 27.4 36.6
+P3  n_peaks 4;  9.1 18.3 27.4 36.6
+P4  n_peaks 4;  9.1 18.3 27.4 36.6
+F4  n_peaks 4;  9.1 18.3 27.4 36.6
+O2  n_peaks 4;  9.1 18.3 27.4 36.6
+O1  n_peaks 4;  9.1 18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+P3
+F4
+C4
+C3
+F3
+O1  n_peaks 3;  18.3 27.4 36.6
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3  n_peaks 3;  18.3 27.4 36.6
+F4  n_peaks 3;  18.3 27.4 36.6
+F3  n_peaks 3;  18.3 27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+C3  n_peaks 3;  18.3 27.4 36.6
+C4  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3  n_peaks 2;  27.4 36.6
+F4  n_peaks 2;  27.4 36.6
+P3  n_peaks 3;  18.3 27.4 36.6
+P4  n_peaks 2;  27.4 36.6
+C3  n_peaks 2;  27.4 36.6
+C4  n_peaks 2;  27.4 36.6
+O1  n_peaks 2;  27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4  n_peaks 3;  18.3 27.4 36.6
+P4  n_peaks 2;  27.4 36.6
+F3  n_peaks 2;  27.4 36.6
+C4  n_peaks 3;  18.3 27.4 36.6
+P3  n_peaks 2;  27.4 36.6
+C3  n_peaks 2;  27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3  n_peaks 3;  18.3 27.4 36.6
+C4  n_peaks 2;  27.4 36.6
+F3  n_peaks 2;  27.4 36.6
+F4  n_peaks 2;  27.4 36.6
+P4  n_peaks 2;  27.4 36.6
+C3  n_peaks 2;  27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3  n_peaks 3;  18.3 27.4 36.6
+F3  n_peaks 3;  18.3 27.4 36.6
+C4  n_peaks 3;  18.3 27.4 36.6
+P3  n_peaks 4;  9.1 18.3 27.4 36.6
+F4  n_peaks 3;  18.3 27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 4;  9.1 18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3  n_peaks 3;  18.3 27.4 36.6
+F3  n_peaks 3;  18.3 27.4 36.6
+C4  n_peaks 3;  18.3 27.4 36.6
+P3  n_peaks 4;  9.1 18.3 27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+F4  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3  n_peaks 3;  18.3 27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+C3  n_peaks 3;  18.3 27.4 36.6
+F4  n_peaks 4;  9.1 18.3 27.4 36.6
+C4  n_peaks 3;  18.3 27.4 36.6
+F3  n_peaks 2;  27.4 36.6
+O1  n_peaks 2;  27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3  n_peaks 2;  27.4 36.6
+F3  n_peaks 3;  18.3 27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+C4  n_peaks 3;  18.3 27.4 36.6
+P3  n_peaks 3;  18.3 27.4 36.6
+F4  n_peaks 2;  27.4 36.6
+O1
+O2  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4  n_peaks 4;  9.1 18.3 27.4 36.6
+P3  n_peaks 4;  9.1 18.3 27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+C4  n_peaks 4;  9.1 18.3 27.4 36.6
+C3  n_peaks 4;  9.1 18.3 27.4 36.6
+F3  n_peaks 4;  9.1 18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3  n_peaks 4;  9.1 18.3 27.4 36.6
+F4  n_peaks 4;  9.1 18.3 27.4 36.6
+F3  n_peaks 4;  9.1 18.3 27.4 36.6
+P4  n_peaks 4;  9.1 18.3 27.4 36.6
+C4  n_peaks 4;  9.1 18.3 27.4 36.6
+P3  n_peaks 4;  9.1 18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4  n_peaks 4;  9.1 18.3 27.4 36.6
+F3  n_peaks 4;  9.1 18.3 27.4 36.6
+P3  n_peaks 4;  9.1 18.3 27.4 36.6
+C4  n_peaks 4;  9.1 18.3 27.4 36.6
+P4  n_peaks 4;  9.1 18.3 27.4 36.6
+C3  n_peaks 8;  9.1 13.7 18.3 22.9 27.4 32.0 36.6 37.5
+O2  n_peaks 4;  9.1 18.3 27.4 36.6
+O1  n_peaks 4;  9.1 18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3  n_peaks 3;  18.3 27.4 36.6
+F3  n_peaks 4;  9.1 18.3 27.4 36.6
+C3  n_peaks 4;  9.1 18.3 27.4 36.6
+C4  n_peaks 4;  9.1 18.3 27.4 36.6
+F4  n_peaks 4;  9.1 18.3 27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 4;  9.1 18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4  n_peaks 3;  18.3 27.4 36.6
+C3  n_peaks 3;  18.3 27.4 36.6
+P4  n_peaks 2;  27.4 36.6
+F3  n_peaks 3;  18.3 27.4 36.6
+F4  n_peaks 3;  18.3 27.4 36.6
+P3  n_peaks 2;  27.4 36.6
+O2  n_peaks 2;  27.4 36.6
+O1  n_peaks 2;  27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4  n_peaks 3;  18.3 27.4 36.6
+C4  n_peaks 4;  9.1 18.3 27.4 36.6
+F3  n_peaks 4;  9.1 18.3 27.4 36.6
+P3  n_peaks 3;  18.3 27.4 36.6
+F4  n_peaks 4;  9.1 18.3 27.4 36.6
+C3  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4  n_peaks 3;  18.3 27.4 36.6
+C3  n_peaks 3;  18.3 27.4 36.6
+C4  n_peaks 3;  18.3 27.4 36.6
+P3  n_peaks 3;  18.3 27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+F3  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 2;  27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4  n_peaks 4;  9.1 18.3 27.4 36.6
+P3  n_peaks 3;  18.3 27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+C3  n_peaks 4;  9.1 18.3 27.4 36.6
+F3  n_peaks 4;  9.1 18.3 27.4 36.6
+C4  n_peaks 4;  9.1 18.3 27.4 36.6
+O2  n_peaks 4;  9.1 18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3  n_peaks 2;  27.4 36.6
+P4  n_peaks 2;  27.4 36.6
+F4  n_peaks 3;  18.3 27.4 36.6
+C3  n_peaks 3;  18.3 27.4 36.6
+F3  n_peaks 2;  27.4 36.6
+C4  n_peaks 9;  9.1 18.3 22.9 27.4 31.4 32.0 32.6 36.6 37.5
+O1  n_peaks 2;  27.4 36.6
+O2  n_peaks 2;  27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+C4  n_peaks 1;  36.6
+P4  n_peaks 2;  27.4 36.6
+C3  n_peaks 2;  27.4 36.6
+P3  n_peaks 3;  8.0 27.4 36.6
+F4  n_peaks 1;  36.6
+O1  n_peaks 2;  27.4 36.6
+O2  n_peaks 1;  36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4  n_peaks 4;  9.1 18.3 27.4 36.6
+F3  n_peaks 4;  9.1 18.3 27.4 36.6
+P3  n_peaks 3;  18.3 27.4 36.6
+C3  n_peaks 4;  9.1 18.3 27.4 36.6
+F4  n_peaks 4;  9.1 18.3 27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4  n_peaks 5;  9.1 18.3 27.4 36.6 37.5
+C3  n_peaks 5;  9.1 18.3 27.4 36.6 37.5
+P3  n_peaks 5;  9.1 18.3 27.4 36.6 37.5
+P4  n_peaks 5;  9.1 18.3 27.4 36.6 37.5
+F4  n_peaks 5;  9.1 18.3 27.4 36.6 37.5
+F3  n_peaks 5;  9.1 18.3 27.4 36.6 37.5
+O1  n_peaks 5;  9.1 18.3 27.4 36.6 37.5
+O2  n_peaks 5;  9.1 18.3 27.4 36.6 37.5
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3  n_peaks 3;  18.3 27.4 36.6
+P4  n_peaks 2;  27.4 36.6
+C4  n_peaks 3;  18.3 27.4 36.6
+C3  n_peaks 3;  18.3 27.4 36.6
+P3  n_peaks 2;  27.4 36.6
+F4  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 2;  27.4 36.6
+O2  n_peaks 2;  27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4  n_peaks 3;  18.3 27.4 36.6
+C4  n_peaks 4;  9.1 18.3 27.4 36.6
+F4  n_peaks 4;  9.1 18.3 27.4 36.6
+P3  n_peaks 3;  18.3 27.4 36.6
+C3  n_peaks 4;  9.1 18.3 27.4 36.6
+F3  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 2;  27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4  n_peaks 3;  18.3 27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+C3  n_peaks 3;  18.3 27.4 36.6
+P3  n_peaks 3;  18.3 27.4 36.6
+F3  n_peaks 3;  18.3 27.4 36.6
+C4  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4  n_peaks 3;  18.3 27.4 36.6
+P3  n_peaks 3;  18.3 27.4 36.6
+C4  n_peaks 4;  9.1 18.3 27.4 36.6
+F4  n_peaks 4;  9.1 18.3 27.4 36.6
+F3  n_peaks 4;  9.1 18.3 27.4 36.6
+C3  n_peaks 4;  9.1 18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3  n_peaks 3;  18.3 27.4 36.6
+C3  n_peaks 3;  18.3 27.4 36.6
+C4  n_peaks 3;  18.3 27.4 36.6
+F4  n_peaks 3;  18.3 27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+P3  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4  n_peaks 3;  18.3 27.4 36.6
+P3  n_peaks 3;  18.3 27.4 36.6
+C3  n_peaks 4;  9.1 18.3 27.4 36.6
+C4  n_peaks 3;  18.3 27.4 36.6
+F4  n_peaks 4;  9.1 18.3 27.4 36.6
+F3  n_peaks 4;  9.1 18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4  n_peaks 4;  9.1 18.3 27.4 36.6
+F3  n_peaks 4;  9.1 18.3 27.4 36.6
+P3  n_peaks 4;  9.1 18.3 27.4 36.6
+C4  n_peaks 4;  9.1 18.3 27.4 36.6
+F4  n_peaks 4;  9.1 18.3 27.4 36.6
+C3  n_peaks 4;  9.1 18.3 27.4 36.6
+O2  n_peaks 4;  9.1 18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3  n_peaks 4;  9.1 18.3 27.4 36.6
+F4  n_peaks 4;  9.1 18.3 27.4 36.6
+C3  n_peaks 3;  18.3 27.4 36.6
+C4  n_peaks 3;  18.3 27.4 36.6
+P3  n_peaks 3;  18.3 27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4  n_peaks 3;  18.3 27.4 36.6
+C3  n_peaks 4;  9.1 18.3 27.4 36.6
+F3  n_peaks 4;  9.1 18.3 27.4 36.6
+P3  n_peaks 4;  9.1 18.3 27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+C4  n_peaks 4;  9.1 18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3  n_peaks 3;  18.3 27.4 36.6
+F4  n_peaks 4;  9.1 18.3 27.4 36.6
+C4  n_peaks 4;  9.1 18.3 27.4 36.6
+F3  n_peaks 4;  9.1 18.3 27.4 36.6
+C3  n_peaks 4;  9.1 18.3 27.4 36.6
+P4  n_peaks 2;  27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4  n_peaks 3;  18.3 27.4 36.6
+P3  n_peaks 3;  18.3 27.4 36.6
+F3  n_peaks 4;  9.1 18.3 27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+C3  n_peaks 3;  18.3 27.4 36.6
+F4  n_peaks 4;  9.1 18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3  n_peaks 4;  9.1 18.3 27.4 36.6
+P4  n_peaks 4;  9.1 18.3 27.4 36.6
+C4  n_peaks 4;  9.1 18.3 27.4 36.6
+F4  n_peaks 4;  9.1 18.3 27.4 36.6
+C3  n_peaks 4;  9.1 18.3 27.4 36.6
+P3  n_peaks 4;  9.1 18.3 27.4 36.6
+O2  n_peaks 4;  9.1 18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3  n_peaks 3;  18.3 27.4 36.6
+C4  n_peaks 3;  18.3 27.4 36.6
+P3  n_peaks 3;  18.3 27.4 36.6
+P4  n_peaks 3;  18.3 27.4 36.6
+F4  n_peaks 3;  18.3 27.4 36.6
+C3  n_peaks 3;  18.3 27.4 36.6
+O1  n_peaks 3;  18.3 27.4 36.6
+O2  n_peaks 3;  18.3 27.4 36.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3  n_peaks 4;  9.1 18.3 27.4 36.6
+F3  n_peaks 4;  9.1 18.3 27.4 36.6
+C4  n_peaks 4;  9.1 18.3 27.4 36.6
+P3  n_peaks 4;  9.1 18.3 27.4 36.6
+P4  n_peaks 4;  9.1 18.3 27.4 36.6
+F4  n_peaks 4;  9.1 18.3 27.4 36.6
+IdleTimeout has been reached.
+Parallel pool using the 'Processes' profile is shutting down.
+    clear edf_files web_files txt_files mat_files;
+    folderpath = 'D:\Masterarbeit Jannick\Data\ACJ\ACJ_EEG';
+ edf_files = dir(fullfile(folderpath, '*\*.edf'));
+    web_files = dir(fullfile(folderpath, '*\*.web'));
+    txt_files = dir(fullfile(folderpath, '*\*.TXT'));
+    mat_files = dir(fullfile(folderpath, '*\*.mat'));
+if ~isempty(edf_files)
+        files = numel(mat_files)
+    else
+        files = numel(edf_files)
+    end
+
+files =
+
+     0
+
+  
+files
+
+files =
+
+     0
+
+  if ~isempty(edf_files)
+        files = numel(mat_files);
+    else
+        files = numel(edf_files);
+    end
+  
+files
+
+files =
+
+     0
+
+mat_files
+
+mat_files = 
+
+  0×1 empty <a href="matlab:helpPopup('struct')" style="font-weight:bold">struct</a> array with fields:
+
+    name
+    folder
+    date
+    bytes
+    isdir
+    datenum
+
+ mat_files = dir(fullfile(folderpath, '*\*\*.mat'));
+if ~isempty(edf_files)
+        files = numel(mat_files);
+    else
+        files = numel(edf_files);
+    end
+files
+
+files =
+
+     0
+
+mat_files
+
+mat_files = 
+
+  40×1 <a href="matlab:helpPopup('struct')" style="font-weight:bold">struct</a> array with fields:
+
+    name
+    folder
+    date
+    bytes
+    isdir
+    datenum
+
+numel(mat_files)
+
+ans =
+
+    40
+
+edf_files
+
+edf_files = 
+
+  0×1 empty <a href="matlab:helpPopup('struct')" style="font-weight:bold">struct</a> array with fields:
+
+    name
+    folder
+    date
+    bytes
+    isdir
+    datenum
+
+ if isempty(edf_files)
+        files = numel(mat_files);
+    else
+        files = numel(edf_files);
+    end
+  
+files
+
+files =
+
+    40
+
+i=1
+
+i =
+
+     1
+
+***********************************************************************************************
+---------------------------------------File:acjb101.mat----------------------------------------
+                                  Iteration: 1
+                             Percentage run: 3%
+***********************************************************************************************
+Unable to resolve the name 'EEG.pnts'.
+
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('Preprocessing_final', 'D:\Masterarbeit Jannick\scripts\2_Preprocessing\Preprocessing_final.m', 105)" style="font-weight:bold">Preprocessing_final</a> (<a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\Preprocessing_final.m',105,0)">line 105</a>)
+            EEG_raw.xmax = EEG.pnts / EEG.srate;     % Maximum time point (in seconds)
+
+ % Set the basic fields in the EEG structure
+            EEG_raw.setname = 'Converted Dataset';  % Dataset name
+            EEG_raw.data = outdata.data;            % EEG/EMG/EOG data
+            EEG_raw.srate = outdata.stages.sample_rate_hz(1);  % Sample rate (assuming it's the same across all stages)
+            EEG_raw.nbchan = size(outdata.data, 1);  % Number of channels (from the data field)
+            EEG_raw.pnts = size(outdata.data, 2);    % Number of data points per channel
+            EEG_raw.trials = 1;                      % Number of trials (set to 1 for continuous data)
+            EEG_raw.xmin = 0;                        % Minimum time point
+            EEG_raw.xmax = EEG_raw.pnts / EEG_raw.srate;     % Maximum time point (in seconds)
+            EEG_raw.chanlocs = struct('labels', cellstr(outdata.channel_names));  % Channel names
+            EEG_raw.times = (0:length(EEG_raw.data)-1) * 1000 / EEG_raw.srate; % Time stamps
+  newlocs = readlocs('D:\Masterarbeit Jannick\scripts\2_Preprocessing\Standard-10-5-Cap385.sfp'); 
+readlocs(): 'sfp' format assumed from file extension
+        newlocl = {newlocs.labels};
+        chanlocsnew = struct();
+        fieldsn = fieldnames(newlocs);
+        for k = 1:numel(fieldsn)
+            chanlocsnew.(fieldsn{k}) = [];
+        end
+        for f = 1:length({EEG_raw.chanlocs.labels})
+            whichrow = find(ismember(newlocl, EEG_raw.chanlocs(f).labels));
+            chanlocsnew(f) = newlocs(whichrow);
+        end
+{Unable to perform assignment because the left and right sides have a different number of elements.
+} 
+  ECG = pop_select(EEG_raw, 'channel', {'ECG'});
+Removing 11 channel(s)...
+eeg_checkset note: upper time limit (xmax) adjusted so (xmax-xmin)*srate+1 = number of frames
+            EEG_raw = pop_select(EEG_raw, 'channel', selected_channels);
+Removing 4 channel(s)...
+eeg_checkset note: upper time limit (xmax) adjusted so (xmax-xmin)*srate+1 = number of frames
+EEG_raw.chanlocs
+
+ans = 
+
+  1×8 <a href="matlab:helpPopup('struct')" style="font-weight:bold">struct</a> array with fields:
+
+    labels
+
+helpPopup('struct')
+for i = 1:length(EEG_raw.chanlocs)
+                label = EEG_raw.chanlocs(i).labels;  % Get the current label
+
+                % Check if the current label is 'C3Cz', if so, rename it to 'C3'
+                if strcmp(label, 'C3Cz')
+                    EEG_raw.chanlocs(i).labels = 'C3';
+
+                    % Otherwise, if the label starts with 'C3', remove the 'C3' prefix
+                elseif startsWith(label, 'C3')
+                    EEG_raw.chanlocs(i).labels = label(3:end);  % Remove the first two characters ('C3')
+                end
+            end
+% add channel location information
+        % on server: readlocs('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\2023_mesmart\eeglab_current\Standard-10-5-Cap385.sfp')
+        newlocs = readlocs('D:\Masterarbeit Jannick\scripts\2_Preprocessing\Standard-10-5-Cap385.sfp'); 
+readlocs(): 'sfp' format assumed from file extension
+        newlocl = {newlocs.labels};
+        chanlocsnew = struct();
+        fieldsn = fieldnames(newlocs);
+        for k = 1:numel(fieldsn)
+            chanlocsnew.(fieldsn{k}) = [];
+        end
+        for f = 1:length({EEG_raw.chanlocs.labels})
+            whichrow = find(ismember(newlocl, EEG_raw.chanlocs(f).labels));
+            chanlocsnew(f) = newlocs(whichrow);
+        end
+        EEG_raw.chanlocs = chanlocsnew;
+ % downsample
+        fprintf('---downsample\n');
+---downsample
+        EEG_raw = pop_resample(EEG_raw, 128);
+resampling data 128.0000 Hz
+1 2 3 4 5 6 7 8 
+resampling finished
+        ECG = pop_resample(ECG, 128);
+resampling data 128.0000 Hz
+1 
+resampling finished
+ % define parameters for plotting
+        screenSize = get(0, 'ScreenSize');
+        srate = EEG_raw.srate;
+        window_length = 4*srate;
+        noverlap = window_length/2;
+        nfft = []; % Use default NFFT
+        fpass = [0.5 40];
+        % how to divide seconds to get values in the plotting frame
+        if size(EEG_raw.data(1,:),2) < srate*60 % less than a minute (in seconds)
+            divideby = 1;
+        elseif size(EEG_raw.data(1,:),2) < srate*60*60 % less than an hour (in minutes)
+            divideby = 60;
+        else % more than an hour (in hours)
+            divideby = 60*60;
+        end
+        % Number of channels
+        num_channels = length(EEG_raw.chanlocs);
+Unable to resolve the name 'EEG.outdata.stages'.
+
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('Preprocessing_final', 'D:\Masterarbeit Jannick\scripts\2_Preprocessing\Preprocessing_final.m', 184)" style="font-weight:bold">Preprocessing_final</a> (<a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\Preprocessing_final.m',184,0)">line 184</a>)
+            EEG_raw.scoring = EEG.outdata.stages
+
+
+EEG_raw = 
+
+  <a href="matlab:helpPopup('struct')" style="font-weight:bold">struct</a> with fields:
+
+             setname: 'Converted Dataset resampled'
+            filename: ''
+            filepath: ''
+             subject: ''
+               group: ''
+           condition: ''
+             session: []
+            comments: ''
+              nbchan: 8
+              trials: 1
+                pnts: 3801600
+               srate: 128
+                xmin: 0
+                xmax: 2.9700e+04
+               times: [0 7.8125 15.6250 23.4375 31.2500 39.0625 46.8750 54.6875 62.5000 70.3125 78.1250 85.9375 93.7500 … ] (1×3801600 double)
+                data: [8×3801600 double]
+              icaact: []
+             icawinv: []
+           icasphere: []
+          icaweights: []
+         icachansind: []
+            chanlocs: [1×8 struct]
+          urchanlocs: []
+            chaninfo: [1×1 struct]
+                 ref: []
+               event: []
+             urevent: []
+    eventdescription: {}
+               epoch: []
+    epochdescription: {}
+              reject: [1×1 struct]
+               stats: [1×1 struct]
+            specdata: []
+          specicaact: []
+          splinefile: ''
+       icasplinefile: ''
+              dipfit: []
+             history: ''
+               saved: 'no'
+                 etc: []
+             scoring: [339×4 table]
+
+---bandpass detrend
+---detecting bad signal
+---detect blocks to remove from calculation
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+C4
+F3
+O2
+P3
+P4
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+C4
+O1
+P3
+P4
+F3
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+F3
+C4
+P3
+O1
+O2
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+O2
+F3
+P3
+C4
+P4
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+P4
+O2
+C4
+F3
+O1
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+P3
+F3
+P4
+O1
+C4
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+F3
+O1  n_peaks 1;  40.0
+P4
+C4
+P3
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+C4
+F3
+P3
+P4
+O1
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+C4
+F3
+O1
+P4
+O2
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+F3
+P3
+P4
+C4
+O1
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
