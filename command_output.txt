@@ -1276,3 +1276,4895 @@ F4
 C3
 ----end
 Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+P4
+O2
+P3
+C4
+O1
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+C4
+P4
+P3
+O2
+O1  n_peaks 1;  40.0
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+O1
+P3
+F3
+O2
+P4
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+C4
+P4
+O2
+O1
+F3
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+P3
+P4
+O1
+O2
+C4
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+20-Sep-2024 14:51:15: Job Queued. Waiting for parallel pool job with ID 142 to start ...
+Parallel pool using the 'Processes' profile is shutting down.
+
+Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('parpool', 'C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\cluster\parpool.m', 133)" style="font-weight:bold">parpool</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\cluster\parpool.m',133,0)">line 133</a>)
+Parallel pool failed to start with the following error. For more detailed information, validate the profile 'Processes' in the Cluster Profile
+Manager.
+
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('eeg_electricalnoise_reducer', 'D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m', 47)" style="font-weight:bold">eeg_electricalnoise_reducer</a> (<a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',47,0)">line 47</a>)
+    parpool(nrparallel);
+
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('Preprocessing_final', 'D:\Masterarbeit Jannick\scripts\2_Preprocessing\Preprocessing_final.m', 218)" style="font-weight:bold">Preprocessing_final</a> (<a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\Preprocessing_final.m',218,0)">line 218</a>)
+        EEG_noise = eeg_electricalnoise_reducer(EEG_detrend, rem_ind_all);
+
+Caused by:
+    Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('parallel.internal.pool.AbstractInteractiveClient>iThrowWithCause', 'C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\+parallel\+internal\+pool\AbstractInteractiveClient.m', 256)" style="font-weight:bold">parallel.internal.pool.AbstractInteractiveClient>iThrowWithCause</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\+parallel\+internal\+pool\AbstractInteractiveClient.m',256,0)">line 256</a>)
+    Failed to initialize the interactive session.
+        Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('parallel.internal.pool.JobStateChecker>iThrowIfBadParallelJobStatus', 'C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\+parallel\+internal\+pool\JobStateChecker.m', 93)" style="font-weight:bold">parallel.internal.pool.JobStateChecker>iThrowIfBadParallelJobStatus</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\+parallel\+internal\+pool\JobStateChecker.m',93,0)">line 93</a>)
+        The parallel pool job failed with no message.
+
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+P4
+C4
+P3
+F3
+O1
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+C4
+P3
+F3
+O2
+P4
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+F3
+O1
+P3
+C4
+O2
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+        fprintf('---removal electrical noise\n');
+---removal electrical noise
+        EEG_noise = EEG_detrend;
+        EEG_noise = eeg_electricalnoise_reducer(EEG_detrend, rem_ind_all);
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+P3
+P4
+O2
+C4
+F3
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+        diary off;  % Stop logging the command window output
+        fprintf('---removal electrical noise\n');
+---removal electrical noise
+        EEG_noise = EEG_detrend;
+        EEG_noise = eeg_electricalnoise_reducer(EEG_detrend, rem_ind_all);
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+P3  n_peaks 1;  24.6
+F3
+C4
+P4
+O1
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+        diary off;  % Stop logging the command window output
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the parfor-loop. If 'duration_fft' is used before it is set,
+a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the parfor-loop. If 'magnitude_logy' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If 'xw' is used before it is set, a runtime error
+will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the parfor-loop. If 'rolling_cutoff' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Preserving jobs with IDs: 150 because they contain crash dump files.
+You can use 'delete(myCluster.Jobs)' to remove all jobs created with profile Processes. To create 'myCluster' use 'myCluster = parcluster('Processes')'.
+Connected to parallel pool with 6 workers.
+----start
+O1
+P3
+O2
+F3
+C4
+P4
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+O1
+P4
+F3
+C4
+P3
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+C4
+O1
+P4
+O2
+P3
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+F3
+C4
+P3
+P4
+O2
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+P3
+O2
+O1  n_peaks 1;  40.0
+P4
+C4
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+P4
+P3
+O1  n_peaks 1;  40.0
+F3
+C4
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+C4
+P3
+O2
+F3
+O1
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+C4
+P4
+P3
+O2
+O1
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+C4
+O1
+F3
+P3
+P4
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+F3
+P3
+C4
+O2
+P4
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+P3
+F3
+C4
+O1
+O2
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F3
+O2
+O1
+P4
+C4
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+O2
+O1
+F3
+P4
+P3
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+O1
+C4
+P4
+P3
+F3
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+P4
+F3
+O1
+P3
+O2
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+O2
+P4
+C4
+P3
+O1  n_peaks 1;  40.0
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+C4
+P3
+P4
+O1
+F3
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+O2
+P4
+O1
+C4
+F3
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+O1
+O2
+P3
+F3
+C4
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+P3
+F3
+O1
+P4
+O2
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+P3
+C4
+P4
+F3
+O1  n_peaks 1;  40.0
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+P3
+C4
+F3
+O1
+P4
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+P3
+C4
+F3
+O1
+O2
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F3
+C4
+O2
+P4
+O1
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+C4
+P4
+P3
+O1
+F3
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+O1
+P3
+F3
+P4
+C4
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+O1
+F3
+P4
+C4
+O2
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+C4
+O1
+O2
+P4
+F3
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'duration_fft' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of
+the parfor-loop. If 'magnitude_logy' is used before it is set, a runtime error will occur. For
+more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'xw' is used before it is set, a runtime error will occur. For more information,
+see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of
+the parfor-loop. If 'rolling_cutoff' is used before it is set, a runtime error will occur. For
+more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+F3
+P3
+P4
+O2
+C4
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+C4
+P3
+P4
+O2
+F3
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+P4
+F3
+C4
+P3
+O2
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+P3  n_peaks 1;  24.6
+O2
+F3
+C4
+P4
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+P3
+F3
+P4
+O1
+O2
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'duration_fft' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'magnitude_logy' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If
+'xw' is used before it is set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for
+Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'rolling_cutoff' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F3
+O2
+P4
+C4
+O1
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+F3
+C4
+O2
+P4
+P3
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+F3
+O1
+C4
+P3
+P4
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+P4
+F3
+C4
+O2
+P3
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'duration_fft' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'magnitude_logy' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If
+'xw' is used before it is set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for
+Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'rolling_cutoff' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+O1
+F3
+O2
+P4
+P3
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+O2
+O1
+P4
+C4
+F3
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F3
+O2
+O1
+P4
+C4
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+F3
+P4
+O1
+P3
+O2
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F3
+P4
+C4
+O1
+O2
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+P3
+F3
+C4
+O2
+P4
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+C4
+P4
+P3
+F3
+O1
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+C4
+O1
+O2
+P3
+F3
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'duration_fft' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'magnitude_logy' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If
+'xw' is used before it is set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for
+Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'rolling_cutoff' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+F3
+O2
+P4
+C4
+P3
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+P4
+O2
+P3
+F3
+C4
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+P3
+P4
+O1
+C4
+F3
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+O1
+P4
+F3
+O2
+P3
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+C4
+F3
+O1
+P3
+O2
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+O1
+C4
+P4
+O2
+P3
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+O1
+P3
+P4
+F3
+C4
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+O2
+O1
+P3
+P4
+C4
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+O1
+P3
+P4
+C4  n_peaks 1;  40.1
+O2
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+P3
+F3
+C4
+O1
+P4
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+O1
+F3
+P4
+O2
+C4
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'duration_fft' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'magnitude_logy' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If
+'xw' is used before it is set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for
+Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'rolling_cutoff' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+P3
+C4
+P4
+O1  n_peaks 1;  10.9
+F3
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+O2
+O1
+P4
+C4
+P3
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+O2
+O1
+C4
+F3
+P3
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+C4
+O2
+P4
+O1
+P3
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+C4
+O1
+P3
+F3
+O2
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+C4
+O2
+O1
+F3
+P4
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+O1  n_peaks 1;  40.0
+P3
+C4
+O2  n_peaks 1;  40.0
+P4
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+C4
+P3
+O2
+P4
+O1
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+O1
+P3
+F3
+C4
+P4
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F3
+O1
+O2
+P4
+C4
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F3
+P4
+O1
+O2
+C4
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+O1  n_peaks 1;  40.0
+F3
+P3
+O2
+C4
+F4
+C3
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2  n_peaks 1;  40.0
+C4  n_peaks 1;  40.0
+F3  n_peaks 1;  40.0
+O1
+P3  n_peaks 1;  40.0
+P4  n_peaks 1;  40.0
+F4  n_peaks 1;  40.0
+C3  n_peaks 1;  40.0
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+O2
+F3
+P3
+P4
+O1
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+F3
+O2
+P3
+C4
+O1
+C3
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+21-Sep-2024 08:42:26: Job Running. Waiting for parallel pool workers to connect ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+F4
+C4
+F3
+C3
+P3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+C4
+C3
+F3
+P3
+P4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+C4
+F4
+P3
+F3
+P4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+F3
+P3
+C3
+P4
+C4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+P3
+F4
+C4
+F3
+P4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+C3
+F4
+P3
+P4
+F3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+F4
+C3
+F3
+P3
+P4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3  n_peaks 1;  16.0
+C3
+C4
+P4  n_peaks 1;  16.0
+F3  n_peaks 1;  16.0
+F4  n_peaks 1;  16.0
+O1  n_peaks 1;  16.0
+O2  n_peaks 1;  16.0
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+F4
+P3
+P4
+F3
+C3  n_peaks 1;  40.0
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+P3
+C3
+F4
+P4
+C4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'duration_fft' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'magnitude_logy' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If
+'xw' is used before it is set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for
+Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'rolling_cutoff' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+C3
+F4
+P3
+F3
+P4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+21-Sep-2024 11:54:20: Job Running. Waiting for parallel pool workers to connect ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+P4
+P3
+F4
+F3
+C4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('parpool', 'C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\cluster\parpool.m', 133)" style="font-weight:bold">parpool</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\cluster\parpool.m',133,0)">line 133</a>)
+Parallel pool failed to start with the following error. For more detailed information, validate the
+profile 'Processes' in the Cluster Profile Manager.
+
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('eeg_electricalnoise_reducer', 'D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m', 47)" style="font-weight:bold">eeg_electricalnoise_reducer</a> (<a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',47,0)">line 47</a>)
+    parpool(nrparallel);
+
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('Preprocessing_final', 'D:\Masterarbeit Jannick\scripts\2_Preprocessing\Preprocessing_final.m', 227)" style="font-weight:bold">Preprocessing_final</a> (<a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\Preprocessing_final.m',227,0)">line 227</a>)
+        EEG_noise = eeg_electricalnoise_reducer(EEG_detrend, rem_ind_all);
+
+Caused by:
+    Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('parallel.internal.pool.SpfClientSession')" style="font-weight:bold">parallel.internal.pool.SpfClientSession</a>
+    An unexpected error occurred accessing a parallel pool. The underlying error was: Timeout
+    binding/connecting to specified endpoints.
+
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'duration_fft' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'magnitude_logy' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If
+'xw' is used before it is set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for
+Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'rolling_cutoff' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4  n_peaks 1;  16.0
+P4
+C4
+F3  n_peaks 1;  16.0
+C3  n_peaks 1;  16.0
+P3  n_peaks 1;  16.0
+O2  n_peaks 1;  16.0
+O1  n_peaks 1;  16.0
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+C3
+F4  n_peaks 1;  16.0
+F3  n_peaks 1;  16.0
+P4  n_peaks 1;  16.0
+P3  n_peaks 1;  16.0
+O2
+O1  n_peaks 1;  16.0
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3  n_peaks 1;  16.0
+P4  n_peaks 1;  16.0
+F3  n_peaks 1;  16.0
+F4  n_peaks 1;  16.0
+C3
+C4
+O2  n_peaks 1;  16.0
+O1  n_peaks 1;  16.0
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3  n_peaks 1;  16.0
+F4
+P3
+C3
+C4
+P4  n_peaks 1;  16.0
+O2  n_peaks 1;  16.0
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+F4
+P3
+C4
+F3
+P4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+P4
+F3
+C4
+C3
+F4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+C4  n_peaks 1;  16.0
+C3  n_peaks 1;  16.0
+F3  n_peaks 1;  16.0
+F4
+P3
+O2  n_peaks 1;  16.0
+O1  n_peaks 1;  16.0
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+F4
+F3
+P3
+P4
+C4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F3
+C3
+C4
+F4
+P4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+F3
+C3
+P3
+C4
+F4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+P3
+F4
+C4
+C3
+F3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+C3
+C4
+P4
+F3
+F4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+F4
+P4
+P3
+C4
+F3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+F3
+C3
+P3
+C4
+P4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+F3
+P4
+C3
+P3
+C4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F3
+F4
+C4
+C3  n_peaks 1;  40.0
+P4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+P4
+F3
+P3
+C3
+F4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+F4
+P3
+P4
+F3
+C4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+F3  n_peaks 1;  34.6
+C4
+P3
+F4  n_peaks 1;  34.6
+P4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+P4
+F4
+C4
+C3
+F3  n_peaks 1;  34.6
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+F4
+C3
+P3
+C4
+P4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+F3
+P3
+P4
+C3
+C4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+P3
+F3
+C3
+F4
+P4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+P4
+F3  n_peaks 1;  40.0
+P3
+C4
+C3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+P3
+C3
+F4
+P4
+C4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+C3
+P3
+F4
+C4
+P4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+F3
+C3
+C4
+F4
+P3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+P4
+F4
+C4
+F3
+P3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F3
+C4
+P4
+F4
+C3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F3
+C4
+F4
+P4
+C3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+P4
+F4
+F3
+P3
+C4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+P4
+C4
+F3
+F4
+C3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+F3
+P4
+C3
+F4
+P3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+C3
+F3
+C4
+F4
+P3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+C4
+F4
+P4
+P3
+C3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+P3
+P4
+F4
+F3
+C4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4  n_peaks 1;  16.0
+C4  n_peaks 1;  16.0
+P4  n_peaks 1;  16.0
+F3  n_peaks 1;  16.0
+C3  n_peaks 1;  16.0
+P3  n_peaks 1;  16.0
+O2  n_peaks 1;  16.0
+O1  n_peaks 1;  16.0
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'duration_fft' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'magnitude_logy' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If
+'xw' is used before it is set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for
+Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'rolling_cutoff' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4  n_peaks 1;  16.0
+P3  n_peaks 1;  16.0
+C3  n_peaks 1;  16.0
+P4  n_peaks 1;  16.0
+C4  n_peaks 1;  16.0
+F3  n_peaks 1;  16.0
+O2  n_peaks 1;  16.0
+O1  n_peaks 1;  16.0
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+C3
+F4
+F3
+P3
+C4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+P4
+C4
+F4
+F3
+P3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+C3
+P3
+C4
+F3
+P4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+C3
+F4
+C4
+P3
+P4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+C4  n_peaks 1;  40.0
+C3
+P3
+F3
+F4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F3
+C3
+C4
+F4
+P4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+C3
+F4
+P4
+F3
+P3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'duration_fft' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'magnitude_logy' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If
+'xw' is used before it is set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for
+Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'rolling_cutoff' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+F3
+P3
+F4
+P4
+C3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F4
+C4
+P4  n_peaks 1;  40.0
+F3
+C3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+P4
+F3
+F4
+C4
+C3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+C3
+P4
+C4
+P3
+F4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'duration_fft' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'magnitude_logy' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If
+'xw' is used before it is set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for
+Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'rolling_cutoff' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+F3
+C4
+P3
+F4
+P4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+F3
+F4
+C4  n_peaks 1;  40.0
+P4
+P3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3  n_peaks 1;  16.0
+F3
+P4  n_peaks 1;  16.0
+F4  n_peaks 1;  16.0
+C4  n_peaks 1;  16.0
+C3  n_peaks 1;  16.0
+O1  n_peaks 1;  16.0
+O2  n_peaks 1;  16.0
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+F4
+F3
+C3
+C4
+P3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F3
+F4
+C4
+C3
+P4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+C4
+F3
+P3
+C3
+P4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+P4
+C3
+F4
+F3
+C4  n_peaks 1;  40.0
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+P3
+F3  n_peaks 1;  40.0
+P4  n_peaks 1;  40.0
+F4
+C3  n_peaks 1;  40.0
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+P3
+C4
+F3
+P4
+F4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+C3
+P3
+C4
+F3
+F4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+P3
+F4
+F3
+P4
+C3  n_peaks 1;  40.0
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+F4
+P4
+C4
+P3
+F3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+P4
+C3
+F4
+P3
+F3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+C3
+P3
+F4
+F3
+C4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+P4  n_peaks 1;  16.0
+F4  n_peaks 1;  16.0
+C4
+F3  n_peaks 1;  16.0
+P3  n_peaks 1;  16.0
+O1  n_peaks 1;  16.0
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+F4
+F3
+P3
+C4
+C3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F4
+P4
+F3
+C4
+C3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+P4
+C3
+F3
+F4
+P3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+F3
+C4
+P4
+C3
+P3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+P4
+C4
+F4
+F3
+C3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+C3
+C4
+P3
+F4
+F3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+P3
+C4
+P4
+F4  n_peaks 1;  16.0
+C3
+O2
+O1  n_peaks 1;  16.0
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+P4
+F3
+C3
+C4
+P3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3  n_peaks 1;  16.0
+F4  n_peaks 1;  16.0
+C3  n_peaks 1;  16.0
+P3
+P4  n_peaks 1;  16.0
+C4  n_peaks 1;  16.0
+O1  n_peaks 1;  16.0
+O2  n_peaks 1;  16.0
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F4
+F3
+C3
+C4
+P4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+P3
+F4
+F3
+C4
+P4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'duration_fft' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'magnitude_logy' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If
+'xw' is used before it is set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for
+Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'rolling_cutoff' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+F3
+C4
+P3
+F4
+C3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F3
+C3
+F4
+C4
+P4  n_peaks 1;  16.0
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+P3
+F4
+C4
+F3
+C3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+P3
+P4
+F4
+C4
+C3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+C3
+C4
+F3  n_peaks 2;  12.7 12.9
+P3
+F4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+P3
+C4
+C3
+F4  n_peaks 1;  16.0
+F3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+F3
+C4
+P3
+P4
+C3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F3
+C4
+F4
+P4
+C3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+F4
+P3
+C3
+P4
+F3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+P4
+P3  n_peaks 1;  16.0
+F3
+F4
+C3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+P4
+C4
+F4
+F3
+P3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+C3
+P4
+C4
+F4
+F3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+P4
+P3
+C3
+C4
+F3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'duration_fft' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'magnitude_logy' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If
+'xw' is used before it is set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for
+Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'rolling_cutoff' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+P3
+C4
+P4
+F4
+C3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+P3
+C3
+F3
+P4
+F4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+C4
+F3
+P4
+C3
+F4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+P3
+F4
+F3
+C3
+P4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+C3
+P4
+C4
+P3
+F3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F4
+C4
+P4
+F3
+C3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+F4
+P3
+C4  n_peaks 1;  40.0
+F3  n_peaks 1;  40.0
+C3  n_peaks 1;  40.0
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+C3
+F3
+P3
+P4
+C4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+C4
+F4
+P4
+P3
+C3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+P3
+P4
+C3
+F3
+F4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+P3
+P4
+F4
+F3
+C4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+P3
+F4  n_peaks 12;  8.3 10.4 12.5 14.6 16.7 18.7 20.8 22.9 25.0 27.1 29.2 39.6
+C3
+F3  n_peaks 11;  8.3 10.4 12.5 14.6 16.7 18.7 20.8 22.9 25.0 27.1 29.2
+C4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+C3
+C4
+P4
+F3  n_peaks 11;  8.3 10.4 12.5 14.6 16.7 18.7 20.8 22.9 25.0 27.1 29.2
+F4  n_peaks 12;  8.3 10.4 12.5 14.6 16.7 18.7 20.8 22.9 25.0 27.1 29.2 39.6
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+P4
+P3
+F4  n_peaks 12;  8.3 10.4 12.5 14.6 16.7 18.7 20.8 22.9 25.0 27.1 29.2 39.6
+F3  n_peaks 11;  8.3 10.4 12.5 14.6 16.7 18.7 20.8 22.9 25.0 27.1 29.2
+C3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+C4
+C3
+F3  n_peaks 11;  8.3 10.4 12.5 14.6 16.7 18.7 20.8 22.9 25.0 27.1 29.2
+F4  n_peaks 12;  8.3 10.4 12.5 14.6 16.7 18.7 20.8 22.9 25.0 27.1 29.2 39.6
+P4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+22-Sep-2024 07:27:56: Connected to 5 of 6 parallel pool workers.
+22-Sep-2024 07:28:57: Connected to 5 of 6 parallel pool workers.
+22-Sep-2024 07:29:58: Connected to 5 of 6 parallel pool workers.
+22-Sep-2024 07:30:58: Connected to 5 of 6 parallel pool workers.
+22-Sep-2024 07:31:59: Connected to 5 of 6 parallel pool workers.
+22-Sep-2024 07:33:00: Connected to 5 of 6 parallel pool workers.
+22-Sep-2024 07:34:01: Connected to 5 of 6 parallel pool workers.
+22-Sep-2024 07:35:02: Connected to 5 of 6 parallel pool workers.
+22-Sep-2024 07:36:03: Connected to 5 of 6 parallel pool workers.
+22-Sep-2024 07:37:04: Connected to 5 of 6 parallel pool workers.
+22-Sep-2024 07:38:05: Connected to 5 of 6 parallel pool workers.
+22-Sep-2024 07:39:05: Connected to 5 of 6 parallel pool workers.
+22-Sep-2024 07:40:06: Connected to 5 of 6 parallel pool workers.
+22-Sep-2024 07:41:07: Connected to 5 of 6 parallel pool workers.
+22-Sep-2024 07:42:08: Connected to 5 of 6 parallel pool workers.
+22-Sep-2024 07:43:09: Connected to 5 of 6 parallel pool workers.
+22-Sep-2024 07:44:10: Connected to 5 of 6 parallel pool workers.
+22-Sep-2024 07:45:10: Connected to 5 of 6 parallel pool workers.
+22-Sep-2024 07:46:11: Connected to 5 of 6 parallel pool workers.
+
+Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('parpool', 'C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\cluster\parpool.m', 133)" style="font-weight:bold">parpool</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\cluster\parpool.m',133,0)">line 133</a>)
+Parallel pool failed to start with the following error. For more detailed information, validate the
+profile 'Processes' in the Cluster Profile Manager.
+
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('eeg_electricalnoise_reducer', 'D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m', 47)" style="font-weight:bold">eeg_electricalnoise_reducer</a> (<a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',47,0)">line 47</a>)
+    parpool(nrparallel);
+
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('Preprocessing_final', 'D:\Masterarbeit Jannick\scripts\2_Preprocessing\Preprocessing_final.m', 227)" style="font-weight:bold">Preprocessing_final</a> (<a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\Preprocessing_final.m',227,0)">line 227</a>)
+        EEG_noise = eeg_electricalnoise_reducer(EEG_detrend, rem_ind_all);
+
+Caused by:
+    Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('parallel.internal.pool.AbstractInteractiveClient>iThrowWithCause', 'C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\+parallel\+internal\+pool\AbstractInteractiveClient.m', 256)" style="font-weight:bold">parallel.internal.pool.AbstractInteractiveClient>iThrowWithCause</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\+parallel\+internal\+pool\AbstractInteractiveClient.m',256,0)">line 256</a>)
+    Failed to initialize the interactive session.
+        Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('parallel.internal.pool.CppBackedSession>iWaitForAllWorkerServices', 'C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\+parallel\+internal\+pool\CppBackedSession.m', 738)" style="font-weight:bold">parallel.internal.pool.CppBackedSession>iWaitForAllWorkerServices</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\+parallel\+internal\+pool\CppBackedSession.m',738,0)">line 738</a>)
+        A timeout occurred setting up the parallel pool communication because no worker activity was
+        detected in 1200 seconds. Use pctconfig("poolstarttimeout") to change this timeout.
+
+Parallel pool using the 'Processes' profile is shutting down.
+{This parallel pool has been shut down.
+
+Caused by:
+    The client lost connection to worker 2. This might be due to network problems, or the interactive
+    communicating job might have errored.
+} 
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'duration_fft' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'magnitude_logy' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If
+'xw' is used before it is set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for
+Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'rolling_cutoff' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+22-Sep-2024 09:04:39: Connected to 4 of 6 parallel pool workers.
+22-Sep-2024 09:05:40: Connected to 4 of 6 parallel pool workers.
+22-Sep-2024 09:06:41: Connected to 4 of 6 parallel pool workers.
+22-Sep-2024 09:07:41: Connected to 4 of 6 parallel pool workers.
+22-Sep-2024 09:08:42: Connected to 4 of 6 parallel pool workers.
+22-Sep-2024 09:09:43: Connected to 4 of 6 parallel pool workers.
+22-Sep-2024 09:10:44: Connected to 4 of 6 parallel pool workers.
+22-Sep-2024 09:11:44: Connected to 4 of 6 parallel pool workers.
+22-Sep-2024 09:12:45: Connected to 4 of 6 parallel pool workers.
+22-Sep-2024 09:13:46: Connected to 4 of 6 parallel pool workers.
+
+Parallel pool using the 'Processes' profile is shutting down.
+{This parallel pool has been shut down.
+
+Caused by:
+    The client lost connection to worker 1. This might be due to network problems, or the interactive
+    communicating job might have errored.
+} 
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'duration_fft' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'magnitude_logy' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If
+'xw' is used before it is set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for
+Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'rolling_cutoff' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+C3
+F4
+P3
+P4
+F3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+C4
+C3
+P3
+F3
+[Warning: A worker aborted during execution of the parfor loop. The parfor loop will now run again on
+the remaining workers.] 
+[Warning: A worker aborted during execution of the parfor loop. The parfor loop will now run again on
+the remaining workers.] 
+F4
+P3
+C4
+C3
+F3
+P4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+[Warning: 1 worker(s) crashed while executing code in the current parallel pool. MATLAB may attempt to
+run the code again on the remaining workers of the pool, unless an spmd block has run. <a href="matlab:edit('C:\Users\janni\AppData\Roaming\MathWorks\MATLAB\local_cluster_jobs\R2024a\Job3\matlab_crash_dump.13020-1')">View the crash
+dump files to determine what caused the workers to crash.</a>] 
+Preserving jobs with IDs: 3 because they contain crash dump files.
+You can use 'delete(myCluster.Jobs)' to remove all jobs created with profile Processes. To create 'myCluster' use 'myCluster = parcluster('Processes')'.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+P4
+C3
+F3
+F4
+C4
+O2  n_peaks 2;  9.6 19.1
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+C4
+P3
+P4
+F3
+F4  n_peaks 1;  40.1
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'duration_fft' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'magnitude_logy' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If
+'xw' is used before it is set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for
+Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'rolling_cutoff' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+C3
+C4
+P3
+F4  n_peaks 1;  40.1
+P4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+P4
+F3
+C4
+F4
+C3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+C4
+C3
+P3  n_peaks 1;  16.0
+F3
+F4  n_peaks 1;  16.0
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4  n_peaks 1;  40.0
+F3
+C4
+P3
+F4
+C3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+P4
+C3
+F4
+F3
+P3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+P4
+F4
+F3
+C4
+P3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+F3
+C4
+P4
+F4
+P3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+P3
+F3
+C3
+C4
+F4
+O2  n_peaks 1;  10.1
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F3
+P4
+O1
+O2
+C3  n_peaks 1;  40.0
+F4
+C4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+C3
+F3
+P4
+O1
+P3
+F4
+C4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+O1
+C3
+F3
+P3
+O2
+F4
+C4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+C3
+F3
+P3
+O2
+P4
+C4
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+O1
+C3
+P3
+P4
+O2
+C4
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+P4
+O2
+F3
+O1
+C3
+C4
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+O2
+P3
+C3
+P4
+O1
+F4
+C4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+O1
+P3
+F3
+O2
+P4
+C4
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+O2
+O1
+C3
+F3
+P4
+F4
+C4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+P4
+F3
+P3
+O1
+C3
+F4
+C4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'duration_fft' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'magnitude_logy' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If
+'xw' is used before it is set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for
+Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'rolling_cutoff' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+P4
+C3
+P3
+O1
+O2
+C4
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+C3
+F3
+O1
+P4
+O2
+F4
+C4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+P4
+O2
+O1
+C3
+F3
+C4
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+P4
+P3
+C3
+O2
+F3
+F4
+C4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+O2
+F3
+C3
+P4
+O1
+F4
+C4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+P4
+P3
+C3
+F3
+O1
+F4
+C4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+O1
+P4
+O2
+P3
+F3
+F4
+C4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+P4
+O2
+O1
+F3
+P3
+F4
+C4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+F3
+C3
+P4
+O2
+P3
+C4
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O2
+F3
+C3
+P3
+O1
+P4
+F4
+C4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'duration_fft' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'magnitude_logy' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If
+'xw' is used before it is set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for
+Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the
+parfor-loop. If 'rolling_cutoff' is used before it is set, a runtime error will occur. For more
+information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F3
+O1
+C3
+O2
+P4
+C4
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+F3
+O2
+P3
+C3
+O1
+C4
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+O1
+F3
+O2
+C3
+P3
+C4
+F4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+C3
+O2
+P3
+F3
+P4
+F4
+C4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+O1
+P3
+P4
+F3
+O2
+C3
+F4
+C4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+O2
+C3
+O1
+F3  n_peaks 1;  40.1
+P3
+F4
+C4
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+P4
+C3
+C4
+P3
+F4  n_peaks 1;  40.0
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+F4
+C4
+F3
+P3
+P4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+mat_path
+
+mat_path =
+
+    'D:\Masterarbeit Jannick\Data\GHB02\GHB02_EEG\VP03\1a_import\vp03_exp2_night.web_relevant_import.mat'
+
+participant
+
+participant =
+
+    'vp03_exp2'
+
+a = load(mat_path);
+***************************************************************************************************************************
+---------------------------------------File:vp03_exp2_night.web_relevant_import.mat----------------------------------------
+                                  Iteration: 2
+                             Percentage run: 18%
+***************************************************************************************************************************
+Removing 8 channel(s)...
+readlocs(): 'sfp' format assumed from file extension
+---downsample
+resampling data 128.0000 Hz
+1 2 3 4 5 6 7 8 
+resampling finished
+Pop_resample error: cannot resample empty dataset
+---bandpass detrend
+---detecting bad signal
+---detect blocks to remove from calculation
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+F4
+C4
+P3
+C3
+F3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+F4
+F3
+P4
+P3
+C4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+C3
+P3
+P4
+F3
+C4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the parfor-loop. If 'duration_fft' is used before it is set,
+a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the parfor-loop. If 'magnitude_logy' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If 'xw' is used before it is set, a runtime error
+will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the parfor-loop. If 'rolling_cutoff' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+P3
+F3
+F4
+P4
+C4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+F3
+C3
+P3
+C4
+P4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4  n_peaks 1;  16.0
+F4  n_peaks 1;  16.0
+P3  n_peaks 1;  16.0
+C3  n_peaks 1;  16.0
+F3  n_peaks 1;  16.0
+P4  n_peaks 1;  16.0
+O2  n_peaks 1;  16.0
+O1  n_peaks 1;  16.0
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+F3
+F4
+P3
+C3
+C4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F4
+C3
+C4
+F3
+P4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4  n_peaks 1;  16.0
+C4  n_peaks 1;  16.0
+F3  n_peaks 1;  16.0
+P3  n_peaks 1;  16.0
+P4  n_peaks 1;  16.0
+C3
+O2  n_peaks 2;  9.6 16.0
+O1  n_peaks 1;  9.6
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4  n_peaks 1;  16.0
+P3  n_peaks 1;  16.0
+P4  n_peaks 1;  16.0
+F3  n_peaks 1;  16.0
+F4
+C3  n_peaks 1;  16.0
+O1
+O2  n_peaks 1;  16.0
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the parfor-loop. If 'duration_fft' is used before it is set,
+a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the parfor-loop. If 'magnitude_logy' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If 'xw' is used before it is set, a runtime error
+will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the parfor-loop. If 'rolling_cutoff' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3  n_peaks 1;  16.0
+P4  n_peaks 1;  16.0
+C3  n_peaks 1;  16.0
+P3  n_peaks 1;  16.0
+C4  n_peaks 1;  16.0
+F4
+O1
+O2  n_peaks 1;  16.0
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+C3
+P4
+F3
+P3
+F4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+24-Sep-2024 12:24:26: Job Queued. Waiting for parallel pool job with ID 7 to start ...
+24-Sep-2024 12:25:26: Job Queued. Waiting for parallel pool job with ID 7 to start ...
+24-Sep-2024 12:26:27: Job Queued. Waiting for parallel pool job with ID 7 to start ...
+24-Sep-2024 12:27:27: Job Queued. Waiting for parallel pool job with ID 7 to start ...
+Parallel pool using the 'Processes' profile is shutting down.
+
+Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('parpool', 'C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\cluster\parpool.m', 133)" style="font-weight:bold">parpool</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\cluster\parpool.m',133,0)">line 133</a>)
+Parallel pool failed to start with the following error. For more detailed information, validate the profile 'Processes' in the Cluster Profile Manager.
+
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('eeg_electricalnoise_reducer', 'D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m', 47)" style="font-weight:bold">eeg_electricalnoise_reducer</a> (<a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',47,0)">line 47</a>)
+    parpool(nrparallel);
+
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('Preprocessing_final', 'D:\Masterarbeit Jannick\scripts\2_Preprocessing\Preprocessing_final.m', 232)" style="font-weight:bold">Preprocessing_final</a> (<a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\Preprocessing_final.m',232,0)">line 232</a>)
+        EEG_noise = eeg_electricalnoise_reducer(EEG_detrend, rem_ind_all);
+
+Caused by:
+    Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('parallel.internal.pool.AbstractInteractiveClient>iThrowWithCause', 'C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\+parallel\+internal\+pool\AbstractInteractiveClient.m', 256)" style="font-weight:bold">parallel.internal.pool.AbstractInteractiveClient>iThrowWithCause</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\+parallel\+internal\+pool\AbstractInteractiveClient.m',256,0)">line 256</a>)
+    Failed to initialize the interactive session.
+        Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('parallel.internal.pool.JobStateChecker>iThrowIfBadParallelJobStatus', 'C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\+parallel\+internal\+pool\JobStateChecker.m', 93)" style="font-weight:bold">parallel.internal.pool.JobStateChecker>iThrowIfBadParallelJobStatus</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\+parallel\+internal\+pool\JobStateChecker.m',93,0)">line 93</a>)
+        The parallel pool job failed with no message.
+
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the parfor-loop. If 'duration_fft' is used before it is set,
+a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the parfor-loop. If 'magnitude_logy' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If 'xw' is used before it is set, a runtime error
+will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the parfor-loop. If 'rolling_cutoff' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+F4
+C4
+P3
+P4
+F3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+P4
+F3
+F4
+C3
+C4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+24-Sep-2024 13:32:10: Job Queued. Waiting for parallel pool job with ID 7 to start ...
+24-Sep-2024 13:33:11: Job Queued. Waiting for parallel pool job with ID 7 to start ...
+24-Sep-2024 13:34:12: Job Queued. Waiting for parallel pool job with ID 7 to start ...
+24-Sep-2024 13:35:13: Job Queued. Waiting for parallel pool job with ID 7 to start ...
+24-Sep-2024 13:36:13: Job Queued. Waiting for parallel pool job with ID 7 to start ...
+24-Sep-2024 13:37:14: Connected to 1 of 6 parallel pool workers.
+24-Sep-2024 13:38:15: Connected to 1 of 6 parallel pool workers.
+
+Parallel pool using the 'Processes' profile is shutting down.
+{This parallel pool has been shut down.
+
+Caused by:
+    The client lost connection to worker 2. This might be due to network problems, or the interactive communicating job might have errored.
+} 
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the parfor-loop. If 'duration_fft' is used before it is set,
+a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the parfor-loop. If 'magnitude_logy' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If 'xw' is used before it is set, a runtime error
+will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the parfor-loop. If 'rolling_cutoff' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+F3  n_peaks 1;  40.0
+F4
+C3
+P4
+P3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4
+C3
+C4
+P4
+P3
+F3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+F3
+P3
+P4
+C4
+F4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+C4  n_peaks 1;  40.0
+P4
+F4
+C3
+F3  n_peaks 1;  40.0
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+F4
+F3
+C3
+P3
+P4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Preserving jobs with IDs: 12 because they contain crash dump files.
+You can use 'delete(myCluster.Jobs)' to remove all jobs created with profile Processes. To create 'myCluster' use 'myCluster = parcluster('Processes')'.
+24-Sep-2024 14:20:56: Job Queued. Waiting for parallel pool job with ID 13 to start ...
+24-Sep-2024 14:21:57: Job Queued. Waiting for parallel pool job with ID 13 to start ...
+24-Sep-2024 14:22:58: Job Queued. Waiting for parallel pool job with ID 13 to start ...
+Parallel pool using the 'Processes' profile is shutting down.
+
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the parfor-loop. If 'duration_fft' is used before it is set,
+a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the parfor-loop. If 'magnitude_logy' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If 'xw' is used before it is set, a runtime error
+will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the parfor-loop. If 'rolling_cutoff' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Preserving jobs with IDs: 12 because they contain crash dump files.
+You can use 'delete(myCluster.Jobs)' to remove all jobs created with profile Processes. To create 'myCluster' use 'myCluster = parcluster('Processes')'.
+Connected to parallel pool with 6 workers.
+----start
+F4
+C4
+P4
+P3
+C3
+F3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+F4
+P4
+P3
+C3
+F3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+P3
+C3  n_peaks 1;  40.0
+F3  n_peaks 1;  40.0
+F4  n_peaks 1;  40.1
+C4  n_peaks 1;  40.0
+O1  n_peaks 1;  40.0
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the parfor-loop. If 'duration_fft' is used before it is set,
+a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the parfor-loop. If 'magnitude_logy' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If 'xw' is used before it is set, a runtime error
+will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the parfor-loop. If 'rolling_cutoff' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4  n_peaks 1;  40.1
+P4
+F3  n_peaks 1;  40.0
+C3  n_peaks 1;  40.0
+P3
+C4  n_peaks 1;  40.0
+O1  n_peaks 1;  40.0
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F4
+C3
+F3
+C4  n_peaks 1;  40.0
+[Warning: A worker aborted during execution of the parfor loop. The parfor loop will now run again on the remaining workers.] 
+[Warning: A worker aborted during execution of the parfor loop. The parfor loop will now run again on the remaining workers.] 
+F4
+C3
+F3
+C4  n_peaks 1;  40.0
+P3
+P4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+[Warning: 1 worker(s) crashed while executing code in the current parallel pool. MATLAB may attempt to run the code again on the remaining workers of the
+pool, unless an spmd block has run. <a href="matlab:edit('C:\Users\janni\AppData\Roaming\MathWorks\MATLAB\local_cluster_jobs\R2024a\Job5\matlab_crash_dump.11688-1')">View the crash dump files to determine what caused the workers to crash.</a>] 
+Preserving jobs with IDs: 5 because they contain crash dump files.
+You can use 'delete(myCluster.Jobs)' to remove all jobs created with profile Processes. To create 'myCluster' use 'myCluster = parcluster('Processes')'.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F4  n_peaks 1;  40.0
+F3  n_peaks 1;  40.0
+C3  n_peaks 1;  40.0
+P4
+C4  n_peaks 1;  40.0
+O1  n_peaks 1;  40.0
+O2  n_peaks 1;  40.0
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+P4
+C4
+F4
+C3
+P3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+F3
+C4
+P4
+P3
+F4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+F4
+P4
+F3
+P3
+C3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+C4
+F4
+F3
+C3
+P3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+F4
+P3
+P4
+C3
+C4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+C4
+F4
+F3
+P3
+C3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+P4
+C4
+F4
+P3  n_peaks 1;  40.1
+F3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+F4
+C3
+F3
+P3
+C4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+C4
+F4  n_peaks 1;  40.0
+P4
+F3
+P3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the parfor-loop. If 'duration_fft' is used before it is set,
+a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the parfor-loop. If 'magnitude_logy' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If 'xw' is used before it is set, a runtime error
+will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the parfor-loop. If 'rolling_cutoff' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F4  n_peaks 1;  40.0
+P4
+C4
+P3
+C3
+F3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C3
+F4  n_peaks 1;  40.0
+P3
+P4
+F3
+C4
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+F3
+C3
+C4
+F4
+P3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+F4
+F3
+P3
+C4
+C3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the parfor-loop. If 'duration_fft' is used before it is set,
+a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the parfor-loop. If 'magnitude_logy' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If 'xw' is used before it is set, a runtime error
+will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the parfor-loop. If 'rolling_cutoff' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+F4
+C4
+P4
+C3
+P3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+P3
+F3
+P4
+C3
+F4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+25-Sep-2024 08:20:54: Job Queued. Waiting for parallel pool job with ID 7 to start ...
+25-Sep-2024 08:21:54: Job Queued. Waiting for parallel pool job with ID 7 to start ...
+Parallel pool using the 'Processes' profile is shutting down.
+
+Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('parpool', 'C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\cluster\parpool.m', 133)" style="font-weight:bold">parpool</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\cluster\parpool.m',133,0)">line 133</a>)
+Parallel pool failed to start with the following error. For more detailed information, validate the profile 'Processes' in the Cluster Profile Manager.
+
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('eeg_electricalnoise_reducer', 'D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m', 47)" style="font-weight:bold">eeg_electricalnoise_reducer</a> (<a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',47,0)">line 47</a>)
+    parpool(nrparallel);
+
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('Preprocessing_final', 'D:\Masterarbeit Jannick\scripts\2_Preprocessing\Preprocessing_final.m', 232)" style="font-weight:bold">Preprocessing_final</a> (<a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\Preprocessing_final.m',232,0)">line 232</a>)
+        EEG_noise = eeg_electricalnoise_reducer(EEG_detrend, rem_ind_all);
+
+Caused by:
+    Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('parallel.internal.pool.AbstractInteractiveClient>iThrowWithCause', 'C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\+parallel\+internal\+pool\AbstractInteractiveClient.m', 256)" style="font-weight:bold">parallel.internal.pool.AbstractInteractiveClient>iThrowWithCause</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\+parallel\+internal\+pool\AbstractInteractiveClient.m',256,0)">line 256</a>)
+    Failed to initialize the interactive session.
+        Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('parallel.internal.pool.JobStateChecker>iThrowIfBadParallelJobStatus', 'C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\+parallel\+internal\+pool\JobStateChecker.m', 93)" style="font-weight:bold">parallel.internal.pool.JobStateChecker>iThrowIfBadParallelJobStatus</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2024a\toolbox\parallel\cluster\+parallel\+internal\+pool\JobStateChecker.m',93,0)">line 93</a>)
+        The parallel pool job failed with no message.
+
+---removal electrical noise
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',87,13)">File: eeg_electricalnoise_reducer.m Line: 87 Column: 13</a>
+The temporary variable 'duration_fft' will be cleared at the beginning of each iteration of the parfor-loop. If 'duration_fft' is used before it is set,
+a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',91,13)">File: eeg_electricalnoise_reducer.m Line: 91 Column: 13</a>
+The temporary variable 'magnitude_logy' will be cleared at the beginning of each iteration of the parfor-loop. If 'magnitude_logy' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',94,13)">File: eeg_electricalnoise_reducer.m Line: 94 Column: 13</a>
+The temporary variable 'xw' will be cleared at the beginning of each iteration of the parfor-loop. If 'xw' is used before it is set, a runtime error
+will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+[Warning: <a href="matlab: opentoline('D:\Masterarbeit Jannick\scripts\2_Preprocessing\matlab_processing_benji\eeg_electricalnoise_reducer.m',104,13)">File: eeg_electricalnoise_reducer.m Line: 104 Column: 13</a>
+The temporary variable 'rolling_cutoff' will be cleared at the beginning of each iteration of the parfor-loop. If 'rolling_cutoff' is used before it is
+set, a runtime error will occur. For more information, see <a href="matlab: helpview([docroot '/parallel-computing/distcomp_ug.map'],'MIR_ERROR_UNINITIALIZED_TEMPORARY_VARIABLE')">Parallel for Loops in MATLAB, "Uninitialized Temporaries"</a>.] 
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+25-Sep-2024 08:32:57: Job Queued. Waiting for parallel pool job with ID 3 to start ...
+25-Sep-2024 08:33:57: Job Queued. Waiting for parallel pool job with ID 3 to start ...
+Parallel pool using the 'Processes' profile is shutting down.
+
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+P3
+C4
+P4
+F4  n_peaks 1;  40.0
+C3
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+C3
+F3  n_peaks 1;  40.0
+P4
+P3
+F4  n_peaks 1;  40.0
+O1
+O2
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+C4
+C3
+P4
+F3
+F4
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P4
+P3
+F4
+C4
+F3
+C3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+C4
+P4
+C3
+F4
+P3
+F3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+P3
+F3
+P4
+C4
+C3
+F4  n_peaks 1;  15.7
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
+---removal electrical noise
+---remove electrical noise: Benjis algorithm
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 6 workers.
+----start
+F3
+P4
+P3
+C4
+F4
+C3
+O2
+O1
+----end
+Parallel pool using the 'Processes' profile is shutting down.
