@@ -63,7 +63,7 @@
     end
   
     %% loop through all files
-    for i = 25:files
+    for i = 1:files
         %% import 
         if ~isempty(edf_files)
             fprintf('********************************************%s****************************************\n', repmat('*', 1, length(edf_files(i).name)));
