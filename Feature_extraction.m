@@ -4,6 +4,8 @@ addpath(genpath('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\2023
 addpath('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\matlab_processing_benji');
 addpath('D:\Masterarbeit Jannick\scripts\2_Preprocessing\eeglab2024.0');
 eeglab nogui;
+py.importlib.import_module('yasa');
+
 %% load python
 pyenv('Version', 'C:\Users\janni\AppData\Local\Programs\Python\Python311\python.EXE');
 %% Define the base folder where the search should start
@@ -124,7 +126,7 @@ disp(['Percentage of clean epochs: ', num2str(clean_epochs_percent), '%']);
                             alpha_b = [8, 12];
                             beta_b = [15, 30];
                             gamma_b = [30, 40];
-                            spindles_b = [12, 16];
+                            spindle_b = [12, 16];
                            
                             % bands #new
                             delta_ts = bandpass(EEG_clean.data(chan, indexs), delta_b, EEG_clean.srate);
@@ -132,131 +134,216 @@ disp(['Percentage of clean epochs: ', num2str(clean_epochs_percent), '%']);
                             alpha_ts = bandpass(EEG_clean.data(chan, indexs), alpha_b, EEG_clean.srate);
                             beta_ts = bandpass(EEG_clean.data(chan, indexs), beta_b, EEG_clean.srate);
                             gamma_ts = bandpass(EEG_clean.data(chan, indexs), gamma_b, EEG_clean.srate);
-
+                            spindle_ts = bandpass(EEG_clean.data(chan, indexs), spindle_b, EEG_clean.srate);
 
                             %% bands burst parameters
-                            t_burst = py.neurodsp.burst.detect_bursts_dual_threshold(py.numpy.array(EEG_clean.data(chan, indexs)), ...
+                            % theta bursts
+                            theta_burst = py.neurodsp.burst.detect_bursts_dual_threshold(py.numpy.array(EEG_clean.data(chan, indexs)), ...
                                 fs=EEG_clean.srate, dual_thresh=[1, 1.5], f_range=theta_b);
-                            d_t_b = diff([0, double(t_burst.tolist()), 0]);
+                            d_t_b = diff([0, double(theta_burst.tolist()), 0]);
                             if sum(abs(d_t_b))/2 > 2
                                 midpp = (find(d_t_b == 1) + find(d_t_b == -1) - 1) / 2;
-                                t_bursts_ssd = std(diff(midpp)/EEG_clean.srate);
+                                theta_bursts_ssd = std(diff(midpp)/EEG_clean.srate);
                             else
-                                t_bursts_ssd = NaN;
+                                theta_bursts_ssd = NaN;
                             end
-                            t_burst_stat = py.neurodsp.burst.compute_burst_stats(t_burst, fs=EEG_clean.srate);
-                            t_burst_stat = struct(t_burst_stat);
-                            t_burst_stat.n_bursts = double(t_burst_stat.n_bursts);
-
-                            a_burst = py.neurodsp.burst.detect_bursts_dual_threshold(py.numpy.array(EEG_clean.data(chan, indexs)), ...
+                            theta_burst_stat = py.neurodsp.burst.compute_burst_stats(theta_burst, fs=EEG_clean.srate);
+                            theta_burst_stat = struct(theta_burst_stat);
+                            theta_burst_stat.n_bursts = double(theta_burst_stat.n_bursts);
+                            
+                            % alpha bursts
+                            alpha_burst = py.neurodsp.burst.detect_bursts_dual_threshold(py.numpy.array(EEG_clean.data(chan, indexs)), ...
                                 fs=EEG_clean.srate, dual_thresh=[1, 1.5], f_range=alpha_b);
-                            d_a_b = diff([0, double(a_burst.tolist()), 0]);
+                            d_a_b = diff([0, double(alpha_burst.tolist()), 0]);
                             if sum(abs(d_a_b))/2 > 2
                                 midpp = (find(d_a_b == 1) + find(d_a_b == -1) - 1) / 2;
-                                a_bursts_ssd = std(diff(midpp)/EEG_clean.srate);
+                                alpha_bursts_ssd = std(diff(midpp)/EEG_clean.srate);
                             else
-                                a_bursts_ssd = NaN;
+                                alpha_bursts_ssd = NaN;
                             end
-                            a_burst_stat = py.neurodsp.burst.compute_burst_stats(a_burst, fs=EEG_clean.srate);
-                            a_burst_stat = struct(a_burst_stat);
-                            a_burst_stat.n_bursts = double(a_burst_stat.n_bursts);
-
-                            b_burst = py.neurodsp.burst.detect_bursts_dual_threshold(py.numpy.array(EEG_clean.data(chan, indexs)), ...
+                            alpha_burst_stat = py.neurodsp.burst.compute_burst_stats(alpha_burst, fs=EEG_clean.srate);
+                            alpha_burst_stat = struct(alpha_burst_stat);
+                            alpha_burst_stat.n_bursts = double(alpha_burst_stat.n_bursts);
+                            
+                            % beta bursts
+                            beta_burst = py.neurodsp.burst.detect_bursts_dual_threshold(py.numpy.array(EEG_clean.data(chan, indexs)), ...
                                 fs=EEG_clean.srate, dual_thresh=[0.9, 1.5], f_range=beta_b);
-                            d_b_b = diff([0, double(b_burst.tolist()), 0]);
+                            d_b_b = diff([0, double(beta_burst.tolist()), 0]);
                             if sum(abs(d_b_b))/2 > 2
                                 midpp = (find(d_b_b == 1) + find(d_b_b == -1) - 1) / 2;
-                                b_bursts_ssd = std(diff(midpp)/EEG_clean.srate);
+                                beta_bursts_ssd = std(diff(midpp)/EEG_clean.srate);
                             else
-                                b_bursts_ssd = NaN;
+                                beta_bursts_ssd = NaN;
                             end
-                            b_burst_stat = py.neurodsp.burst.compute_burst_stats(b_burst, fs=EEG_clean.srate);
-                            b_burst_stat = struct(b_burst_stat);
-                            b_burst_stat.n_bursts = double(b_burst_stat.n_bursts);
+                            beta_burst_stat = py.neurodsp.burst.compute_burst_stats(beta_burst, fs=EEG_clean.srate);
+                            beta_burst_stat = struct(beta_burst_stat);
+                            beta_burst_stat.n_bursts = double(beta_burst_stat.n_bursts);
 
-                            %% bands coherence within #new
-                            t_lagcoh = py.neurodsp.rhythm.compute_lagged_coherence(py.numpy.array(EEG_clean.data(chan, indexs)), fs=EEG_clean.srate, freqs=theta_b);
-                            a_lagcoh = py.neurodsp.rhythm.compute_lagged_coherence(py.numpy.array(EEG_clean.data(chan, indexs)), fs=EEG_clean.srate, freqs=alpha_b);
-                            t_a_lagcoh = py.neurodsp.rhythm.compute_lagged_coherence(py.numpy.array(EEG_clean.data(chan, indexs)), fs=EEG_clean.srate, freqs=[theta_b(1), alpha_b(2)]);
-                            b_lagcoh = py.neurodsp.rhythm.compute_lagged_coherence(py.numpy.array(EEG_clean.data(chan, indexs)), fs=EEG_clean.srate, freqs=beta_b);
-                            a_b_lagcoh = py.neurodsp.rhythm.compute_lagged_coherence(py.numpy.array(EEG_clean.data(chan, indexs)), fs=EEG_clean.srate, freqs=[alpha_b(1), beta_b(2)]);
+                            % spindle bursts
+                            spindle_burst = py.neurodsp.burst.detect_bursts_dual_threshold(py.numpy.array(EEG_clean.data(chan, indexs)), ...
+                                fs=EEG_clean.srate, dual_thresh=[0.9, 1.5], f_range=spindle_b);
+                            d_s_b = diff([0, double(spindle_burst.tolist()), 0]);
+                            if sum(abs(d_s_b))/2 > 2
+                                midpp = (find(d_s_b == 1) + find(d_s_b == -1) - 1) / 2;
+                                spindle_bursts_ssd = std(diff(midpp)/EEG_clean.srate);
+                            else
+                                spindle_bursts_ssd = NaN;
+                            end
+                            spindle_burst_stat = py.neurodsp.burst.compute_burst_stats(spindle_burst, fs=EEG_clean.srate);
+                            spindle_burst_stat = struct(spindle_burst_stat);
+                            spindle_burst_stat.n_bursts = double(spindle_burst_stat.n_bursts);
 
-
-           
-                            %% geht nicht hurst long
-                            hurs_exp_long = hurst_estimate(zscore(EEG_clean.data(chan, indexs)), 'absval', 0, 1);
-                            hurs_alpha = hurst_estimate(zscore(alpha_ts), 'absval', 0, 1);
-                            hurs_beta = hurst_estimate(zscore(beta_ts), 'absval', 0, 1);
-                            hurs_theta = hurst_estimate(zscore(theta_ts), 'absval', 0, 1);
-                            hurs_delta = hurst_estimate(zscore(delta_ts), 'absval', 0, 1);
-                             %#new
-                            hurs_gamma = hurst_estimate(zscore(gamma_ts), 'absval', 0, 1);
-
-                            %% other fractal dimensions
-                            higuchi_fd = Higuchi_FD(zscore(EEG_clean.data(chan, indexs)), min(50, max(1,length(indexs)-2)));
-                            katz_fd = Katz_FD(zscore(EEG_clean.data(chan, indexs)));
-                            bubble_en = BubbEn(zscore(EEG_clean.data(chan, indexs)));
-                            spect_en = SpecEn(zscore(EEG_clean.data(chan, indexs)));
-                            sydy_en = SyDyEn(zscore(EEG_clean.data(chan, indexs)));
-                            phase_en = PhasEn(zscore(EEG_clean.data(chan, indexs)));
-                            slope_en =  SlopEn(EEG_clean.data(chan, indexs)); % original data
-                            slope_en_z =  SlopEn(zscore(EEG_clean.data(chan, indexs))); %zscore
-                            slope_en_z_05_20 =  SlopEn(zscore(EEG_clean.data(chan, indexs)), 'Lvls',[0.5,20]); %zscore
-                            eoe_en = EnofEn(zscore(EEG_clean.data(chan, indexs)));
-                            att_en = AttnEn(zscore(EEG_clean.data(chan, indexs)));
-                            
-                            %% pwelch for power spectrum
+                                                  
+                            %% Power Spectrum: pwelch
                             % set up pwelch method for power spectrum
                             duration_window = 4*EEG_clean.srate;           % 4s windows
                             which_window = hanning(duration_window); % hanning window
                             overlap_window = duration_window*0.5;    % 50% overlap, 2s
-
                             % setup epochs
-                            epoch_windowlen = 30; % seconds
+                            epoch_windowlen = 30; % secondsspindle_burst
                             epoch_windowover = 0; % no overlap
+                            % do pwelch spectrum
+                            [psd, freq] = pwelch(EEG_clean.data(chan,indexs), ...
+                                which_window, overlap_window, EEG_clean.srate/freq_res, EEG_clean.srate);
+                            freq_of_interest = freq >= 0.5 & freq <= 30;
+                            psdl = 10*log10(psd(freq_of_interest,:))';
+                            psdo = psd(freq_of_interest,:)';
+                            freql = freq(freq_of_interest,:)';
 
-                         
-                                % do pwelch spectrum
-                                [psd, freq] = pwelch(EEG_clean.data(chan,idxs), ...
-                                    which_window, overlap_window, EEG_clean.srate/freq_res, EEG_clean.srate);
+                            % absolute and relative power delta band
+                            id_swa = find(freql >= delta_b(1) & freql <= delta_b(2));
+                            delta_absolute_power = trapz(freql(id_swa), psdo(id_swa));
+                            delta_relative_power = trapz(freql(id_swa), psdo(id_swa))/trapz(freql,psdo);
+                            % absolute and relative power theta band
+                            id_swa = find(freql >= theta_b(1) & freql <= theta_b(2));
+                            theta_absolute_power = trapz(freql(id_swa), psdo(id_swa));
+                            theta_relative_power = trapz(freql(id_swa), psdo(id_swa))/trapz(freql,psdo);
+                            % absolute and relative power alpha band
+                            id_swa = find(freql >= alpha_b(1) & freql <= alpha_b(2));
+                            alpha_absolute_power = trapz(freql(id_swa), psdo(id_swa));
+                            alpha_relative_power = trapz(freql(id_swa), psdo(id_swa))/trapz(freql,psdo);
+                            % absolute and relative power beta band
+                            id_swa = find(freql >= beta_b(1) & freql <= beta_b(2));
+                            beta_absolute_power = trapz(freql(id_swa), psdo(id_swa));
+                            beta_relative_power = trapz(freql(id_swa), psdo(id_swa))/trapz(freql,psdo);
+                            % absolute and relative power spindle band
+                            id_swa = find(freql >= spindle_b(1) & freql <= spindle_b(2));
+                            spindle_absolute_power = trapz(freql(id_swa), psdo(id_swa));
+                            spindle_relative_power = trapz(freql(id_swa), psdo(id_swa))/trapz(freql,psdo);
 
-                                freq_of_interest = freq >= 0.5 & freq <= 30;
-                                psdl = 10*log10(psd(freq_of_interest,:))';
-                                psdo = psd(freq_of_interest,:)';
-                                freql = freq(freq_of_interest,:)';
+  
+                            %% fooof algorithm (Fitting Oscillations and One-Over-F)
+                            % analyze neural power spectra by separating oscillatory components from the aperiodic background activity
+                            f_result = py.fooof.FOOOF( ...
+                                peak_width_limits= [0.5 12], ...    % Set peak width limits in Hz
+                                max_n_peaks=inf, ...                % Allow an unlimited number of peaks
+                                min_peak_height=0.0, ...            % Minimum peak height to consider
+                                peak_threshold=2.0, ...             % Threshold for peak detection
+                                aperiodic_mode='fixed', ...
+                                verbose=false);
+                            f_result.fit(py.numpy.array(freq(freq >= delta_b(1) & freq <= gamma_b(2))'), py.numpy.array(psd(freq >= delta_b(1) & freq <= gamma_b(2))'), py.list([delta_b(1), gamma_b(2)]));
 
-                                id_swa = find(freql >= delta_b(1) & freql <= delta_b(2));
-                                eeg_d_abs = trapz(freql(id_swa), psdo(id_swa));
-                                eeg_d_rel = trapz(freql(id_swa), psdo(id_swa))/trapz(freql,psdo);
+                            aperpar = double(f_result.aperiodic_params_.tolist());
+                            % gives me the values of the 1/f curve in 
+                            fooofed_spectrum = double(f_result.fooofed_spectrum_.tolist());
+                            ap_fit = py.fooof.sim.gen.gen_aperiodic(f_result.freqs, f_result.aperiodic_params_); %aperpar(1) - exp(aperpar(2))*foof_freq;
+                            f_freqs = double(f_result.freqs.tolist());
+                            % Exponent: Describes the slope of the 1/f decay. A steeper slope (more negative exponent) means more low-frequency power.
+                            fooof_exponent = aperpar(2);
+                            % Offset: Represents the overall vertical shift of the spectrum.
+                            fooof_offset = aperpar(1);
+                            normalized_spect = fooofed_spectrum-double(ap_fit.tolist());
+                            outcell = cellfun(@double,cell(f_result.peak_params_.tolist()),'UniformOutput',false);
+                            peak_params = reshape([outcell{:}], 3, size(outcell,2))';
 
-                                id_swa = find(freql >= theta_b(1) & freql <= theta_b(2));
-                                eeg_t_abs = trapz(freql(id_swa), psdo(id_swa));
-                                eeg_t_rel = trapz(freql(id_swa), psdo(id_swa))/trapz(freql,psdo);
+            
+                            [mp, imp] = max(peak_params(:,2));
+                            [mpa, impa] = max(peak_params(:,2).*peak_params(:,3));
+                            
+                            if isempty(imp)
+                                strongest_frequency_peak_overall = NaN;
+                                strongest_frequency_peak_overall_area = NaN;
+                            else
+                                strongest_frequency_peak_overall = peak_params(imp, 1);
+                                strongest_frequency_peak_overall_area = peak_params(impa, 1);
+                            end
+            
+                            % strongest peak detection in delta band
+                            d_sc = peak_params(:,1) >= delta_b(1) &  peak_params(:,1) < delta_b(2);
+                            [mp, imp] = max(peak_params(d_sc,2));
+                            [mpa, impa] = max(peak_params(d_sc,2).*peak_params(d_sc,3));
+                            indf = find(d_sc);
+                            if isempty(imp)
+                                strongest_frequency_peak_delta = NaN;
+                                strongest_frequency_peak_delta_area = NaN;
+                            else
+                                strongest_frequency_peak_delta = peak_params(indf(imp), 1);
+                                strongest_frequency_peak_delta_area = peak_params(indf(impa), 1);
+                            end
+                            % strongest peak detection in theta band
+                            t_sc = peak_params(:,1) >= theta_b(1) &  peak_params(:,1) < theta_b(2);
+                            [mp, imp] = max(peak_params(t_sc,2));
+                            [mpa, impa] = max(peak_params(t_sc,2).*peak_params(t_sc,3));
+                            indf = find(t_sc);
+                            if isempty(imp)
+                                strongest_frequency_peak_theta = NaN;
+                                strongest_frequency_peak_theta_area = NaN;
+                            else
+                                strongest_frequency_peak_theta = peak_params(indf(imp), 1);
+                                strongest_frequency_peak_theta_area = peak_params(indf(impa), 1);
+                            end
+                            % strongest peak detection in alpha band
+                            a_sc = peak_params(:,1) >= alpha_b(1) &  peak_params(:,1) < alpha_b(2);
+                            [mp, imp] = max(peak_params(a_sc,2));
+                            [mpa, impa] = max(peak_params(a_sc,2).*peak_params(a_sc,3));
+                            indf = find(a_sc);
 
-                                id_swa = find(freql >= alpha_b(1) & freql <= alpha_b(2));
-                                eeg_a_abs = trapz(freql(id_swa), psdo(id_swa));
-                                eeg_a_rel = trapz(freql(id_swa), psdo(id_swa))/trapz(freql,psdo);
+                            if isempty(imp)
+                                strongest_frequency_peak_alpha = NaN;
+                                strongest_frequency_peak_alpha_area = NaN;
+                            else
+                                strongest_frequency_peak_alpha = peak_params(indf(imp), 1);
+                                strongest_frequency_peak_alpha_area = peak_params(indf(impa), 1);
+                            end
+                            % strongest peak detection in beta band
+                            b_sc = peak_params(:,1) >= beta_b(1) &  peak_params(:,1) < beta_b(2);
+                            [mp, imp] = max(peak_params(b_sc,2));
+                            [mpa, impa] = max(peak_params(b_sc,2).*peak_params(b_sc,3));
+                            indf = find(b_sc);
+                            if isempty(imp)
+                                strongest_frequency_peak_beta = NaN;
+                                strongest_frequency_peak_beta_area = NaN;
+                            else
+                                strongest_frequency_peak_beta = peak_params(indf(imp), 1);
+                                strongest_frequency_peak_beta_area = peak_params(indf(impa), 1);
+                            end
+                            % strongest peak detection in spindle band
+                            s_sc = peak_params(:,1) >= spindle_b(1) &  peak_params(:,1) < spindle_b(2);
+                            [mp, imp] = max(peak_params(s_sc,2));
+                            [mpa, impa] = max(peak_params(s_sc,2).*peak_params(s_sc,3));
+                            indf = find(s_sc);
+                            if isempty(imp)
+                                strongest_frequency_peak_spindle = NaN;
+                                strongest_frequency_peak_spindle_area = NaN;
+                            else
+                                strongest_frequency_peak_spindle = peak_params(indf(imp), 1);
+                                strongest_frequency_peak_spindle_area = peak_params(indf(impa), 1);
+                            end
+                        
 
-                                id_swa = find(freql >= beta_b(1) & freql <= beta_b(2));
-                                eeg_b_abs = trapz(freql(id_swa), psdo(id_swa));
-                                eeg_b_rel = trapz(freql(id_swa), psdo(id_swa))/trapz(freql,psdo);
-
-                                %anpassen
-                                id_swa = find(freql >= swa_b(1) & freql <= swa_b(2));
-                                eeg_s_abs = trapz(freql(id_swa), psdo(id_swa));
-                                eeg_s_rel = trapz(freql(id_swa), psdo(id_swa))/trapz(freql,psdo);
-
-                                % fooof algorithm
-                                f_result = py.fooof.FOOOF(peak_width_limits= [0.5 12], max_n_peaks=inf, min_peak_height=0.0, ...
-                                    peak_threshold=2.0, aperiodic_mode='fixed', verbose=false);
-                                f_result.fit(py.numpy.array(freq'), py.numpy.array(psd'), py.list([1, 30]));
-
-                                aperpar = double(f_result.aperiodic_params_.tolist());
-                                f_exponent = aperpar(2);
-                                f_offset = aperpar(1);
+                            % normalized, absolute power of bands
+                            normalized_absolute_delta_power = sum(normalized_spect(f_freqs >= delta_b(1) & f_freqs < delta_b(2)));
+                            normalized_absolute_theta_power = sum(normalized_spect(f_freqs >= theta_b(1) & f_freqs < theta_b(2)));
+                            normalized_absolute_alpha_power = sum(normalized_spect(f_freqs >= alpha_b(1) & f_freqs < alpha_b(2)));
+                            normalized_absolute_beta_power = sum(normalized_spect(f_freqs >= beta_b(1) & f_freqs < beta_b(2)));
+                            normalized_absolute_gamma_power = sum(normalized_spect(f_freqs >= gamma_b(1) & f_freqs < gamma_b(2)));
+                            normalized_absolute_spindle_power = sum(normalized_spect(f_freqs >= spindle_b(1) & f_freqs < spindle_b(2)));
+                            normalized_absolute_total_power = sum(normalized_spect);
+            
+                    
 
 
-                                % save
+                                %% save for parpool
                                 stagecurr = string(EEG_clean.clean_epochs.stage(EEG_clean.clean_epochs.epoch(epochs) == epo));
                                 if isempty(stagecurr)
                                     stagecurr = NaN;
@@ -266,13 +353,13 @@ disp(['Percentage of clean epochs: ', num2str(clean_epochs_percent), '%']);
                                     {epo}, ...
                                     {stagecurr(1)}, ... % 'MGT_H23_N4_sleep_sienna2_808r0s2' i = 59 has two stages named 1, 2, 3,....
                                     {chan}, ...
-                                    {f_exponent}, ...
-                                    {f_offset}, ...
-                                    num2cell([eeg_d_abs, eeg_d_rel,...
-                                    eeg_t_abs, eeg_t_rel,...
-                                    eeg_a_abs, eeg_a_rel,...
-                                    eeg_b_abs, eeg_b_rel,...
-                                    eeg_s_abs, eeg_s_rel]), ...
+                                    {fooof_exponent}, ...
+                                    {fooof_offset}, ...
+                                    num2cell([delta_absolute_power, delta_relative_power,...
+                                    theta_absolute_power, theta_relative_power,...
+                                    alpha_absolute_power, alpha_relative_power,...
+                                    beta_absolute_power, beta_relative_power,...
+                                    spindle_absolute_power, spindle_relative_power]), ...
                                     num2cell(psdo)], 'VariableNames', colnames_spect);
                             
 
@@ -280,7 +367,7 @@ disp(['Percentage of clean epochs: ', num2str(clean_epochs_percent), '%']);
                         spectrum_info = [spectrum_info; vertcat(temp_t{:})];
 
                             
-                            %% geht
+                            %% geht erst wieder wenn ich Serveraccess habe
                             perm_en = PermEn(symb_king(EEG_clean.data(chan, indexs)), 7);
                             perm_en = perm_en(7);
                             perm_en_t = PermEn(symb_king(theta_ts), 7);
@@ -290,53 +377,46 @@ disp(['Percentage of clean epochs: ', num2str(clean_epochs_percent), '%']);
                             perm_en_b = PermEn(symb_king(beta_ts), 7);
                             perm_en_b = perm_en_b(7);
                             
-                            %% geht nicht, googeln?
-                            % phase amp coupling #new
+                            
+                            %% phase amp coupling 
+                            % a measure of the interaction between the phase of low-frequency brain oscillations and the amplitude of higher-frequency oscillations
                             EEG_cleant = EEG_clean;
                             EEG_cleant.data = EEG_cleant.data(:,indexs);
                             evalc('EEG_cleant = eeg_checkset(EEG_cleant)');
                             EEG_cleant = pop_pac(EEG_cleant, 'channels', theta_b, alpha_b, chan,chan, 'forcecomp', 1); % pop_plotpac(EEG);
-                            phase_amp_t_a = mean(EEG_cleant.etc.eegpac(1).glm.pacval, 'all');
+                            phase_amplitude_coupling_theta_alpha = mean(EEG_cleant.etc.eegpac(1).glm.pacval, 'all');
                             EEG_cleant.etc.eegpac = [];
                             EEG_cleant.etc.pacplotopt = [];
                             EEG_cleant = pop_pac(EEG_cleant, 'channels', alpha_b, beta_b, chan,chan, 'forcecomp', 1);
-                            phase_amp_a_b = mean(EEG_cleant.etc.eegpac(1).glm.pacval, 'all');
+                            phase_amplitude_coupling_alpha_beta = mean(EEG_cleant.etc.eegpac(1).glm.pacval, 'all');
                             EEG_cleant.etc.eegpac = [];
                             EEG_cleant.etc.pacplotopt = [];
                             EEG_cleant = pop_pac(EEG_cleant, 'channels', theta_b, beta_b, chan,chan, 'forcecomp', 1);
-                            phase_amp_t_b = mean(EEG_cleant.etc.eegpac(1).glm.pacval, 'all');
+                            phase_amplitude_coupling_theta_beta = mean(EEG_cleant.etc.eegpac(1).glm.pacval, 'all');
+                            EEG_cleant.etc.eegpac = [];
+                            EEG_cleant.etc.pacplotopt = [];
+                            EEG_cleant = pop_pac(EEG_cleant, 'channels', delta_b, spindle_b, chan,chan, 'forcecomp', 1);
+                            phase_amplitude_coupling_delta_spindle = mean(EEG_cleant.etc.eegpac(1).glm.pacval, 'all');
                             EEG_cleant.etc.eegpac = [];
                             EEG_cleant.etc.pacplotopt = [];
                             clear EEG_cleant;
             
                            
-                            %% other time vars
-                            kurt = kurtosis(EEG_clean.data(chan, indexs));
-                            skew = skewness(EEG_clean.data(chan, indexs));
-                            [hjorth_activity, hjorth_mobility, hjorth_complexity] = hjorth(EEG_clean.data(chan, indexs)',0);
-            
-                            %% other complexity measures
-                      
-                            [MSx,smse] = MSEn(EEG_clean.data(chan, indexs), MSobject('SampEn')); % multiscale sample enntropy
-
-                            scalz = unique(2*floor(linspace(EEG_clean.srate/30, EEG_clean.srate/0.7, 5)/2)+ 1);
-                            mlz = getMultiscaleLZ(EEG_clean.data(chan, indexs), scalz);
-                            smlz = sum(mlz);
-                            figure();
-                            plot(mlz);
-
-                            %% geht nicht
-                            % mutual information in bands
+                          
+                            %% mutual information in bands (was bedeuten die Werte?)
                             % paper zu gcmi_cc anschauen
-                            % für P channels auch noch machen
-                            mi_delta_theta = gcmi_cc(delta_ts(:), theta_ts(:));
-                            mi_delta_alpha = gcmi_cc(delta_ts(:), alpha_ts(:));
-                            mi_delta_beta = gcmi_cc(delta_ts(:), beta_ts(:));
-                            mi_theta_alpha = gcmi_cc(theta_ts(:), alpha_ts(:));
-                            mi_theta_beta = gcmi_cc(theta_ts(:), beta_ts(:));
-                            mi_alpha_beta = gcmi_cc(alpha_ts(:), beta_ts(:));
+                            mutual_information_delta_theta = gcmi_cc(delta_ts(:), theta_ts(:));
+                            mutual_information_delta_alpha = gcmi_cc(delta_ts(:), alpha_ts(:));
+                            mutual_information_delta_beta = gcmi_cc(delta_ts(:), beta_ts(:));
+                            mutual_information_delta_spindles = gcmi_cc(delta_ts(:), spindles_ts(:));
+                            mutual_information_theta_alpha = gcmi_cc(theta_ts(:), alpha_ts(:));
+                            mutual_information_theta_beta = gcmi_cc(theta_ts(:), beta_ts(:));
+                            mutual_information_theta_spindles = gcmi_cc(theta_ts(:), spindles_ts(:));
+                            mutual_information_alpha_beta = gcmi_cc(alpha_ts(:), beta_ts(:));
+                            mutual_information_alpha_spindles = gcmi_cc(alpha_ts(:), spindles_ts(:));
+                            mutual_information_beta_spindles = gcmi_cc(beta_ts(:), spindles_ts(:));
             
-                            % median mutual information between F and O channels
+                            %% median mutual information between F, C, P & O channels (was bedeuten die Werte?)
 
                                 % anonymous if function hack
                                 call = @(fun,par) fun(par{:});
@@ -358,141 +438,44 @@ disp(['Percentage of clean epochs: ', num2str(clean_epochs_percent), '%']);
                                 % remove no channels
                                 remove_channel_which = zeros(1,8);
 
-                                mi_F_O_within = nanmean([gcmi_cc_helper('O1', 'F3', remove_channel_which, EEG_clean, indexs), ...
+                                % Mutual information for within and crossed comparisons
+                                mutual_information_F_O_within = nanmean([gcmi_cc_helper('O1', 'F3', remove_channel_which, EEG_clean, indexs), ...
                                     gcmi_cc_helper('O2', 'F4', remove_channel_which, EEG_clean, indexs)]);
-                                mi_F_O_crossed = nanmean([gcmi_cc_helper('O1', 'F4', remove_channel_which, EEG_clean, indexs), ...
+                                mutual_information_F_O_crossed = nanmean([gcmi_cc_helper('O1', 'F4', remove_channel_which, EEG_clean, indexs), ...
                                     gcmi_cc_helper('O2', 'F3', remove_channel_which, EEG_clean, indexs)]);
-                              
-                                mi_F_C_within = nanmean([gcmi_cc_helper('C3', 'F3', remove_channel_which, EEG_clean, indexs), ...
+
+                                mutual_information_F_C_within = nanmean([gcmi_cc_helper('C3', 'F3', remove_channel_which, EEG_clean, indexs), ...
                                     gcmi_cc_helper('C4', 'F4', remove_channel_which, EEG_clean, indexs)]);
-                                mi_F_C_crossed = nanmean([gcmi_cc_helper('C3', 'F4', remove_channel_which, EEG_clean, indexs), ...
+                                mutual_information_F_C_crossed = nanmean([gcmi_cc_helper('C3', 'F4', remove_channel_which, EEG_clean, indexs), ...
                                     gcmi_cc_helper('C4', 'F3', remove_channel_which, EEG_clean, indexs)]);
 
-                                mi_C_O_within = nanmean([gcmi_cc_helper('O1', 'C3', remove_channel_which, EEG_clean, indexs), ...
+                                mutual_information_C_O_within = nanmean([gcmi_cc_helper('O1', 'C3', remove_channel_which, EEG_clean, indexs), ...
                                     gcmi_cc_helper('O2', 'C4', remove_channel_which, EEG_clean, indexs)]);
-                                mi_C_O_crossed = nanmean([gcmi_cc_helper('O1', 'C4', remove_channel_which, EEG_clean, indexs), ...
+                                mutual_information_C_O_crossed = nanmean([gcmi_cc_helper('O1', 'C4', remove_channel_which, EEG_clean, indexs), ...
                                     gcmi_cc_helper('O2', 'C3', remove_channel_which, EEG_clean, indexs)]);
 
+                                % Mutual information for P3 and P4 (extension)
+                                mutual_information_F_P_within = nanmean([gcmi_cc_helper('P3', 'F3', remove_channel_which, EEG_clean, indexs), ...
+                                    gcmi_cc_helper('P4', 'F4', remove_channel_which, EEG_clean, indexs)]);
+                                mutual_information_F_P_crossed = nanmean([gcmi_cc_helper('P3', 'F4', remove_channel_which, EEG_clean, indexs), ...
+                                    gcmi_cc_helper('P4', 'F3', remove_channel_which, EEG_clean, indexs)]);
 
-                                mi_F_hemi = gcmi_cc_helper('F3', 'F4', remove_channel_which, EEG_clean, indexs);
-                                mi_C_hemi = gcmi_cc_helper('C3', 'C4', remove_channel_which, EEG_clean, indexs);
-                                mi_O_hemi = gcmi_cc_helper('O1', 'O2', remove_channel_which, EEG_clean, indexs);
+                                mutual_information_C_P_within = nanmean([gcmi_cc_helper('P3', 'C3', remove_channel_which, EEG_clean, indexs), ...
+                                    gcmi_cc_helper('P4', 'C4', remove_channel_which, EEG_clean, indexs)]);
+                                mutual_information_C_P_crossed = nanmean([gcmi_cc_helper('P3', 'C4', remove_channel_which, EEG_clean, indexs), ...
+                                    gcmi_cc_helper('P4', 'C3', remove_channel_which, EEG_clean, indexs)]);
 
-                                
-            
-                        %% geht wieder
-                            % fooof algorithm
-                            f_result = py.fooof.FOOOF(peak_width_limits= [0.5 12], max_n_peaks=inf, min_peak_height=0.0, ...
-                                peak_threshold=2.0, aperiodic_mode='fixed', verbose=false);
-                            f_result.fit(py.numpy.array(freq'), py.numpy.array(psd'), py.list([1, 30]));
+                                mutual_information_O_P_within = nanmean([gcmi_cc_helper('P3', 'O1', remove_channel_which, EEG_clean, indexs), ...
+                                    gcmi_cc_helper('P4', 'O2', remove_channel_which, EEG_clean, indexs)]);
+                                mutual_information_O_P_crossed = nanmean([gcmi_cc_helper('P3', 'O2', remove_channel_which, EEG_clean, indexs), ...
+                                    gcmi_cc_helper('P4', 'O1', remove_channel_which, EEG_clean, indexs)]);
 
-                            aperpar = double(f_result.aperiodic_params_.tolist());
-                            fooofed_spectrum = double(f_result.fooofed_spectrum_.tolist());
-                            ap_fit = py.fooof.sim.gen.gen_aperiodic(f_result.freqs, f_result.aperiodic_params_); %aperpar(1) - exp(aperpar(2))*foof_freq;
-                            f_freqs = double(f_result.freqs.tolist());
-                            f_exponent = aperpar(2);
-                            f_offset = aperpar(1);
-                            normalized_spect = fooofed_spectrum-double(ap_fit.tolist());
-                            outcell = cellfun(@double,cell(f_result.peak_params_.tolist()),'UniformOutput',false);
-                            peak_params = reshape([outcell{:}], 3, size(outcell,2))';
-
-            
-                            [mp, imp] = max(peak_params(:,2));
-                            [mpa, impa] = max(peak_params(:,2).*peak_params(:,3));
-                            
-                            if isempty(imp)
-                                strfpeak = NaN;
-                                strfpeak_area = NaN;
-                            else
-                                strfpeak = peak_params(imp, 1);
-                                strfpeak_area = peak_params(impa, 1);
-                            end
-            
-                             % strongest peak detection in certain band
-                            d_sc = peak_params(:,1) >= delta_b(1) &  peak_params(:,1) < delta_b(2);
-                            [mp, imp] = max(peak_params(d_sc,2));
-                            [mpa, impa] = max(peak_params(d_sc,2).*peak_params(d_sc,3));
-                            indf = find(d_sc);
-                            if isempty(imp)
-                                strfpeak_d = NaN;
-                                strfpeak_d_area = NaN;
-                            else
-                                strfpeak_d = peak_params(indf(imp), 1);
-                                strfpeak_d_area = peak_params(indf(impa), 1);
-                            end
-
-                            t_sc = peak_params(:,1) >= theta_b(1) &  peak_params(:,1) < theta_b(2);
-                            [mp, imp] = max(peak_params(t_sc,2));
-                            [mpa, impa] = max(peak_params(t_sc,2).*peak_params(t_sc,3));
-                            indf = find(t_sc);
-                            if isempty(imp)
-                                strfpeak_t = NaN;
-                                strfpeak_t_area = NaN;
-                            else
-                                strfpeak_t = peak_params(indf(imp), 1);
-                                strfpeak_t_area = peak_params(indf(impa), 1);
-                            end
-
-                            t_sc = peak_params(:,1) >= theta_b(1)  &  peak_params(:,1) <= alpha_b(2);
-                            [mp, imp] = max(peak_params(t_sc,2));
-                            [mpa, impa] = max(peak_params(t_sc,2).*peak_params(t_sc,3));
-                            indf = find(t_sc);
-                            if isempty(imp)
-                                strfpeak_ta = NaN;
-                                strfpeak_ta_area = NaN;
-                            else
-                                strfpeak_ta = peak_params(indf(imp), 1);
-                                strfpeak_ta_area = peak_params(indf(impa), 1);
-                            end
-
-                            a_sc = peak_params(:,1) >= alpha_b(1) &  peak_params(:,1) < alpha_b(2);
-                            [mp, imp] = max(peak_params(a_sc,2));
-                            [mpa, impa] = max(peak_params(a_sc,2).*peak_params(a_sc,3));
-                            indf = find(a_sc);
-
-                            if isempty(imp)
-                                strfpeak_a = NaN;
-                                strfpeak_a_area = NaN;
-                            else
-                                strfpeak_a = peak_params(indf(imp), 1);
-                                strfpeak_a_area = peak_params(indf(impa), 1);
-                            end
-
-                            b_sc = peak_params(:,1) >= beta_b(1) &  peak_params(:,1) < beta_b(2);
-                            [mp, imp] = max(peak_params(b_sc,2));
-                            [mpa, impa] = max(peak_params(b_sc,2).*peak_params(b_sc,3));
-                            indf = find(b_sc);
-                            if isempty(imp)
-                                strfpeak_b = NaN;
-                                strfpeak_b_area = NaN;
-                            else
-                                strfpeak_b = peak_params(indf(imp), 1);
-                                strfpeak_b_area = peak_params(indf(impa), 1);
-                            end
-
-                            %#new
-                            g_sc = peak_params(:,1) >= gamma_b(1) &  peak_params(:,1) < gamma_b(2);
-                            [mp, imp] = max(peak_params(g_sc,2));
-                            [mpa, impa] = max(peak_params(g_sc,2).*peak_params(g_sc,3));
-                            indf = find(g_sc);
-                            if isempty(imp)
-                                strfpeak_g = NaN;
-                                strfpeak_g_area = NaN;
-                            else
-                                strfpeak_g = peak_params(indf(imp), 1);
-                                strfpeak_g_area = peak_params(indf(impa), 1);
-                            end
-
-
-                            % periodic power #new
-                            delta_f = sum(normalized_spect(f_freqs >= delta_b(1) & f_freqs < delta_b(2)));
-                            theta_f = sum(normalized_spect(f_freqs >= theta_b(1) & f_freqs < theta_b(2)));
-                            alpha_f = sum(normalized_spect(f_freqs >= alpha_b(1) & f_freqs < alpha_b(2)));
-                            beta_f = sum(normalized_spect(f_freqs >= beta_b(1) & f_freqs < beta_b(2)));
-                            %#new
-                            gamma_f = sum(normalized_spect(f_freqs >= gamma_b(1) & f_freqs < gamma_b(2)));
-                            total_f = sum(normalized_spect);
-            
+                                % Hemispheric comparisons
+                                mutual_information_F_hemi = gcmi_cc_helper('F3', 'F4', remove_channel_which, EEG_clean, indexs);
+                                mutual_information_C_hemi = gcmi_cc_helper('C3', 'C4', remove_channel_which, EEG_clean, indexs);
+                                mutual_information_O_hemi = gcmi_cc_helper('O1', 'O2', remove_channel_which, EEG_clean, indexs);
+                                mutual_information_P_hemi = gcmi_cc_helper('P3', 'P4', remove_channel_which, EEG_clean, indexs);  % Added for P3 and P4
+                       
                             
                             %% hemispheric spectral measure
                             % wie ähnlich sind zwei spektren (fläche zwischen den spectrograms)
@@ -670,6 +653,65 @@ disp(['Percentage of clean epochs: ', num2str(clean_epochs_percent), '%']);
                                 br_permin = NaN;
                             end
                                
+                            %% Complexity: Lagged coherence
+                            % Lagged coherence is a measure to quantify the rhythmicity of neural signals.
+                            % Lagged coherence works by quantifying phase consistency between non-overlapping data fragments, calculated with Fourier coefficients. 
+                            % The consistency of the phase differences across epochs indexes the rhythmicity of the signal. 
+                            % https://neurodsp-tools.github.io/neurodsp/auto_tutorials/rhythm/plot_LaggedCoherence.html
+
+                            t_lagcoh = py.neurodsp.rhythm.compute_lagged_coherence(py.numpy.array(EEG_clean.data(chan, indexs)), fs=EEG_clean.srate, freqs=theta_b);
+                            a_lagcoh = py.neurodsp.rhythm.compute_lagged_coherence(py.numpy.array(EEG_clean.data(chan, indexs)), fs=EEG_clean.srate, freqs=alpha_b);
+                            t_a_lagcoh = py.neurodsp.rhythm.compute_lagged_coherence(py.numpy.array(EEG_clean.data(chan, indexs)), fs=EEG_clean.srate, freqs=[theta_b(1), alpha_b(2)]);
+                            b_lagcoh = py.neurodsp.rhythm.compute_lagged_coherence(py.numpy.array(EEG_clean.data(chan, indexs)), fs=EEG_clean.srate, freqs=beta_b);
+                            a_b_lagcoh = py.neurodsp.rhythm.compute_lagged_coherence(py.numpy.array(EEG_clean.data(chan, indexs)), fs=EEG_clean.srate, freqs=[alpha_b(1), beta_b(2)]);
+                            s_lagcoh = py.neurodsp.rhythm.compute_lagged_coherence(py.numpy.array(EEG_clean.data(chan, indexs)), fs=EEG_clean.srate, freqs=spindle_b);
+                            d_lagcoh = py.neurodsp.rhythm.compute_lagged_coherence(py.numpy.array(EEG_clean.data(chan, indexs)), fs=EEG_clean.srate, freqs=delta_b);
+                            d_s_lagcoh = py.neurodsp.rhythm.compute_lagged_coherence(py.numpy.array(EEG_clean.data(chan, indexs)), fs=EEG_clean.srate, freqs=[delta_b(1), spindle_b(2)]);
+
+
+                            %% Complexity: Hurst exponent
+                            % The Hurst exponent (or Hurst estimate) is a measure used to evaluate the long-term memory or self-similarity of a time series. 
+                            % It helps you understand the persistence, randomness, or mean-reverting behavior of a dataset.
+                            % H < 0.5 (Anti-persistent behavior): The time series has anti-persistent or mean-reverting behavior. If the time series increases in the past, it is likely to decrease in the future and vice versa.
+                            % H = 0.5 (Random walk): The time series is a random walk (Brownian motion), meaning future values are independent of past values. There is no long-term memory in the process.
+                            % H > 0.5 (Persistent behavior): The time series shows persistent or trending behavior. If it increases in the past, it is likely to keep increasing in the future (and similarly for decreases).
+                            hurs_exp_long = hurst_estimate(zscore(EEG_clean.data(chan, indexs)), 'absval', 0, 1);
+                            hurs_alpha = hurst_estimate(zscore(alpha_ts), 'absval', 0, 1);
+                            hurs_beta = hurst_estimate(zscore(beta_ts), 'absval', 0, 1);
+                            hurs_theta = hurst_estimate(zscore(theta_ts), 'absval', 0, 1);
+                            hurs_delta = hurst_estimate(zscore(delta_ts), 'absval', 0, 1);
+                            hurs_gamma = hurst_estimate(zscore(gamma_ts), 'absval', 0, 1);
+                            hurs_spindle = hurst_estimate(zscore(spindle_ts), 'absval', 0, 1);
+
+                            %% Complexity measures
+                            higuchi_fd = Higuchi_FD(zscore(EEG_clean.data(chan, indexs)), min(50, max(1,length(indexs)-2)));
+                            katz_fd = Katz_FD(zscore(EEG_clean.data(chan, indexs)));
+                            bubble_en = BubbEn(zscore(EEG_clean.data(chan, indexs)));
+                            spect_en = SpecEn(zscore(EEG_clean.data(chan, indexs)));
+                            sydy_en = SyDyEn(zscore(EEG_clean.data(chan, indexs)));
+                            phase_en = PhasEn(zscore(EEG_clean.data(chan, indexs)));
+                            slope_en =  SlopEn(EEG_clean.data(chan, indexs)); % original data
+                            slope_en_z =  SlopEn(zscore(EEG_clean.data(chan, indexs))); %zscore
+                            slope_en_z_05_20 =  SlopEn(zscore(EEG_clean.data(chan, indexs)), 'Lvls',[0.5,20]); %zscore
+                            eoe_en = EnofEn(zscore(EEG_clean.data(chan, indexs)));
+                            att_en = AttnEn(zscore(EEG_clean.data(chan, indexs)));
+
+                            [MSx,smse] = MSEn(EEG_clean.data(chan, indexs), MSobject('SampEn')); % multiscale sample enntropy
+
+                            scalz = unique(2*floor(linspace(EEG_clean.srate/30, EEG_clean.srate/0.7, 5)/2)+ 1);
+                            mlz = getMultiscaleLZ(EEG_clean.data(chan, indexs), scalz);
+                            smlz = sum(mlz);
+                            figure();
+                            plot(mlz);
+
+                            %% other time vars
+                            kurt = kurtosis(EEG_clean.data(chan, indexs));
+                            skew = skewness(EEG_clean.data(chan, indexs));
+                            [hjorth_activity, hjorth_mobility, hjorth_complexity] = hjorth(EEG_clean.data(chan, indexs)',0);
+            
+                           
+
+
                             %% save the data in parpool
                              % save
                         stagecurr = string(current_scoring.stage(current_scoring.epoch == epo));
@@ -681,17 +723,17 @@ disp(['Percentage of clean epochs: ', num2str(clean_epochs_percent), '%']);
                             {epo}, ...
                             {stagecurr(1)}, ... % 'MGT_H23_N4_sleep_sienna2_808r0s2' i = 59 has two stages named 1, 2, 3,....
                             {chan}, ...
-                            {f_exponent}, ...
-                            {f_offset}, ...
-                            num2cell([eeg_d1_abs, eeg_d1_rel, eeg_d2_abs, eeg_d2_rel, eeg_d_abs, eeg_d_rel,...
-                            eeg_t1_abs, eeg_t1_rel, eeg_t2_abs, eeg_t2_rel, eeg_t_abs, eeg_t_rel,...
-                            eeg_a1_abs, eeg_a1_rel, eeg_a2_abs, eeg_a2_rel, eeg_a_abs, eeg_a_rel,...
-                            eeg_b1_abs, eeg_b1_rel, eeg_b2_abs, eeg_b2_rel, eeg_b_abs, eeg_b_rel,...
-                            eeg_s1_abs, eeg_s1_rel, eeg_s2_abs, eeg_s2_rel, eeg_s_abs, eeg_s_rel]), ...
+                            {fooof_exponent}, ...
+                            {fooof_offset}, ...
+                            num2cell([eeg_d1_abs, eeg_d1_rel, eeg_d2_abs, eeg_d2_rel, delta_absolute_power, delta_relative_power,...
+                            eeg_t1_abs, eeg_t1_rel, eeg_t2_abs, eeg_t2_rel, theta_absolute_power, theta_relative_power,...
+                            eeg_a1_abs, eeg_a1_rel, eeg_a2_abs, eeg_a2_rel, alpha_absolute_power, alpha_relative_power,...
+                            eeg_b1_abs, eeg_b1_rel, eeg_b2_abs, eeg_b2_rel, beta_absolute_power, beta_relative_power,...
+                            eeg_s1_abs, eeg_s1_rel, eeg_s2_abs, eeg_s2_rel, spindle_absolute_power, spindle_relative_power]), ...
                             num2cell(psdo)], 'VariableNames', colnames_spect);
                     else % end if larger than window size
                         temp_t{epo} =[];
-                    end
+                  
                 end % epoch loop
                 delete(gcp('nocreate'));
 
@@ -710,14 +752,14 @@ disp(['Percentage of clean epochs: ', num2str(clean_epochs_percent), '%']);
                                 eeg_aa_o_absolute, ...
                                 eeg_aa_o_relative, ...
                                 wasserstein_frontal, wasserstein_central, wasserstein_occipital, ...
-                                f_exponent, f_offset, ...
-                                delta_f, theta_f, alpha_f, beta_f, gamma_f, total_f, ...
-                                strfpeak, strfpeak_area, ...
-                                strfpeak_d, strfpeak_d_area, ...
-                                strfpeak_t, strfpeak_t_area, ...
+                                fooof_exponent, fooof_offset, ...
+                                normalized_absolute_delta_power, normalized_absolute_theta_power, normalized_absolute_alpha_power, normalized_absolute_beta_power, normalized_absolute_gamma_power, normalized_absolute_total_power, ...
+                                strongest_frequency_peak_overall, strongest_frequency_peak_overall_area, ...
+                                strongest_frequency_peak_delta, strongest_frequency_peak_delta_area, ...
+                                strongest_frequency_peak_theta, strongest_frequency_peak_theta_area, ...
                                 strfpeak_ta, strfpeak_ta_area, ...
-                                strfpeak_a, strfpeak_a_area, ...
-                                strfpeak_b, strfpeak_b_area, ...
+                                strongest_frequency_peak_alpha, strongest_frequency_peak_alpha_area, ...
+                                strongest_frequency_peak_beta, strongest_frequency_peak_beta_area, ...
                                 strfpeak_g, strfpeak_g_area, ...
                                 eog_d_abs, ...
                                 eog_d_rel, ...
@@ -744,21 +786,21 @@ disp(['Percentage of clean epochs: ', num2str(clean_epochs_percent), '%']);
                                 hjorth_activity, ...
                                 hjorth_mobility, ...
                                 hjorth_complexity, ...
-                                mi_delta_theta, ...
-                                mi_delta_alpha, ...
-                                mi_delta_beta, ...
-                                mi_theta_alpha, ...
-                                mi_theta_beta, ...
-                                mi_alpha_beta, ...
-                                mi_F_O_within, ...
-                                mi_F_O_crossed, ...
-                                mi_F_C_within, ...
-                                mi_F_C_crossed, ...
-                                mi_C_O_within, ...
-                                mi_C_O_crossed, ...
-                                mi_F_hemi, ...
-                                mi_C_hemi, ...
-                                mi_O_hemi, ...
+                                mutual_information_delta_theta, ...
+                                mutual_information_delta_alpha, ...
+                                mutual_information_delta_beta, ...
+                                mutual_information_theta_alpha, ...
+                                mutual_information_theta_beta, ...
+                                mutual_information_alpha_beta, ...
+                                mutual_information_F_O_within, ...
+                                mutual_information_F_O_crossed, ...
+                                mutual_information_F_C_within, ...
+                                mutual_information_F_C_crossed, ...
+                                mutual_information_C_O_within, ...
+                                mutual_information_C_O_crossed, ...
+                                mutual_information_F_hemi, ...
+                                mutual_information_C_hemi, ...
+                                mutual_information_O_hemi, ...
                                 bubble_en, ...
                                 spect_en, ...
                                 sydy_en, ...
@@ -795,26 +837,30 @@ disp(['Percentage of clean epochs: ', num2str(clean_epochs_percent), '%']);
                                 ecg_eoe_en, ...
                                 ecg_att_en, ...
                                 br_permin, ...
-                                t_burst_stat.n_bursts, ...
-                                t_burst_stat.duration_mean, ...
-                                t_burst_stat.duration_std, ...
-                                a_burst_stat.n_bursts, ...
-                                a_burst_stat.duration_mean, ...
-                                a_burst_stat.duration_std, ...
-                                b_burst_stat.n_bursts, ...
-                                b_burst_stat.duration_mean, ...
-                                b_burst_stat.duration_std, ...
+                                theta_burst_stat.n_bursts, ...
+                                theta_burst_stat.duration_mean, ...
+                                theta_burst_stat.duration_std, ...
+                                alpha_burst_stat.n_bursts, ...
+                                alpha_burst_stat.duration_mean, ...
+                                alpha_burst_stat.duration_std, ...
+                                beta_burst_stat.n_bursts, ...
+                                beta_burst_stat.duration_mean, ...
+                                beta_burst_stat.duration_std, ...
+                                spindle_burst_stat.n_bursts, ...
+                                spindle_burst_stat.duration_mean, ...
+                                spindle_burst_stat.duration_std, ...
                                 t_lagcoh, ...
                                 a_lagcoh, ...
                                 t_a_lagcoh, ...
                                 b_lagcoh, ...
                                 a_b_lagcoh, ...
-                                t_bursts_ssd, ...
-                                a_bursts_ssd, ...
-                                b_bursts_ssd, ...
-                                phase_amp_t_a, ...
-                                phase_amp_a_b, ...
-                                phase_amp_t_b, ...
+                                theta_bursts_ssd, ...
+                                alpha_bursts_ssd, ...
+                                beta_bursts_ssd, ...
+                                spindle_bursts_ssd, ...
+                                phase_amplitude_coupling_theta_alpha, ...
+                                phase_amplitude_coupling_alpha_beta, ...
+                                phase_amplitude_coupling_theta_beta, ...
                                 perm_en, ...
                                 perm_en_t, ...
                                 perm_en_a, ...
@@ -827,46 +873,70 @@ disp(['Percentage of clean epochs: ', num2str(clean_epochs_percent), '%']);
                                 q_ta_diff20max, ...
                                 'VariableNames', variable_names_types(:,1))];
                         end
-                    end
-
-
-
-
-
-
-###### again other script, with SW detection and travelling waves
-if size(EEG_clean.data,1) > 0 & ~isempty(EEG_clean.scoring)
-        nr_epochs = min(ceil((size(EEG_clean.data,2)/EEG_clean.srate)/30),size(current_scoring,1));
-        if ~ ceil((size(EEG_clean.data,2)/EEG_clean.srate)/30) == size(current_scoring,1)
-            fprintf('------------Warning nr_epochs not matching for iteration %d\n', i);
         end
-        nr_channels = size(EEG_clean.data,1);
-
-     
+%% Macrofeatures
         epoch_windowlen = 30; % seconds
         epoch_windowover = 0; % no overlap
         if length(EEG_clean.data(1, :))/EEG_clean.srate >= 2
             % add stage to each data sample
-            current_stages = str2double(string(current_scoring.stage)');
-            lastvalue = find(~isnan(table2array(current_scoring(:,'interval_s')))');
+            current_stages = str2double(string(EEG_clean.scoring_long_30s.stage)');
+            lastvalue = find(~isnan(table2array(EEG_clean.scoring_long_30s(:,'duration_s')))');
             lastvalue = lastvalue(end);
-            hypnodata = [repelem(current_stages(1),table2array(current_scoring(1,'start_s'))*EEG_clean.srate), ...
-                        repelem(current_stages(1:lastvalue), 30*EEG_clean.srate), ...
-                        repelem(current_stages(lastvalue), max(0,(size(EEG_clean.data,2)/EEG_clean.srate- (table2array(current_scoring(lastvalue,'start_s'))+table2array(current_scoring(lastvalue,'interval_s'))))*EEG_clean.srate))
-                        ];
-            current_epoch = str2double(string(current_scoring.epoch)');
-            epochdata = [repelem(current_epoch(1),table2array(current_scoring(1,'start_s'))*EEG_clean.srate), ...
-                        repelem(current_epoch(1:lastvalue), 30*EEG_clean.srate), ...
-                        repelem(current_epoch(lastvalue), max(0,(size(EEG_clean.data,2)/EEG_clean.srate- (table2array(current_scoring(lastvalue,'start_s'))+table2array(current_scoring(lastvalue,'interval_s'))))*EEG_clean.srate))
-                        ];
-                    
+            % hypnodata = [repelem(current_stages(1),table2array(current_scoring(1,'start_s'))*EEG_clean.srate), ...
+            %             repelem(current_stages(1:lastvalue), 30*EEG_clean.srate), ...
+            %             repelem(current_stages(lastvalue), max(0,(size(EEG_clean.data,2)/EEG_clean.srate- (table2array(current_scoring(lastvalue,'start_s'))+table2array(current_scoring(lastvalue,'interval_s'))))*EEG_clean.srate))
+            %             ];
+            % current_epoch = str2double(string(current_scoring.epoch)');
+            % epochdata = [repelem(current_epoch(1),table2array(current_scoring(1,'start_s'))*EEG_clean.srate), ...
+            %             repelem(current_epoch(1:lastvalue), 30*EEG_clean.srate), ...
+            %             repelem(current_epoch(lastvalue), max(0,(size(EEG_clean.data,2)/EEG_clean.srate- (table2array(current_scoring(lastvalue,'start_s'))+table2array(current_scoring(lastvalue,'interval_s'))))*EEG_clean.srate))
+            %             ];
+            % Initialize an empty array for hypnodata
+            hypnodata = [];
+
+            % Loop through each row of the EEG_clean.scoring_long_30s table
+            for i = 1:height(EEG_clean.scoring_long)
+                % Get the number of samples for this epoch
+                num_samples_in_epoch = EEG_clean.scoring_long.duration_s(1) *srate;
+
+                % Get the stage for this epoch (converted to a number if necessary)
+                stage = str2double(EEG_clean.scoring_long.stage{i});
+
+                % Repeat the stage value for the number of samples in the epoch
+                hypnodata = [hypnodata, repelem(stage, num_samples_in_epoch)];
+            end
                                 
-            data_for_py = cell(1, size(EEG_clean.data, 1));
+            % Check if the lengths of hypnodata and EEG_clean.data match
+            data_length = size(EEG_clean.data, 2);  % Number of samples in EEG_clean.data
+            hypnodata_length = length(hypnodata);   % Length of hypnodata
+
+            % If hypnodata is shorter than EEG_clean.data
+            if hypnodata_length < data_length
+                % Calculate the difference in length
+                length_diff = data_length - hypnodata_length;
+
+                % Shorten EEG_clean.data by removing the extra samples from the beginning
+                EEG_clean.data_shortened = EEG_clean.data(:, length_diff+1:end);
+
+                % Display the result
+                disp(['Data was shortened by ', num2str(length_diff), ' samples from the beginning.']);
+            else
+                EEG_clean.data_shortened = EEG_clean.data;
+                disp('hypnodata and EEG_clean.data have the same length. No changes made.');
+            end
+            
+
+
+
+
+           
+
+            data_for_py = cell(1, size(EEG_clean.data_shortened, 1));
             for row = 1:size(EEG_clean.data, 1)
-                data_for_py(row) = {EEG_clean.data(row, :)};
+                data_for_py(row) = {EEG_clean.data_shortened(row, :)};
             end
             data_for_py = py.numpy.array(data_for_py);
-
+            
 
             sws_detection_result = py.yasa.sw_detect(data = data_for_py, ...
                         sf = py.float(EEG_clean.srate), ...
@@ -882,7 +952,7 @@ if size(EEG_clean.data,1) > 0 & ~isempty(EEG_clean.scoring)
                         coupling = false, ... % phase coupling calculation
                         remove_outliers = false, ... % isolation forest to remove wierd detected peaks
                         verbose=false);
-
+py.yasa.plot_hypnogram(hypnodata)
 
             if ~isempty(sws_detection_info)
                 sws_detection_info = sws_detection_result.summary();
@@ -970,10 +1040,91 @@ if size(EEG_clean.data,1) > 0 & ~isempty(EEG_clean.scoring)
 
 
 
+
+%% Output Variabeln
+% power per band
+delta_absolute_power
+delta_relative_power
+theta_absolute_power 
+theta_relative_power
+alpha_absolute_power
+alpha_relative_power
+beta_absolute_power
+beta_relative_power
+spindle_absolute_power
+spindle_relative_power, 
+normalized_absolute_delta_power, 
+normalized_absolute_theta_power, 
+normalized_absolute_alpha_power, 
+normalized_absolute_beta_power, 
+normalized_absolute_gamma_power, 
+normalized_absolute_spindle_power,
+normalized_absolute_total_power, ...
+% band bursts
+theta_burst_stat.n_bursts, ...
+theta_burst_stat.duration_mean, ...
+theta_burst_stat.duration_std, ...
+alpha_burst_stat.n_bursts, ...
+alpha_burst_stat.duration_mean, ...
+alpha_burst_stat.duration_std, ...
+beta_burst_stat.n_bursts, ...
+beta_burst_stat.duration_mean, ...
+beta_burst_stat.duration_std, ...
+spindle_burst_stat.n_bursts, ...
+spindle_burst_stat.duration_mean, ...
+spindle_burst_stat.duration_std, ...
+% fooof
+fooof_exponent
+fooof_offset
+strongest_frequency_peak_overall, strongest_frequency_peak_overall_area, ...
+strongest_frequency_peak_delta, strongest_frequency_peak_delta_area, ...
+strongest_frequency_peak_theta, strongest_frequency_peak_theta_area, ...
+strongest_frequency_peak_alpha, strongest_frequency_peak_alpha_area, ...
+strongest_frequency_peak_beta, strongest_frequency_peak_beta_area, ...
+strongest_frequency_peak_spindle, strongest_frequency_peak_spindle_area, ...
+% phase amplitude coupling
+phase_amplitude_coupling_theta_alpha, ...
+phase_amplitude_coupling_alpha_beta, ...
+phase_amplitude_coupling_theta_beta, ...
+phase_amplitude_coupling_delta_spindle, ...
+% mutual information
+mutual_information_delta_theta, ...
+mutual_information_delta_alpha, ...
+mutual_information_delta_beta, ...
+mutual_information_delta_spindles
+mutual_information_theta_alpha, ...
+mutual_information_theta_beta, ...
+mutual_information_theta_spindles
+mutual_information_alpha_beta, ...
+mutual_information_alpha_spindles
+mutual_information_beta_spindles
+mutual_information_F_O_within, ...
+mutual_information_F_O_crossed, ...
+mutual_information_F_C_within, ...
+mutual_information_F_C_crossed, ...
+mutual_information_C_O_within, ...
+mutual_information_C_O_crossed, ...
+mutual_information_F_P_within
+mutual_information_F_P_crossed
+mutual_information_C_P_within
+mutual_information_C_P_crossed
+mutual_information_O_P_within
+mutual_information_O_P_crossed
+mutual_information_F_hemi, ...
+mutual_information_C_hemi, ...
+mutual_information_O_hemi, ...
+mutual_information_P_hemi
+
+
+
+
+
+
+
     %% average pro sleep stage?
     %erster fooof löschen weil zweiter detaillierter?
     % ideen für sleep EEG?
     %yasa spindles?
     % cap pattern (cyclic, acyclic pattern)
     % arousals über ganze nacht, nicht nur clean epochs?
-    
+

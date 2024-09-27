@@ -39,6 +39,15 @@ function scoring_long_30s = scoring_convert20sTo30s(scoring_long)
         error('The file contains epochs with inconsistent durations.');
     end
     
+   % Add start_index and end_index of each respective epoch
+    samples_per_epoch = scoring_long_30s.duration_s(1) * scoring_long_30s.sample_rate_hz(1);  % Number of samples per 30s epoch
+    start_indices = (0:num_epochs-1)' * samples_per_epoch + 1;  % Start indices for each epoch
+    end_indices = start_indices + samples_per_epoch - 1;  % End indices for each epoch
+
+    % Add the start_index and end_index as new columns to the scoring_long_30s table
+    scoring_long_30s.start_index = start_indices;
+    scoring_long_30s.end_index = end_indices;
+
     % Display the new 30s scoring table
     disp('Converted to 30-second epochs');
 end
