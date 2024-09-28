@@ -380,6 +380,8 @@ disp(['Percentage of clean epochs: ', num2str(clean_epochs_percent), '%']);
                             
                             %% phase amp coupling 
                             % a measure of the interaction between the phase of low-frequency brain oscillations and the amplitude of higher-frequency oscillations
+                            % PACTool Matlab Add on
+                            % https://github.com/sccn/PACTools/tree/develop
                             EEG_cleant = EEG_clean;
                             EEG_cleant.data = EEG_cleant.data(:,indexs);
                             evalc('EEG_cleant = eeg_checkset(EEG_cleant)');
@@ -405,6 +407,8 @@ disp(['Percentage of clean epochs: ', num2str(clean_epochs_percent), '%']);
                           
                             %% mutual information in bands (was bedeuten die Werte?)
                             % paper zu gcmi_cc anschauen
+                            % GCMI Matlab Add-on
+                            % https://github.com/robince/gcmi
                             mutual_information_delta_theta = gcmi_cc(delta_ts(:), theta_ts(:));
                             mutual_information_delta_alpha = gcmi_cc(delta_ts(:), alpha_ts(:));
                             mutual_information_delta_beta = gcmi_cc(delta_ts(:), beta_ts(:));
@@ -477,61 +481,7 @@ disp(['Percentage of clean epochs: ', num2str(clean_epochs_percent), '%']);
                                 mutual_information_P_hemi = gcmi_cc_helper('P3', 'P4', remove_channel_which, EEG_clean, indexs);  % Added for P3 and P4
                        
                             
-                            %% hemispheric spectral measure
-                            % wie ähnlich sind zwei spektren (fläche zwischen den spectrograms)
-                            if remove_channel_which(strcmp({EEG_clean.chanlocs.labels}, 'F4'))|remove_channel_which(strcmp({EEG_clean.chanlocs.labels}, 'F3'))
-                                wasserstein_frontal = NaN;
-                            else
-                                if all(~strcmp({EEG_clean.chanlocs.labels}, 'F4'))|all(~strcmp({EEG_clean.chanlocs.labels}, 'F3'))
-                                    wasserstein_frontal = NaN;
-                                else
-                                    [psdf4, freqf4] = pwelch(EEG_clean.data(strcmp({EEG_clean.chanlocs.labels},'F4'), indexs), ...
-                                                         which_window, overlap_window, duration_fft, srate);
-                                    [psdf3, freqf3] = pwelch(EEG_clean.data(strcmp({EEG_clean.chanlocs.labels},'F3'), indexs), ...
-                                                         which_window, overlap_window, duration_fft, srate);
-                                    cf3 = cumtrapz(psdf3(freqf3 >= 0.5 & freqf3 <= 30));
-                                    cf3 = cf3./cf3(end);
-                                    cf4 = cumtrapz(psdf4(freqf4 >= 0.5 & freqf4 <= 30));
-                                    cf4 = cf4./cf4(end);
-                                    wasserstein_frontal = sum(abs(cf3-cf4))/length(cf3);
-                                end
-                            end
-            
-                            if remove_channel_which(strcmp({EEG_clean.chanlocs.labels}, 'C4'))|remove_channel_which(strcmp({EEG_clean.chanlocs.labels}, 'C3'))
-                                wasserstein_central = NaN;
-                            else
-                                if all(~strcmp({EEG_clean.chanlocs.labels}, 'C4'))|all(~strcmp({EEG_clean.chanlocs.labels}, 'C3'))
-                                    wasserstein_central = NaN;
-                                else
-                                    [psdf4, freqf4] = pwelch(EEG_clean.data(strcmp({EEG_clean.chanlocs.labels},'C4'), indexs), ...
-                                                         which_window, overlap_window, duration_fft, srate);
-                                    [psdf3, freqf3] = pwelch(EEG_clean.data(strcmp({EEG_clean.chanlocs.labels},'C3'), indexs), ...
-                                                         which_window, overlap_window, duration_fft, srate);
-                                    cf3 = cumtrapz(psdf3(freqf3 >= 0.5 & freqf3 <= 30));
-                                    cf3 = cf3./cf3(end);
-                                    cf4 = cumtrapz(psdf4(freqf4 >= 0.5 & freqf4 <= 30));
-                                    cf4 = cf4./cf4(end);
-                                    wasserstein_central = sum(abs(cf3-cf4))/length(cf3); 
-                                end
-                            end
-            
-                            if remove_channel_which(strcmp({EEG_clean.chanlocs.labels}, 'O2'))|remove_channel_which(strcmp({EEG_clean.chanlocs.labels}, 'O1')) 
-                                wasserstein_occipital = NaN;
-                            else
-                                if all(~strcmp({EEG_clean.chanlocs.labels}, 'O2'))|all(~strcmp({EEG_clean.chanlocs.labels}, 'O1'))
-                                    wasserstein_occipital = NaN;
-                                else
-                                    [psdf4, freqf4] = pwelch(EEG_clean.data(strcmp({EEG_clean.chanlocs.labels},'O2'), indexs), ...
-                                                         which_window, overlap_window, duration_fft, srate);
-                                    [psdf3, freqf3] = pwelch(EEG_clean.data(strcmp({EEG_clean.chanlocs.labels},'O1'), indexs), ...
-                                                         which_window, overlap_window, duration_fft, srate);
-                                    cf3 = cumtrapz(psdf3(freqf3 >= 0.5 & freqf3 <= 30));
-                                    cf3 = cf3./cf3(end);
-                                    cf4 = cumtrapz(psdf4(freqf4 >= 0.5 & freqf4 <= 30));
-                                    cf4 = cf4./cf4(end);
-                                    wasserstein_occipital = sum(abs(cf3-cf4))/length(cf3);
-                                end
-                            end
+                            
             
                             
             
@@ -872,7 +822,25 @@ disp(['Percentage of clean epochs: ', num2str(clean_epochs_percent), '%']);
                                 q_ta_diff20max_20, ...
                                 q_ta_diff20max, ...
                                 'VariableNames', variable_names_types(:,1))];
-                        end
+                    end
+
+                   
+                    %% wasserstein interhemispheric spectral measure
+                    % wie ähnlich sind zwei spektren (fläche zwischen den spectrograms)
+                    % done over whole night
+                    % remove no channels
+                    remove_channel_which = zeros(1,8);
+                    duration_window = 4*EEG_clean.srate;          
+                    which_window = hanning(duration_window);
+                    overlap_window = duration_window*0.5;
+                    
+                    wasserstein_distance(EEG_clean, 'F3', 'F4', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
+                    wasserstein_distance(EEG_clean, 'C3', 'C4', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
+                    wasserstein_distance(EEG_clean, 'P3', 'P4', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
+                    wasserstein_distance(EEG_clean, 'O1', 'O2', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
+
+
+                   
         end
 %% Macrofeatures
         epoch_windowlen = 30; % seconds
