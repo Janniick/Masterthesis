@@ -1,3 +1,34 @@
+% Function: scoring_convert20sTo30s
+%
+% Description:
+% This function converts a sleep scoring table with 20-second epochs into a new table with 30-second epochs. 
+% If the input table is already in 30-second epochs, no changes are made. The function works by combining every 
+% three consecutive 20-second epochs into two 30-second epochs, keeping the stage data from the first and third 
+% epochs, respectively.
+%
+% Additionally, the function calculates the start and end sample indices for each 30-second epoch based on the 
+% sample rate and adds them as new columns to the output table.
+%
+% Inputs:
+% - scoring_long: A table containing sleep scoring data with columns for epoch number, sleep stage, 
+%   duration (in seconds), sample rate, and optionally start and end sample indices.
+%
+% Outputs:
+% - scoring_long_30s: A new table with 30-second epochs, updated epoch numbers, and calculated start and end 
+%   sample indices for each 30-second epoch.
+%
+% Usage Example:
+% scoring_long_30s = scoring_convert20sTo30s(scoring_long)
+% 
+% This function assumes that all the epochs in the input table are either 20 or 30 seconds long and will return an 
+% error if the input table contains inconsistent durations. If the epochs
+% are already in 30s format, the function won't do anything
+%
+% Author: Jannick Mauron
+% Date: 2024
+%
+
+
 function scoring_long_30s = scoring_convert20sTo30s(scoring_long)
     % Check if the file is already in 30-second epochs
     if all(scoring_long.duration_s == 30)
