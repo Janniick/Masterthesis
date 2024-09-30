@@ -72,14 +72,6 @@ weighting = 'unity'; % weight each taper at 1
 plot_on = false; % plot spectrogram
 verbose = false; % print extra info
 
-%% bands
-delta_b = [0.5, 4];
-theta_b = [4, 8];
-alpha_b = [8, 12];
-beta_b = [15, 30];
-gamma_b = [30, 40];
-spindle_b = [12, 16];
-
 %% Initialize table for saving of the features
 feature_table = table();
 %% loop over channels
@@ -94,7 +86,7 @@ if nr_chan > 0
             if isempty(gcp('nocreate'))
                 parpool(max(1, floor(0.8 * feature('numcores'))));  % This opens a parallel pool with 0.8*available workers
             end
-            parfor epochs = 1:10%nr_epochs
+            for epochs = 1:1%nr_epochs
                 current_epoch = EEG_clean.clean_epochs.epoch(epochs);
                 start_index = EEG_clean.clean_epochs{epochs, 'start_index'}; %(epochs-1)*epoch_windowlen*(1-epoch_windowover)*EEG_clean.srate + start_index_o; % (epochs-1)*epoch_windowlen*EEG_clean.srate + start_index_o;
                 end_index = EEG_clean.clean_epochs{epochs, 'end_index'}; % min(start_index + epoch_windowlen*EEG_clean.srate, end_index_o) % min(epochs*epoch_windowlen*EEG_clean.srate + start_index_o, end_index_o);
@@ -107,9 +99,16 @@ if nr_chan > 0
                 end
                 % previously everything from start_index:end_index
                 % indexs = find(ismember(index_cumsum,start_index:end_index) & index_cut); % start_index:end:index
-              
+                %% bands
+                % werte checken "O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\2023_laura_ghb\scripts\ghb_spectrum_jannickmat.m"
+                delta_b = [0.5, 4];
+                theta_b = [4, 8];
+                alpha_b = [8, 12];
+                beta_b = [15, 30];
+                gamma_b = [30, 40];
+                spindle_b = [12, 16];
 
-                %% bandpassed data
+                % bands #new
                 delta_ts = bandpass(EEG_clean.data(chan, indexs), delta_b, EEG_clean.srate);
                 theta_ts = bandpass(EEG_clean.data(chan, indexs), theta_b, EEG_clean.srate);
                 alpha_ts = bandpass(EEG_clean.data(chan, indexs), alpha_b, EEG_clean.srate);

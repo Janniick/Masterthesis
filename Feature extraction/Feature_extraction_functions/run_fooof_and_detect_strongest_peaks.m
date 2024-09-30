@@ -1,6 +1,6 @@
-function [fooof_offset, fooof_exponent, peak_table, normalized_absolute_power] = run_fooof_and_detect_strongest_peaks(freq, psd, delta_b, theta_b, alpha_b, beta_b, spindle_b, gamma_b)
-    % Function to run FOOOF, detect the strongest peak in each frequency band, 
-    % and calculate the normalized, absolute power for each band
+function [fooof_offset, fooof_exponent, peak_params_struct, normalized_absolute_power] = run_fooof_and_detect_strongest_peaks(freq, psd, delta_b, theta_b, alpha_b, beta_b, spindle_b, gamma_b)
+    % Function to run FOOOF, detect the strongest peak in each frequency band,
+    % and calculate the normalized, absolute power for each band.
 
     % Initialize FOOOF model
     f_result = py.fooof.FOOOF( ...
@@ -34,11 +34,11 @@ function [fooof_offset, fooof_exponent, peak_table, normalized_absolute_power] =
     bands = {delta_b, theta_b, alpha_b, beta_b, spindle_b, gamma_b};
     band_names = {'delta', 'theta', 'alpha', 'beta', 'spindle', 'gamma'};
     
-    % Initialize the peak_table with a header row
-    peak_table = {'Band', 'Frequency (Hz)', 'Amplitude', 'Bandwidth (Hz)'};
+    % Initialize a structure to store peak parameters for each band
+    peak_params_struct = struct();
     normalized_absolute_power = struct();
 
-    % Loop through bands to detect the strongest peak
+    % Loop through bands to detect the strongest peak and calculate power
     for i = 1:length(bands)
         band = bands{i};
         band_name = band_names{i};
@@ -54,11 +54,15 @@ function [fooof_offset, fooof_exponent, peak_table, normalized_absolute_power] =
             [~, strongest_idx] = max(peaks_in_band(:, 2));  % Find the peak with the maximum amplitude
             strongest_peak = peaks_in_band(strongest_idx, :);
             
-            % Add the strongest peak to the table
-            peak_table(end+1, :) = {band_name, strongest_peak(1), strongest_peak(2), strongest_peak(3)};
+            % Store the strongest peak parameters directly as variables
+            peak_params_struct.([band_name '_frequency']) = strongest_peak(1);
+            peak_params_struct.([band_name '_amplitude']) = strongest_peak(2);
+            peak_params_struct.([band_name '_bandwidth']) = strongest_peak(3);
         else
             % No peak detected in this band
-            peak_table(end+1, :) = {band_name, 'No peak', 'No peak', 'No peak'};
+            peak_params_struct.([band_name '_frequency']) = NaN;
+            peak_params_struct.([band_name '_amplitude']) = NaN;
+            peak_params_struct.([band_name '_bandwidth']) = NaN;
         end
 
         % Calculate normalized, absolute power for the current band
@@ -67,5 +71,4 @@ function [fooof_offset, fooof_exponent, peak_table, normalized_absolute_power] =
 
     % Calculate total power (for reference)
     normalized_absolute_power.total = sum(normalized_spect);
-
 end
