@@ -72,6 +72,14 @@ weighting = 'unity'; % weight each taper at 1
 plot_on = false; % plot spectrogram
 verbose = false; % print extra info
 
+%% bands
+delta_b = [0.5, 4];
+theta_b = [4, 8];
+alpha_b = [8, 12];
+beta_b = [15, 30];
+gamma_b = [30, 40];
+spindle_b = [12, 16];
+
 %% Initialize table for saving of the features
 feature_table = table();
 %% loop over channels
@@ -81,12 +89,13 @@ if nr_chan > 0
         current_channel = EEG_clean.chanlocs(chan).labels;
         %% loop over all clean epochs
         nr_epochs = height(EEG_clean.clean_epochs);
-        if nr_epochs > 0
+        feature_table = cell(nr_epochs, 1);  % Preallocate cell array to store rows for each epoch
+
             % Open a parallel pool if it isn't already open
             if isempty(gcp('nocreate'))
                 parpool(max(1, floor(0.8 * feature('numcores'))));  % This opens a parallel pool with 0.8*available workers
             end
-            for epochs = 1:1%nr_epochs
+            parfor epochs = 1:6%nr_epochs
                 current_epoch = EEG_clean.clean_epochs.epoch(epochs);
                 start_index = EEG_clean.clean_epochs{epochs, 'start_index'}; %(epochs-1)*epoch_windowlen*(1-epoch_windowover)*EEG_clean.srate + start_index_o; % (epochs-1)*epoch_windowlen*EEG_clean.srate + start_index_o;
                 end_index = EEG_clean.clean_epochs{epochs, 'end_index'}; % min(start_index + epoch_windowlen*EEG_clean.srate, end_index_o) % min(epochs*epoch_windowlen*EEG_clean.srate + start_index_o, end_index_o);
@@ -99,16 +108,9 @@ if nr_chan > 0
                 end
                 % previously everything from start_index:end_index
                 % indexs = find(ismember(index_cumsum,start_index:end_index) & index_cut); % start_index:end:index
-                %% bands
-                % werte checken "O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\2023_laura_ghb\scripts\ghb_spectrum_jannickmat.m"
-                delta_b = [0.5, 4];
-                theta_b = [4, 8];
-                alpha_b = [8, 12];
-                beta_b = [15, 30];
-                gamma_b = [30, 40];
-                spindle_b = [12, 16];
+              
 
-                % bands #new
+                %% bandpassed data
                 delta_ts = bandpass(EEG_clean.data(chan, indexs), delta_b, EEG_clean.srate);
                 theta_ts = bandpass(EEG_clean.data(chan, indexs), theta_b, EEG_clean.srate);
                 alpha_ts = bandpass(EEG_clean.data(chan, indexs), alpha_b, EEG_clean.srate);
@@ -138,26 +140,31 @@ if nr_chan > 0
                 % a measure of the interaction between the phase of low-frequency brain oscillations and the amplitude of higher-frequency oscillations
                 % PACTool Matlab Add on
                 % https://github.com/sccn/PACTools/tree/develop
-                EEG_cleant = EEG_clean;
-                EEG_cleant.data = EEG_cleant.data(:,indexs);
-                evalc('EEG_cleant = eeg_checkset(EEG_cleant)');
-                EEG_cleant = pop_pac(EEG_cleant, 'channels', theta_b, alpha_b, chan, chan, 'forcecomp', 1); % pop_plotpac(EEG);
+                %% Create a new EEG structure with only the necessary fields
+                EEG_cleant = struct();  % Create a new empty structure for EEG_cleant
+                EEG_cleant.srate = EEG_clean.srate;  % Copy over only the required fields
+                EEG_cleant.chanlocs = EEG_clean.chanlocs;  % Copy channel locations
+                EEG_cleant.data = EEG_clean.data(:, indexs);  % Copy the sliced data
+                EEG_cleant.times = EEG_clean.times(:, indexs);  % Copy the sliced times
+                EEG_cleant.etc = EEG_clean.etc;
+                EEG_cleant.pnts = length(indexs);  % Number of points in the current epoch
+                EEG_cleant.trials = 1;  % Single epoch
+                EEG_cleant = pop_pac_modified(EEG_cleant, 'channels', theta_b, alpha_b, chan, chan, 'forcecomp', 1); % pop_plotpac(EEG);
                 phase_amplitude_coupling_theta_alpha = mean(EEG_cleant.etc.eegpac(1).glm.pacval, 'all');
                 EEG_cleant.etc.eegpac = [];
                 EEG_cleant.etc.pacplotopt = [];
-                EEG_cleant = pop_pac(EEG_cleant, 'channels', alpha_b, beta_b, chan, chan, 'forcecomp', 1);
+                EEG_cleant = pop_pac_modified(EEG_cleant, 'channels', alpha_b, beta_b, chan, chan, 'forcecomp', 1);
                 phase_amplitude_coupling_alpha_beta = mean(EEG_cleant.etc.eegpac(1).glm.pacval, 'all');
                 EEG_cleant.etc.eegpac = [];
                 EEG_cleant.etc.pacplotopt = [];
-                EEG_cleant = pop_pac(EEG_cleant, 'channels', theta_b, beta_b, chan, chan, 'forcecomp', 1);
+                EEG_cleant = pop_pac_modified(EEG_cleant, 'channels', theta_b, beta_b, chan, chan, 'forcecomp', 1);
                 phase_amplitude_coupling_theta_beta = mean(EEG_cleant.etc.eegpac(1).glm.pacval, 'all');
                 EEG_cleant.etc.eegpac = [];
                 EEG_cleant.etc.pacplotopt = [];
-                EEG_cleant = pop_pac(EEG_cleant, 'channels', delta_b, spindle_b, chan, chan, 'forcecomp', 1);
+                EEG_cleant = pop_pac_modified(EEG_cleant, 'channels', delta_b, spindle_b, chan, chan, 'forcecomp', 1);
                 phase_amplitude_coupling_delta_spindle = mean(EEG_cleant.etc.eegpac(1).glm.pacval, 'all');
                 EEG_cleant.etc.eegpac = [];
                 EEG_cleant.etc.pacplotopt = [];
-                clear EEG_cleant;
 
                 %% Complexity measures
                 % Entropy calculations
@@ -234,163 +241,165 @@ if nr_chan > 0
                 skew = skewness(EEG_clean.data(chan, indexs));
                 [hjorth_activity, hjorth_mobility, hjorth_complexity] = hjorth(EEG_clean.data(chan, indexs)',0);
 
-                %%  save the data jannick
-                % Add Burst Features
-                burst_theta_n = burst_parameters.burst_theta_n;
-                burst_theta_duration_mean = burst_parameters.burst_theta_duration_mean;
-                burst_theta_duration_ssd = burst_parameters.burst_theta_duration_ssd;
-                burst_alpha_n = burst_parameters.burst_alpha_n;
-                burst_alpha_duration_mean = burst_parameters.burst_alpha_duration_mean;
-                burst_alpha_duration_ssd = burst_parameters.burst_alpha_duration_ssd;
-                burst_beta_n = burst_parameters.burst_beta_n;
-                burst_beta_duration_mean = burst_parameters.burst_beta_duration_mean;
-                burst_beta_duration_ssd = burst_parameters.burst_beta_duration_ssd;
-                burst_spindle_n = burst_parameters.burst_spindle_n;
-                burst_spindle_duration_mean = burst_parameters.burst_spindle_duration_mean;
-                burst_spindle_duration_ssd = burst_parameters.burst_spindle_duration_ssd;
-                % Add Power Features
-                absolute_delta = absolute_power.delta;
-                absolute_theta = absolute_power.theta;
-                absolute_alpha = absolute_power.alpha;
-                absolute_beta = absolute_power.beta;
-                absolute_spindle = absolute_power.spindle;
-                relative_delta = relative_power.delta;
-                relative_theta = relative_power.theta;
-                relative_alpha = relative_power.alpha;
-                relative_beta = relative_power.beta;
-                relative_spindle = relative_power.spindle;
-                % Add Fooof Features
-                fooof_offset_val = fooof_offset;
-                fooof_exponent_val = fooof_exponent;
-                % Add Peak Table Features
-                % Extract values from the structured peak_table
-                peak_delta_frequency = peak_table.delta_frequency;
-                peak_delta_amplitude = peak_table.delta_amplitude;
-                peak_delta_bandwidth = peak_table.delta_bandwidth;
-                peak_theta_frequency = peak_table.theta_frequency;
-                peak_theta_amplitude = peak_table.theta_amplitude;
-                peak_theta_bandwidth = peak_table.theta_bandwidth;
-                peak_alpha_frequency = peak_table.alpha_frequency;
-                peak_alpha_amplitude = peak_table.alpha_amplitude;
-                peak_alpha_bandwidth = peak_table.alpha_bandwidth;
-                peak_beta_frequency = peak_table.beta_frequency;
-                peak_beta_amplitude = peak_table.beta_amplitude;
-                peak_beta_bandwidth = peak_table.beta_bandwidth;
-                peak_spindle_frequency = peak_table.spindle_frequency;
-                peak_spindle_amplitude = peak_table.spindle_amplitude;
-                peak_spindle_bandwidth = peak_table.spindle_bandwidth;
-                peak_gamma_frequency = peak_table.gamma_frequency;
-                peak_gamma_amplitude = peak_table.gamma_amplitude;
-                peak_gamma_bandwidth = peak_table.gamma_bandwidth;
-                % Add Normalized Absolute Power Features
-                norm_absolute_delta = normalized_absolute_power.delta;
-                norm_absolute_theta = normalized_absolute_power.theta;
-                norm_absolute_alpha = normalized_absolute_power.alpha;
-                norm_absolute_beta = normalized_absolute_power.beta;
-                norm_absolute_spindle = normalized_absolute_power.spindle;
-                norm_absolute_gamma = normalized_absolute_power.gamma;
-                norm_absolute_total = normalized_absolute_power.total;
-                % Add Mutual Information Band Features
-                mi_delta_theta = mutual_information_band.delta_theta;
-                mi_delta_alpha = mutual_information_band.delta_alpha;
-                mi_delta_beta = mutual_information_band.delta_beta;
-                mi_delta_spindle = mutual_information_band.delta_spindles;
-                mi_theta_alpha = mutual_information_band.theta_alpha;
-                mi_theta_beta = mutual_information_band.theta_beta;
-                mi_theta_spindle = mutual_information_band.theta_spindles;
-                mi_alpha_beta = mutual_information_band.alpha_beta;
-                mi_alpha_spindle = mutual_information_band.alpha_spindles;
-                mi_beta_spindle = mutual_information_band.beta_spindles;
-                % Add Phase Amplitude Coupling Features
-                pac_theta_alpha = phase_amplitude_coupling_theta_alpha;
-                pac_alpha_beta = phase_amplitude_coupling_alpha_beta;
-                pac_theta_beta = phase_amplitude_coupling_theta_beta;
-                pac_delta_spindle = phase_amplitude_coupling_delta_spindle;
-                % Add Complexity Measures
-                complexity_perm_en = perm_en;
-                complexity_hurst = hurs_exp_long;
-                complexity_hurst_alpha = hurs_alpha;
-                complexity_hurst_beta = hurs_beta;
-                complexity_hurst_theta = hurs_theta;
-                complexity_hurst_delta = hurs_delta;
-                complexity_hurst_gamma = hurs_gamma;
-                complexity_hurst_spindle = hurs_spindle;
-                complexity_hilbert_rmssd = rmssd_hilbert;
-                % Add Lagged Coherence Features
-                lag_coh_theta = t_lagcoh;
-                lag_coh_alpha = a_lagcoh;
-                lag_coh_theta_alpha = t_a_lagcoh;
-                lag_coh_beta = b_lagcoh;
-                lag_coh_alpha_beta = a_b_lagcoh;
-                lag_coh_spindle = s_lagcoh;
-                lag_coh_delta = d_lagcoh;
-                lag_coh_delta_spindle = d_s_lagcoh;
-                % Add Other Features
-                kurt_val = kurt;
-                skew_val = skew;
-                hjorth_activity_val = hjorth_activity;
-                hjorth_mobility_val = hjorth_mobility;
-                hjorth_complexity_val = hjorth_complexity;
-                % Ensure text fields are wrapped in cell arrays or use string arrays for text data
-                % Create a new row with all the extracted features
-                new_row = table({study}, {participant}, {current_channel}, current_epoch, start_index, end_index, current_stage, ...
-                    burst_theta_n, burst_theta_duration_mean, burst_theta_duration_ssd, ...
-                    burst_alpha_n, burst_alpha_duration_mean, burst_alpha_duration_ssd, ...
-                    burst_beta_n, burst_beta_duration_mean, burst_beta_duration_ssd, ...
-                    burst_spindle_n, burst_spindle_duration_mean, burst_spindle_duration_ssd, ...
-                    absolute_delta, absolute_theta, absolute_alpha, absolute_beta, absolute_spindle, ...
-                    relative_delta, relative_theta, relative_alpha, relative_beta, relative_spindle, ...
-                    fooof_offset_val, fooof_exponent_val, ...
-                    peak_delta_frequency, peak_delta_amplitude, peak_delta_bandwidth, ...
-                    peak_theta_frequency, peak_theta_amplitude, peak_theta_bandwidth, ...
-                    peak_alpha_frequency, peak_alpha_amplitude, peak_alpha_bandwidth, ...
-                    peak_beta_frequency, peak_beta_amplitude, peak_beta_bandwidth, ...
-                    peak_spindle_frequency, peak_spindle_amplitude, peak_spindle_bandwidth, ...
-                    peak_gamma_frequency, peak_gamma_amplitude, peak_gamma_bandwidth, ...
-                    norm_absolute_delta, norm_absolute_theta, norm_absolute_alpha, norm_absolute_beta, ...
-                    norm_absolute_spindle, norm_absolute_gamma, norm_absolute_total, ...
-                    mi_delta_theta, mi_delta_alpha, mi_delta_beta, mi_delta_spindle, ...
-                    mi_theta_alpha, mi_theta_beta, mi_theta_spindle, ...
-                    mi_alpha_beta, mi_alpha_spindle, mi_beta_spindle, ...
-                    pac_theta_alpha, pac_alpha_beta, pac_theta_beta, pac_delta_spindle, ...
-                    complexity_perm_en, complexity_hurst, complexity_hurst_alpha, complexity_hurst_beta, ...
-                    complexity_hurst_theta, complexity_hurst_delta, complexity_hurst_gamma, complexity_hurst_spindle, ...
-                    complexity_hilbert_rmssd, ...
-                    lag_coh_theta, lag_coh_alpha, lag_coh_theta_alpha, lag_coh_beta, lag_coh_alpha_beta, ...
-                    lag_coh_spindle, lag_coh_delta, lag_coh_delta_spindle, ...
-                    kurt_val, skew_val, hjorth_activity_val, hjorth_mobility_val, hjorth_complexity_val, ...
-                    'VariableNames', {'study', 'participant', 'channel', 'epoch', 'start_index', 'end_index', 'stage', ...
-                    'burst_theta_n', 'burst_theta_duration_mean', 'burst_theta_duration_ssd', ...
-                    'burst_alpha_n', 'burst_alpha_duration_mean', 'burst_alpha_duration_ssd', ...
-                    'burst_beta_n', 'burst_beta_duration_mean', 'burst_beta_duration_ssd', ...
-                    'burst_spindle_n', 'burst_spindle_duration_mean', 'burst_spindle_duration_ssd', ...
-                    'absolute_delta_power', 'absolute_theta_power', 'absolute_alpha_power', 'absolute_beta_power', 'absolute_spindle_power', ...
-                    'relative_delta_power', 'relative_theta_power', 'relative_alpha_power', 'relative_beta_power', 'relative_spindle_power', ...
-                    'fooof_offset', 'fooof_exponent', ...
-                    'peak_delta_frequency', 'peak_delta_amplitude', 'peak_delta_bandwidth', ...
-                    'peak_theta_frequency', 'peak_theta_amplitude', 'peak_theta_bandwidth', ...
-                    'peak_alpha_frequency', 'peak_alpha_amplitude', 'peak_alpha_bandwidth', ...
-                    'peak_beta_frequency', 'peak_beta_amplitude', 'peak_beta_bandwidth', ...
-                    'peak_spindle_frequency', 'peak_spindle_amplitude', 'peak_spindle_bandwidth', ...
-                    'peak_gamma_frequency', 'peak_gamma_amplitude', 'peak_gamma_bandwidth', ...
-                    'normalized_delta_power', 'normalized_theta_power', 'normalized_alpha_power', 'normalized_beta_power', ...
-                    'normalized_spindle_power', 'normalized_gamma_power', 'normalized_total_power', ...
-                    'mi_delta_theta', 'mi_delta_alpha', 'mi_delta_beta', 'mi_delta_spindles', 'mi_theta_alpha', 'mi_theta_beta', ...
-                    'mi_theta_spindles', 'mi_alpha_beta', 'mi_alpha_spindles', 'mi_beta_spindles', ...
-                    'phase_amplitude_coupling_theta_alpha', 'phase_amplitude_coupling_alpha_beta', ...
-                    'phase_amplitude_coupling_theta_beta', 'phase_amplitude_coupling_delta_spindle', ...
-                    'complexity_perm_en', 'complexity_hurst', 'complexity_hurst_alpha', 'complexity_hurst_beta', ...
-                    'complexity_hurst_theta', 'complexity_hurst_delta', 'complexity_hurst_gamma', 'complexity_hurst_spindle', ...
-                    'complexity_hilbert_rmssd', ...
-                    'lagged_coherence_theta', 'lagged_coherence_alpha', 'lagged_coherence_theta_alpha', ...
-                    'lagged_coherence_beta', 'lagged_coherence_alpha_beta', 'lagged_coherence_spindle', ...
-                    'lagged_coherence_delta', 'lagged_coherence_delta_spindle', ...
-                    'kurtosis', 'skewness', 'hjorth_activity', 'hjorth_mobility', 'hjorth_complexity'});
-
-                % Append the new row to the main feature table
-                feature_table = [feature_table; new_row];
-
+                % %%  save the data jannick
+                % % Add Burst Features
+                % burst_theta_n = burst_parameters.burst_theta_n;
+                % burst_theta_duration_mean = burst_parameters.burst_theta_duration_mean;
+                % burst_theta_duration_ssd = burst_parameters.burst_theta_duration_ssd;
+                % burst_alpha_n = burst_parameters.burst_alpha_n;
+                % burst_alpha_duration_mean = burst_parameters.burst_alpha_duration_mean;
+                % burst_alpha_duration_ssd = burst_parameters.burst_alpha_duration_ssd;
+                % burst_beta_n = burst_parameters.burst_beta_n;
+                % burst_beta_duration_mean = burst_parameters.burst_beta_duration_mean;
+                % burst_beta_duration_ssd = burst_parameters.burst_beta_duration_ssd;
+                % burst_spindle_n = burst_parameters.burst_spindle_n;
+                % burst_spindle_duration_mean = burst_parameters.burst_spindle_duration_mean;
+                % burst_spindle_duration_ssd = burst_parameters.burst_spindle_duration_ssd;
+                % % Add Power Features
+                % absolute_delta = absolute_power.delta;
+                % absolute_theta = absolute_power.theta;
+                % absolute_alpha = absolute_power.alpha;
+                % absolute_beta = absolute_power.beta;
+                % absolute_spindle = absolute_power.spindle;
+                % relative_delta = relative_power.delta;
+                % relative_theta = relative_power.theta;
+                % relative_alpha = relative_power.alpha;
+                % relative_beta = relative_power.beta;
+                % relative_spindle = relative_power.spindle;
+                % % Add Fooof Features
+                % fooof_offset_val = fooof_offset;
+                % fooof_exponent_val = fooof_exponent;
+                % % Add Peak Table Features
+                % % Extract values from the structured peak_table
+                % peak_delta_frequency = peak_table.delta_frequency;
+                % peak_delta_amplitude = peak_table.delta_amplitude;
+                % peak_delta_bandwidth = peak_table.delta_bandwidth;
+                % peak_theta_frequency = peak_table.theta_frequency;
+                % peak_theta_amplitude = peak_table.theta_amplitude;
+                % peak_theta_bandwidth = peak_table.theta_bandwidth;
+                % peak_alpha_frequency = peak_table.alpha_frequency;
+                % peak_alpha_amplitude = peak_table.alpha_amplitude;
+                % peak_alpha_bandwidth = peak_table.alpha_bandwidth;
+                % peak_beta_frequency = peak_table.beta_frequency;
+                % peak_beta_amplitude = peak_table.beta_amplitude;
+                % peak_beta_bandwidth = peak_table.beta_bandwidth;
+                % peak_spindle_frequency = peak_table.spindle_frequency;
+                % peak_spindle_amplitude = peak_table.spindle_amplitude;
+                % peak_spindle_bandwidth = peak_table.spindle_bandwidth;
+                % peak_gamma_frequency = peak_table.gamma_frequency;
+                % peak_gamma_amplitude = peak_table.gamma_amplitude;
+                % peak_gamma_bandwidth = peak_table.gamma_bandwidth;
+                % % Add Normalized Absolute Power Features
+                % norm_absolute_delta = normalized_absolute_power.delta;
+                % norm_absolute_theta = normalized_absolute_power.theta;
+                % norm_absolute_alpha = normalized_absolute_power.alpha;
+                % norm_absolute_beta = normalized_absolute_power.beta;
+                % norm_absolute_spindle = normalized_absolute_power.spindle;
+                % norm_absolute_gamma = normalized_absolute_power.gamma;
+                % norm_absolute_total = normalized_absolute_power.total;
+                % % Add Mutual Information Band Features
+                % mi_delta_theta = mutual_information_band.delta_theta;
+                % mi_delta_alpha = mutual_information_band.delta_alpha;
+                % mi_delta_beta = mutual_information_band.delta_beta;
+                % mi_delta_spindle = mutual_information_band.delta_spindles;
+                % mi_theta_alpha = mutual_information_band.theta_alpha;
+                % mi_theta_beta = mutual_information_band.theta_beta;
+                % mi_theta_spindle = mutual_information_band.theta_spindles;
+                % mi_alpha_beta = mutual_information_band.alpha_beta;
+                % mi_alpha_spindle = mutual_information_band.alpha_spindles;
+                % mi_beta_spindle = mutual_information_band.beta_spindles;
+                % % Add Phase Amplitude Coupling Features
+                % pac_theta_alpha = phase_amplitude_coupling_theta_alpha;
+                % pac_alpha_beta = phase_amplitude_coupling_alpha_beta;
+                % pac_theta_beta = phase_amplitude_coupling_theta_beta;
+                % pac_delta_spindle = phase_amplitude_coupling_delta_spindle;
+                % % Add Complexity Measures
+                % complexity_perm_en = perm_en;
+                % complexity_hurst = hurs_exp_long;
+                % complexity_hurst_alpha = hurs_alpha;
+                % complexity_hurst_beta = hurs_beta;
+                % complexity_hurst_theta = hurs_theta;
+                % complexity_hurst_delta = hurs_delta;
+                % complexity_hurst_gamma = hurs_gamma;
+                % complexity_hurst_spindle = hurs_spindle;
+                % complexity_hilbert_rmssd = rmssd_hilbert;
+                % % Add Lagged Coherence Features
+                % lag_coh_theta = t_lagcoh;
+                % lag_coh_alpha = a_lagcoh;
+                % lag_coh_theta_alpha = t_a_lagcoh;
+                % lag_coh_beta = b_lagcoh;
+                % lag_coh_alpha_beta = a_b_lagcoh;
+                % lag_coh_spindle = s_lagcoh;
+                % lag_coh_delta = d_lagcoh;
+                % lag_coh_delta_spindle = d_s_lagcoh;
+                % % Add Other Features
+                % kurt_val = kurt;
+                % skew_val = skew;
+                % hjorth_activity_val = hjorth_activity;
+                % hjorth_mobility_val = hjorth_mobility;
+                % hjorth_complexity_val = hjorth_complexity;
+                % % Ensure text fields are wrapped in cell arrays or use string arrays for text data
+                % % Create a new row with all the extracted features
+                % new_row = table({study}, {participant}, {current_channel}, current_epoch, start_index, end_index, current_stage, ...
+                %     burst_theta_n, burst_theta_duration_mean, burst_theta_duration_ssd, ...
+                %     burst_alpha_n, burst_alpha_duration_mean, burst_alpha_duration_ssd, ...
+                %     burst_beta_n, burst_beta_duration_mean, burst_beta_duration_ssd, ...
+                %     burst_spindle_n, burst_spindle_duration_mean, burst_spindle_duration_ssd, ...
+                %     absolute_delta, absolute_theta, absolute_alpha, absolute_beta, absolute_spindle, ...
+                %     relative_delta, relative_theta, relative_alpha, relative_beta, relative_spindle, ...
+                %     fooof_offset_val, fooof_exponent_val, ...
+                %     peak_delta_frequency, peak_delta_amplitude, peak_delta_bandwidth, ...
+                %     peak_theta_frequency, peak_theta_amplitude, peak_theta_bandwidth, ...
+                %     peak_alpha_frequency, peak_alpha_amplitude, peak_alpha_bandwidth, ...
+                %     peak_beta_frequency, peak_beta_amplitude, peak_beta_bandwidth, ...
+                %     peak_spindle_frequency, peak_spindle_amplitude, peak_spindle_bandwidth, ...
+                %     peak_gamma_frequency, peak_gamma_amplitude, peak_gamma_bandwidth, ...
+                %     norm_absolute_delta, norm_absolute_theta, norm_absolute_alpha, norm_absolute_beta, ...
+                %     norm_absolute_spindle, norm_absolute_gamma, norm_absolute_total, ...
+                %     mi_delta_theta, mi_delta_alpha, mi_delta_beta, mi_delta_spindle, ...
+                %     mi_theta_alpha, mi_theta_beta, mi_theta_spindle, ...
+                %     mi_alpha_beta, mi_alpha_spindle, mi_beta_spindle, ...
+                %     pac_theta_alpha, pac_alpha_beta, pac_theta_beta, pac_delta_spindle, ...
+                %     complexity_perm_en, complexity_hurst, complexity_hurst_alpha, complexity_hurst_beta, ...
+                %     complexity_hurst_theta, complexity_hurst_delta, complexity_hurst_gamma, complexity_hurst_spindle, ...
+                %     complexity_hilbert_rmssd, ...
+                %     lag_coh_theta, lag_coh_alpha, lag_coh_theta_alpha, lag_coh_beta, lag_coh_alpha_beta, ...
+                %     lag_coh_spindle, lag_coh_delta, lag_coh_delta_spindle, ...
+                %     kurt_val, skew_val, hjorth_activity_val, hjorth_mobility_val, hjorth_complexity_val, ...
+                %     'VariableNames', {'study', 'participant', 'channel', 'epoch', 'start_index', 'end_index', 'stage', ...
+                %     'burst_theta_n', 'burst_theta_duration_mean', 'burst_theta_duration_ssd', ...
+                %     'burst_alpha_n', 'burst_alpha_duration_mean', 'burst_alpha_duration_ssd', ...
+                %     'burst_beta_n', 'burst_beta_duration_mean', 'burst_beta_duration_ssd', ...
+                %     'burst_spindle_n', 'burst_spindle_duration_mean', 'burst_spindle_duration_ssd', ...
+                %     'absolute_delta_power', 'absolute_theta_power', 'absolute_alpha_power', 'absolute_beta_power', 'absolute_spindle_power', ...
+                %     'relative_delta_power', 'relative_theta_power', 'relative_alpha_power', 'relative_beta_power', 'relative_spindle_power', ...
+                %     'fooof_offset', 'fooof_exponent', ...
+                %     'peak_delta_frequency', 'peak_delta_amplitude', 'peak_delta_bandwidth', ...
+                %     'peak_theta_frequency', 'peak_theta_amplitude', 'peak_theta_bandwidth', ...
+                %     'peak_alpha_frequency', 'peak_alpha_amplitude', 'peak_alpha_bandwidth', ...
+                %     'peak_beta_frequency', 'peak_beta_amplitude', 'peak_beta_bandwidth', ...
+                %     'peak_spindle_frequency', 'peak_spindle_amplitude', 'peak_spindle_bandwidth', ...
+                %     'peak_gamma_frequency', 'peak_gamma_amplitude', 'peak_gamma_bandwidth', ...
+                %     'normalized_delta_power', 'normalized_theta_power', 'normalized_alpha_power', 'normalized_beta_power', ...
+                %     'normalized_spindle_power', 'normalized_gamma_power', 'normalized_total_power', ...
+                %     'mi_delta_theta', 'mi_delta_alpha', 'mi_delta_beta', 'mi_delta_spindles', 'mi_theta_alpha', 'mi_theta_beta', ...
+                %     'mi_theta_spindles', 'mi_alpha_beta', 'mi_alpha_spindles', 'mi_beta_spindles', ...
+                %     'phase_amplitude_coupling_theta_alpha', 'phase_amplitude_coupling_alpha_beta', ...
+                %     'phase_amplitude_coupling_theta_beta', 'phase_amplitude_coupling_delta_spindle', ...
+                %     'complexity_perm_en', 'complexity_hurst', 'complexity_hurst_alpha', 'complexity_hurst_beta', ...
+                %     'complexity_hurst_theta', 'complexity_hurst_delta', 'complexity_hurst_gamma', 'complexity_hurst_spindle', ...
+                %     'complexity_hilbert_rmssd', ...
+                %     'lagged_coherence_theta', 'lagged_coherence_alpha', 'lagged_coherence_theta_alpha', ...
+                %     'lagged_coherence_beta', 'lagged_coherence_alpha_beta', 'lagged_coherence_spindle', ...
+                %     'lagged_coherence_delta', 'lagged_coherence_delta_spindle', ...
+                %     'kurtosis', 'skewness', 'hjorth_activity', 'hjorth_mobility', 'hjorth_complexity'});
+                % 
+                % % Store the row result in the preallocated cell array
+                % feature_table{epochs} = new_row;
+            disp('run successfully');
             end % epoch loop
+            % Convert the cell array of structures into a table after the loop
+            feature_table = struct2table(vertcat(feature_table{:}));
             %% 
             delete(gcp('nocreate'));
 

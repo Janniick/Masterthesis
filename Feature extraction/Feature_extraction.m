@@ -15,6 +15,7 @@ all_mat_files = dir(fullfile(base_folder, '**', '*_preprocessed.mat'));
 %% load the file
 i=38;
 load([all_mat_files(i).folder, '\', all_mat_files(i).name]);
+pathtosave= all_mat_files(i).folder;
 %% extract the name of the file
 % Example filename
 filename = all_mat_files(i).name;
@@ -89,12 +90,13 @@ if nr_chan > 0
         current_channel = EEG_clean.chanlocs(chan).labels;
         %% loop over all clean epochs
         nr_epochs = height(EEG_clean.clean_epochs);
-        if nr_epochs > 0
+        feature_table = cell(nr_epochs, 1);  % Preallocate cell array to store rows for each epoch
+
             % Open a parallel pool if it isn't already open
             if isempty(gcp('nocreate'))
                 parpool(max(1, floor(0.8 * feature('numcores'))));  % This opens a parallel pool with 0.8*available workers
             end
-            parfor epochs = 1:10%nr_epochs
+            parfor epochs = 1:nr_epochs
                 current_epoch = EEG_clean.clean_epochs.epoch(epochs);
                 start_index = EEG_clean.clean_epochs{epochs, 'start_index'}; %(epochs-1)*epoch_windowlen*(1-epoch_windowover)*EEG_clean.srate + start_index_o; % (epochs-1)*epoch_windowlen*EEG_clean.srate + start_index_o;
                 end_index = EEG_clean.clean_epochs{epochs, 'end_index'}; % min(start_index + epoch_windowlen*EEG_clean.srate, end_index_o) % min(epochs*epoch_windowlen*EEG_clean.srate + start_index_o, end_index_o);
@@ -139,26 +141,31 @@ if nr_chan > 0
                 % a measure of the interaction between the phase of low-frequency brain oscillations and the amplitude of higher-frequency oscillations
                 % PACTool Matlab Add on
                 % https://github.com/sccn/PACTools/tree/develop
-                EEG_cleant = EEG_clean;
-                EEG_cleant.data = EEG_cleant.data(:,indexs);
-                evalc('EEG_cleant = eeg_checkset(EEG_cleant)');
-                EEG_cleant = pop_pac(EEG_cleant, 'channels', theta_b, alpha_b, chan, chan, 'forcecomp', 1); % pop_plotpac(EEG);
+                %% Create a new EEG structure with only the necessary fields
+                EEG_cleant = struct();  % Create a new empty structure for EEG_cleant
+                EEG_cleant.srate = EEG_clean.srate;  % Copy over only the required fields
+                EEG_cleant.chanlocs = EEG_clean.chanlocs;  % Copy channel locations
+                EEG_cleant.data = EEG_clean.data(:, indexs);  % Copy the sliced data
+                EEG_cleant.times = EEG_clean.times(:, indexs);  % Copy the sliced times
+                EEG_cleant.etc = EEG_clean.etc;
+                EEG_cleant.pnts = length(indexs);  % Number of points in the current epoch
+                EEG_cleant.trials = 1;  % Single epoch
+                EEG_cleant = pop_pac_modified(EEG_cleant, 'channels', theta_b, alpha_b, chan, chan, 'forcecomp', 1); % pop_plotpac(EEG);
                 phase_amplitude_coupling_theta_alpha = mean(EEG_cleant.etc.eegpac(1).glm.pacval, 'all');
                 EEG_cleant.etc.eegpac = [];
                 EEG_cleant.etc.pacplotopt = [];
-                EEG_cleant = pop_pac(EEG_cleant, 'channels', alpha_b, beta_b, chan, chan, 'forcecomp', 1);
+                EEG_cleant = pop_pac_modified(EEG_cleant, 'channels', alpha_b, beta_b, chan, chan, 'forcecomp', 1);
                 phase_amplitude_coupling_alpha_beta = mean(EEG_cleant.etc.eegpac(1).glm.pacval, 'all');
                 EEG_cleant.etc.eegpac = [];
                 EEG_cleant.etc.pacplotopt = [];
-                EEG_cleant = pop_pac(EEG_cleant, 'channels', theta_b, beta_b, chan, chan, 'forcecomp', 1);
+                EEG_cleant = pop_pac_modified(EEG_cleant, 'channels', theta_b, beta_b, chan, chan, 'forcecomp', 1);
                 phase_amplitude_coupling_theta_beta = mean(EEG_cleant.etc.eegpac(1).glm.pacval, 'all');
                 EEG_cleant.etc.eegpac = [];
                 EEG_cleant.etc.pacplotopt = [];
-                EEG_cleant = pop_pac(EEG_cleant, 'channels', delta_b, spindle_b, chan, chan, 'forcecomp', 1);
+                EEG_cleant = pop_pac_modified(EEG_cleant, 'channels', delta_b, spindle_b, chan, chan, 'forcecomp', 1);
                 phase_amplitude_coupling_delta_spindle = mean(EEG_cleant.etc.eegpac(1).glm.pacval, 'all');
                 EEG_cleant.etc.eegpac = [];
                 EEG_cleant.etc.pacplotopt = [];
-                clear EEG_cleant;
 
                 %% Complexity measures
                 % Entropy calculations
@@ -388,10 +395,23 @@ if nr_chan > 0
                     'lagged_coherence_delta', 'lagged_coherence_delta_spindle', ...
                     'kurtosis', 'skewness', 'hjorth_activity', 'hjorth_mobility', 'hjorth_complexity'});
 
-                % Append the new row to the main feature table
-                feature_table = [feature_table; new_row];
-
+                % Store the row result in the preallocated cell array
+                feature_table{epochs} = new_row;
             end % epoch loop
+            % Convert the cell array of structures into a table after the loop
+            feature_table = struct2table(vertcat(feature_table{:}));
+
+            % Generating final table
+            combined_table = vertcat(feature_table{:});
+            % Generate the file name dynamically using study and participant variables
+            file_name = sprintf('%s_%s_features_chan_epoch.csv', study, participant);
+            % Create the full file path
+            full_file_path = fullfile(pathtosave, file_name);
+            % Save the combined table as a CSV file with the dynamic name in the specified directory
+            writetable(combined_table, full_file_path);
+            % Display a success message
+            disp(['File saved successfully: ', full_file_path]);
+
             %% 
             delete(gcp('nocreate'));
 
