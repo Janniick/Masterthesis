@@ -1,7 +1,5 @@
 %% add functions
 addpath(genpath('D:\Masterarbeit Jannick\scripts\2_Preprocessing\Feature extraction\Feature_extraction_functions'));
-addpath(genpath('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\2023_mesmart\scripts'));
-addpath('O:\BenjaminS\Benjamin Stucky Projekte und Skripte\Projekte\matlab_processing_benji');
 addpath('D:\Masterarbeit Jannick\scripts\2_Preprocessing\eeglab2024.0');
 eeglab nogui;
 % py.importlib.import_module('yasa');
@@ -107,13 +105,6 @@ parfor chan = 1:1%nr_chan %loops over all channels
             current_stage = EEG_clean.clean_epochs.stage(epochs);  % Leave it as is if it's already numeric
         end
 
-        % bands burst parameters
-        % calculates burst parameters for all the input bands
-        % over sleep stage? only spindle_b?
-        tic;
-        burst_parameters = compute_band_burst_parameters(EEG_clean, chan, indexs, theta_b, alpha_b, beta_b, spindle_b);
-        duration_bursts = toc;
-        disp(duration_bursts);
         % Power Spectrum: pwelch
         % Calculate the absolute and relative power of certain frequency bands using the pwelch method
         tic;
