@@ -479,7 +479,7 @@ for i = 1:1%length(all_mat_files)
 
 
 
-    % Slow wave detection on clean epochs
+    % Extract only clean epoch data for SW and Spindle detection
     % Initialize an empty array to store clean data
     clean_data = [];
     % Loop through each clean epoch and concatenate the corresponding data
@@ -523,6 +523,9 @@ for i = 1:1%length(all_mat_files)
     % Repeat each entry in hypnogram_clean for 30 * srate times
     repeats_per_epoch = epoch_duration_sec * srate;  % Number of samples per epoch
     hypnogram_clean_upsampled = repelem(hypnogram_clean, repeats_per_epoch);
+
+
+
     % Run the slow wave detection in YASA
     sws_detection_results = py.yasa.sw_detect(data = data_for_py, ...
         sf = py.float(EEG_clean.srate), ...
@@ -538,122 +541,198 @@ for i = 1:1%length(all_mat_files)
         coupling = false, ...  % Disable phase coupling calculation
         remove_outliers = false, ...  % Disable outlier removal
         verbose = false);
+    % Make the python structure accessible for MATLAB
+    if ~isempty(sws_detection_results)
+        sws_detection_info = sws_detection_results.summary();
+        sws_colnames = cellfun(@string,cell(sws_detection_info.columns.values.tolist()));
+        sws_detection_info = cell(sws_detection_info.values.tolist());
+        sws_detection_info = cellfun(@(xs)cell2table(cell(xs), 'VariableNames', sws_colnames),sws_detection_info, 'UniformOutput', false);
+        sws_detection_info = vertcat(sws_detection_info{:});
+        sws_detection_info.Stage = cellfun(@double, sws_detection_info.Stage);
+        sws_detection_info.Channel = string(sws_detection_info.Channel);
+        sws_detection_info.IdxChannel = cellfun(@double, sws_detection_info.IdxChannel);
+        sws_detection_info.neg_sw_peaks_ind = sws_detection_info.NegPeak*EEG_clean.srate;
+        sws_detection_info.duration_negative_phase = (sws_detection_info.MidCrossing - sws_detection_info.Start)*EEG_clean.srate;
+        sws_detection_info.duration_positive_phase = (sws_detection_info.End - sws_detection_info.MidCrossing)*EEG_clean.srate;
+        sws_detection_info.duration_start_to_neg = (sws_detection_info.NegPeak - sws_detection_info.Start)*EEG_clean.srate;
+        sws_detection_info.duration_neg_to_mid = (sws_detection_info.MidCrossing - sws_detection_info.NegPeak)*EEG_clean.srate;
+        sws_detection_info.duration_mid_to_pos = (sws_detection_info.PosPeak - sws_detection_info.MidCrossing)*EEG_clean.srate;
+        sws_detection_info.duration_pos_to_end = (sws_detection_info.End - sws_detection_info.PosPeak)*EEG_clean.srate;
+    end
+    % Initialize an empty struct to hold the results for each cycle
+    SW_results = struct();
+    % Loop through each sleep cycle in the cycle_table
+    for cycle_idx = 1:height(cycle_table)
+        start_epoch = cycle_table.start_epoch(cycle_idx) * 30;  % Convert to data points
+        end_epoch = cycle_table.end_epoch(cycle_idx) * 30;      % Convert to data points
+        % Initialize arrays to hold slow wave data for this cycle (NREM stages only)
+        sw_cycle_data_NREM = [];
+        % Loop through the detected slow waves in sws_detection_info
+        for sw_idx = 1:height(sws_detection_info)
+            sw_start = sws_detection_info.Start(sw_idx);  % Start of slow wave (in data points)
+            sw_stage = sws_detection_info.Stage(sw_idx);  % Stage of the slow wave
 
-
- if ~isempty(sws_detection_results)
-                sws_detection_info = sws_detection_results.summary();
-                sws_colnames = cellfun(@string,cell(sws_detection_info.columns.values.tolist()));
-                sws_detection_info = cell(sws_detection_info.values.tolist());
-                sws_detection_info = cellfun(@(xs)cell2table(cell(xs), 'VariableNames', sws_colnames),sws_detection_info, 'UniformOutput', false);
-                sws_detection_info = vertcat(sws_detection_info{:});
-                sws_detection_info.Stage = cellfun(@double, sws_detection_info.Stage);
-                sws_detection_info.Channel = string(sws_detection_info.Channel);
-                sws_detection_info.IdxChannel = cellfun(@double, sws_detection_info.IdxChannel);
-
-                sws_detection_info.neg_sw_peaks_ind = sws_detection_info.NegPeak*EEG_clean.srate;
-                sws_detection_info.duration_negative_phase = (sws_detection_info.MidCrossing - sws_detection_info.Start)*EEG_clean.srate;
-                sws_detection_info.duration_positive_phase = (sws_detection_info.End - sws_detection_info.MidCrossing)*EEG_clean.srate;
-                sws_detection_info.duration_start_to_neg = (sws_detection_info.NegPeak - sws_detection_info.Start)*EEG_clean.srate;
-                sws_detection_info.duration_neg_to_mid = (sws_detection_info.MidCrossing - sws_detection_info.NegPeak)*EEG_clean.srate;
-                sws_detection_info.duration_mid_to_pos = (sws_detection_info.PosPeak - sws_detection_info.MidCrossing)*EEG_clean.srate;
-                sws_detection_info.duration_pos_to_end = (sws_detection_info.End - sws_detection_info.PosPeak)*EEG_clean.srate;
-
- end
-
-
-% Initialize an empty struct to hold the results for each cycle
-SW_results = struct();
-
-% Loop through each sleep cycle in the cycle_table
-for cycle_idx = 1:height(cycle_table)
-    start_epoch = cycle_table.start_epoch(cycle_idx) * 30;  % Convert to data points
-    end_epoch = cycle_table.end_epoch(cycle_idx) * 30;      % Convert to data points
-    
-    % Initialize arrays to hold slow wave data for this cycle (NREM stages only)
-    sw_cycle_data_NREM = [];
-    
-    % Loop through the detected slow waves in sws_detection_info
-    for sw_idx = 1:height(sws_detection_info)
-        sw_start = sws_detection_info.Start(sw_idx);  % Start of slow wave (in data points)
-        sw_stage = sws_detection_info.Stage(sw_idx);  % Stage of the slow wave
-        
-        % Check if the slow wave occurs within the current cycle and is in NREM (stage 2 or 3)
-        if sw_start >= start_epoch && sw_start <= end_epoch && (sw_stage == 2 || sw_stage == 3)
-            sw_cycle_data_NREM = [sw_cycle_data_NREM; sws_detection_info(sw_idx, :)];
+            % Check if the slow wave occurs within the current cycle and is in NREM (stage 2 or 3)
+            if sw_start >= start_epoch && sw_start <= end_epoch && (sw_stage == 2 || sw_stage == 3)
+                sw_cycle_data_NREM = [sw_cycle_data_NREM; sws_detection_info(sw_idx, :)];
+            end
+        end
+        % For NREM slow waves, calculate mean and std of the relevant metrics
+        if ~isempty(sw_cycle_data_NREM)
+            SW_results.(['Cycle_' num2str(cycle_idx)]).mean.duration = mean(sw_cycle_data_NREM.Duration);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).std.duration = std(sw_cycle_data_NREM.Duration);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).mean.ValNegPeak = mean(sw_cycle_data_NREM.ValNegPeak);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).std.ValNegPeak = std(sw_cycle_data_NREM.ValNegPeak);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).mean.ValPosPeak = mean(sw_cycle_data_NREM.ValPosPeak);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).std.ValPosPeak = std(sw_cycle_data_NREM.ValPosPeak);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).mean.PTP = mean(sw_cycle_data_NREM.PTP);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).std.PTP = std(sw_cycle_data_NREM.PTP);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).mean.Slope = mean(sw_cycle_data_NREM.Slope);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).std.Slope = std(sw_cycle_data_NREM.Slope);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).mean.Frequency = mean(sw_cycle_data_NREM.Frequency);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).std.Frequency = std(sw_cycle_data_NREM.Frequency);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).mean.duration_negative_phase = mean(sw_cycle_data_NREM.duration_negative_phase);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).std.duration_negative_phase = std(sw_cycle_data_NREM.duration_negative_phase);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).mean.duration_positive_phase = mean(sw_cycle_data_NREM.duration_positive_phase);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).std.duration_positive_phase = std(sw_cycle_data_NREM.duration_positive_phase);
+        else
+            % If no NREM slow waves found in this cycle, set fields to NaN
+            SW_results.(['Cycle_' num2str(cycle_idx)]).mean = NaN;
+            SW_results.(['Cycle_' num2str(cycle_idx)]).std = NaN;
         end
     end
-    
-    % For NREM slow waves, calculate mean and std of the relevant metrics
-    if ~isempty(sw_cycle_data_NREM)
-        SW_results.(['Cycle_' num2str(cycle_idx)]).mean.duration = mean(sw_cycle_data_NREM.Duration);
-        SW_results.(['Cycle_' num2str(cycle_idx)]).std.duration = std(sw_cycle_data_NREM.Duration);
-        SW_results.(['Cycle_' num2str(cycle_idx)]).mean.ValNegPeak = mean(sw_cycle_data_NREM.ValNegPeak);
-        SW_results.(['Cycle_' num2str(cycle_idx)]).std.ValNegPeak = std(sw_cycle_data_NREM.ValNegPeak);
-        SW_results.(['Cycle_' num2str(cycle_idx)]).mean.ValPosPeak = mean(sw_cycle_data_NREM.ValPosPeak);
-        SW_results.(['Cycle_' num2str(cycle_idx)]).std.ValPosPeak = std(sw_cycle_data_NREM.ValPosPeak);
-        SW_results.(['Cycle_' num2str(cycle_idx)]).mean.PTP = mean(sw_cycle_data_NREM.PTP);
-        SW_results.(['Cycle_' num2str(cycle_idx)]).std.PTP = std(sw_cycle_data_NREM.PTP);
-        SW_results.(['Cycle_' num2str(cycle_idx)]).mean.Slope = mean(sw_cycle_data_NREM.Slope);
-        SW_results.(['Cycle_' num2str(cycle_idx)]).std.Slope = std(sw_cycle_data_NREM.Slope);
-        SW_results.(['Cycle_' num2str(cycle_idx)]).mean.Frequency = mean(sw_cycle_data_NREM.Frequency);
-        SW_results.(['Cycle_' num2str(cycle_idx)]).std.Frequency = std(sw_cycle_data_NREM.Frequency);
-        SW_results.(['Cycle_' num2str(cycle_idx)]).mean.duration_negative_phase = mean(sw_cycle_data_NREM.duration_negative_phase);
-        SW_results.(['Cycle_' num2str(cycle_idx)]).std.duration_negative_phase = std(sw_cycle_data_NREM.duration_negative_phase);
-        SW_results.(['Cycle_' num2str(cycle_idx)]).mean.duration_positive_phase = mean(sw_cycle_data_NREM.duration_positive_phase);
-        SW_results.(['Cycle_' num2str(cycle_idx)]).std.duration_positive_phase = std(sw_cycle_data_NREM.duration_positive_phase);
-    else
-        % If no NREM slow waves found in this cycle, set fields to NaN
-        SW_results.(['Cycle_' num2str(cycle_idx)]).mean = NaN;
-        SW_results.(['Cycle_' num2str(cycle_idx)]).std = NaN;
+    % Calculate the difference between the first and last cycle
+    first_cycle = SW_results.Cycle_1;
+    last_cycle = SW_results.(['Cycle_' num2str(height(cycle_table))]);
+    % Calculate the difference in mean values between the first and last cycle
+    SW_results.Difference.mean.duration = first_cycle.mean.duration - last_cycle.mean.duration;
+    SW_results.Difference.mean.ValNegPeak = first_cycle.mean.ValNegPeak - last_cycle.mean.ValNegPeak;
+    SW_results.Difference.mean.ValPosPeak = first_cycle.mean.ValPosPeak - last_cycle.mean.ValPosPeak;
+    SW_results.Difference.mean.PTP = first_cycle.mean.PTP - last_cycle.mean.PTP;
+    SW_results.Difference.mean.Slope = first_cycle.mean.Slope - last_cycle.mean.Slope;
+    SW_results.Difference.mean.Frequency = first_cycle.mean.Frequency - last_cycle.mean.Frequency;
+    SW_results.Difference.mean.duration_negative_phase = first_cycle.mean.duration_negative_phase - last_cycle.mean.duration_negative_phase;
+    SW_results.Difference.mean.duration_positive_phase = first_cycle.mean.duration_positive_phase - last_cycle.mean.duration_positive_phase;
+    % Calculate the difference in standard deviation between the first and last cycle
+    SW_results.Difference.std.duration = first_cycle.std.duration - last_cycle.std.duration;
+    SW_results.Difference.std.ValNegPeak = first_cycle.std.ValNegPeak - last_cycle.std.ValNegPeak;
+    SW_results.Difference.std.ValPosPeak = first_cycle.std.ValPosPeak - last_cycle.std.ValPosPeak;
+    SW_results.Difference.std.PTP = first_cycle.std.PTP - last_cycle.std.PTP;
+    SW_results.Difference.std.Slope = first_cycle.std.Slope - last_cycle.std.Slope;
+    SW_results.Difference.std.Frequency = first_cycle.std.Frequency - last_cycle.std.Frequency;
+    SW_results.Difference.std.duration_negative_phase = first_cycle.std.duration_negative_phase - last_cycle.std.duration_negative_phase;
+    SW_results.Difference.std.duration_positive_phase = first_cycle.std.duration_positive_phase - last_cycle.std.duration_positive_phase;
+
+
+
+    % Run the spindle detection from YASA
+    % Correct the 'thresh' parameter to be a Python dictionary
+    thresh_py = py.dict(pyargs('corr', 0.65, 'rel_pow', 0.2, 'rms', 1.5));
+    spindles_detection_results = py.yasa.spindles_detect(data = data_for_py, ...
+        sf = py.float(EEG_clean.srate), ...
+        ch_names = py.list({EEG_clean.chanlocs.labels}), ...
+        hypno = py.numpy.array(hypnogram_clean_upsampled, 'int'), ...
+        include = py.numpy.array([2, 3], 'int'), ...
+        freq_sp = py.tuple([12, 15]), ...
+        freq_broad = py.tuple([1, 30]), ...
+        duration = py.tuple([0.5, 2]), ...
+        min_distance = py.int(500), ...
+        thresh = thresh_py, ...
+        multi_only = py.False, ...
+        remove_outliers = py.False, ...
+        verbose = py.False);
+    % Extract the spindle summary from the detection results
+    if ~isempty(spindles_detection_results)
+        spindles_summary_py = spindles_detection_results.summary();
+        % Extract the column names
+        spindle_colnames = cellfun(@string, cell(spindles_summary_py.columns.values.tolist()));
+        % Convert the Python dataframe into a MATLAB cell array
+        spindles_detection_info = cell(spindles_summary_py.values.tolist());
+        % Convert each row in the cell array to a table with the extracted column names
+        spindles_detection_info = cellfun(@(xs) cell2table(cell(xs), 'VariableNames', spindle_colnames), spindles_detection_info, 'UniformOutput', false);
+        % Concatenate all rows to form the final table
+        spindles_detection_info = vertcat(spindles_detection_info{:});
+        % Convert necessary columns to appropriate data types
+        spindles_detection_info.Stage = cellfun(@double, spindles_detection_info.Stage);  % Convert 'Stage' to double
+        spindles_detection_info.Channel = string(spindles_detection_info.Channel);        % Convert 'Channel' to string
+        spindles_detection_info.IdxChannel = cellfun(@double, spindles_detection_info.IdxChannel);  % Convert 'IdxChannel' to double
+        % Convert other numeric columns if necessary
+        spindles_detection_info.Start = cellfun(@double, spindles_detection_info.Start);
+        spindles_detection_info.Peak = cellfun(@double, spindles_detection_info.Peak);
+        spindles_detection_info.End = cellfun(@double, spindles_detection_info.End);
+        spindles_detection_info.Duration = cellfun(@double, spindles_detection_info.Duration);
+        spindles_detection_info.Amplitude = cellfun(@double, spindles_detection_info.Amplitude);
+        spindles_detection_info.RMS = cellfun(@double, spindles_detection_info.RMS);
+        spindles_detection_info.AbsPower = cellfun(@double, spindles_detection_info.AbsPower);
+        spindles_detection_info.RelPower = cellfun(@double, spindles_detection_info.RelPower);
+        spindles_detection_info.Frequency = cellfun(@double, spindles_detection_info.Frequency);
+        spindles_detection_info.Oscillations = cellfun(@double, spindles_detection_info.Oscillations);
+        spindles_detection_info.Symmetry = cellfun(@double, spindles_detection_info.Symmetry);
     end
-end
+    % Initialize an empty struct to hold the spindle results for each cycle
+    Spindle_results = struct();
+    % Loop through each sleep cycle in the cycle_table
+    for cycle_idx = 1:height(cycle_table)
+        start_epoch = cycle_table.start_epoch(cycle_idx) * 30;  % Convert to data points
+        end_epoch = cycle_table.end_epoch(cycle_idx) * 30;      % Convert to data points
+        % Initialize arrays to hold spindle data for this cycle (NREM stages only)
+        spindle_cycle_data_NREM = [];
+        % Loop through the detected spindles in spindles_detection_info
+        for spindle_idx = 1:height(spindles_detection_info)
+            spindle_start = spindles_detection_info.Start(spindle_idx);  % Start of spindle (in data points)
+            spindle_stage = spindles_detection_info.Stage(spindle_idx);  % Stage of the spindle
+            % Check if the spindle occurs within the current cycle and is in NREM (stage 2 or 3)
+            if spindle_start >= start_epoch && spindle_start <= end_epoch && (spindle_stage == 2 || spindle_stage == 3)
+                spindle_cycle_data_NREM = [spindle_cycle_data_NREM; spindles_detection_info(spindle_idx, :)];
+            end
+        end
+        % For NREM spindles, calculate mean and std of the relevant metrics
+        if ~isempty(spindle_cycle_data_NREM)
+            Spindle_results.(['Cycle_' num2str(cycle_idx)]).mean.duration = mean(spindle_cycle_data_NREM.Duration);
+            Spindle_results.(['Cycle_' num2str(cycle_idx)]).std.duration = std(spindle_cycle_data_NREM.Duration);
+            Spindle_results.(['Cycle_' num2str(cycle_idx)]).mean.Amplitude = mean(spindle_cycle_data_NREM.Amplitude);
+            Spindle_results.(['Cycle_' num2str(cycle_idx)]).std.Amplitude = std(spindle_cycle_data_NREM.Amplitude);
+            Spindle_results.(['Cycle_' num2str(cycle_idx)]).mean.RMS = mean(spindle_cycle_data_NREM.RMS);
+            Spindle_results.(['Cycle_' num2str(cycle_idx)]).std.RMS = std(spindle_cycle_data_NREM.RMS);
+            Spindle_results.(['Cycle_' num2str(cycle_idx)]).mean.AbsPower = mean(spindle_cycle_data_NREM.AbsPower);
+            Spindle_results.(['Cycle_' num2str(cycle_idx)]).std.AbsPower = std(spindle_cycle_data_NREM.AbsPower);
+            Spindle_results.(['Cycle_' num2str(cycle_idx)]).mean.RelPower = mean(spindle_cycle_data_NREM.RelPower);
+            Spindle_results.(['Cycle_' num2str(cycle_idx)]).std.RelPower = std(spindle_cycle_data_NREM.RelPower);
+            Spindle_results.(['Cycle_' num2str(cycle_idx)]).mean.Frequency = mean(spindle_cycle_data_NREM.Frequency);
+            Spindle_results.(['Cycle_' num2str(cycle_idx)]).std.Frequency = std(spindle_cycle_data_NREM.Frequency);
+            Spindle_results.(['Cycle_' num2str(cycle_idx)]).mean.Oscillations = mean(spindle_cycle_data_NREM.Oscillations);
+            Spindle_results.(['Cycle_' num2str(cycle_idx)]).std.Oscillations = std(spindle_cycle_data_NREM.Oscillations);
+            Spindle_results.(['Cycle_' num2str(cycle_idx)]).mean.Symmetry = mean(spindle_cycle_data_NREM.Symmetry);
+            Spindle_results.(['Cycle_' num2str(cycle_idx)]).std.Symmetry = std(spindle_cycle_data_NREM.Symmetry);
+        else
+            % If no NREM spindles found in this cycle, set fields to NaN
+            Spindle_results.(['Cycle_' num2str(cycle_idx)]).mean = NaN;
+            Spindle_results.(['Cycle_' num2str(cycle_idx)]).std = NaN;
+        end
+    end
+    % Calculate the difference between the first and last cycle
+    first_cycle = Spindle_results.Cycle_1;
+    last_cycle = Spindle_results.(['Cycle_' num2str(height(cycle_table))]);
+    % Calculate the difference in mean values between the first and last cycle
+    Spindle_results.Difference.mean.duration = first_cycle.mean.duration - last_cycle.mean.duration;
+    Spindle_results.Difference.mean.Amplitude = first_cycle.mean.Amplitude - last_cycle.mean.Amplitude;
+    Spindle_results.Difference.mean.RMS = first_cycle.mean.RMS - last_cycle.mean.RMS;
+    Spindle_results.Difference.mean.AbsPower = first_cycle.mean.AbsPower - last_cycle.mean.AbsPower;
+    Spindle_results.Difference.mean.RelPower = first_cycle.mean.RelPower - last_cycle.mean.RelPower;
+    Spindle_results.Difference.mean.Frequency = first_cycle.mean.Frequency - last_cycle.mean.Frequency;
+    Spindle_results.Difference.mean.Oscillations = first_cycle.mean.Oscillations - last_cycle.mean.Oscillations;
+    Spindle_results.Difference.mean.Symmetry = first_cycle.mean.Symmetry - last_cycle.mean.Symmetry;
+    % Calculate the difference in standard deviation between the first and last cycle
+    Spindle_results.Difference.std.duration = first_cycle.std.duration - last_cycle.std.duration;
+    Spindle_results.Difference.std.Amplitude = first_cycle.std.Amplitude - last_cycle.std.Amplitude;
+    Spindle_results.Difference.std.RMS = first_cycle.std.RMS - last_cycle.std.RMS;
+    Spindle_results.Difference.std.AbsPower = first_cycle.std.AbsPower - last_cycle.std.AbsPower;
+    Spindle_results.Difference.std.RelPower = first_cycle.std.RelPower - last_cycle.std.RelPower;
+    Spindle_results.Difference.std.Frequency = first_cycle.std.Frequency - last_cycle.std.Frequency;
+    Spindle_results.Difference.std.Oscillations = first_cycle.std.Oscillations - last_cycle.std.Oscillations;
+    Spindle_results.Difference.std.Symmetry = first_cycle.std.Symmetry - last_cycle.std.Symmetry;
 
-% Calculate the difference between the first and last cycle
-first_cycle = SW_results.Cycle_1;
-last_cycle = SW_results.(['Cycle_' num2str(height(cycle_table))]);
 
-% Calculate the difference in mean values between the first and last cycle
-SW_results.Difference.mean.duration = first_cycle.mean.duration - last_cycle.mean.duration;
-SW_results.Difference.mean.ValNegPeak = first_cycle.mean.ValNegPeak - last_cycle.mean.ValNegPeak;
-SW_results.Difference.mean.ValPosPeak = first_cycle.mean.ValPosPeak - last_cycle.mean.ValPosPeak;
-SW_results.Difference.mean.PTP = first_cycle.mean.PTP - last_cycle.mean.PTP;
-SW_results.Difference.mean.Slope = first_cycle.mean.Slope - last_cycle.mean.Slope;
-SW_results.Difference.mean.Frequency = first_cycle.mean.Frequency - last_cycle.mean.Frequency;
-SW_results.Difference.mean.duration_negative_phase = first_cycle.mean.duration_negative_phase - last_cycle.mean.duration_negative_phase;
-SW_results.Difference.mean.duration_positive_phase = first_cycle.mean.duration_positive_phase - last_cycle.mean.duration_positive_phase;
-
-% Calculate the difference in standard deviation between the first and last cycle
-SW_results.Difference.std.duration = first_cycle.std.duration - last_cycle.std.duration;
-SW_results.Difference.std.ValNegPeak = first_cycle.std.ValNegPeak - last_cycle.std.ValNegPeak;
-SW_results.Difference.std.ValPosPeak = first_cycle.std.ValPosPeak - last_cycle.std.ValPosPeak;
-SW_results.Difference.std.PTP = first_cycle.std.PTP - last_cycle.std.PTP;
-SW_results.Difference.std.Slope = first_cycle.std.Slope - last_cycle.std.Slope;
-SW_results.Difference.std.Frequency = first_cycle.std.Frequency - last_cycle.std.Frequency;
-SW_results.Difference.std.duration_negative_phase = first_cycle.std.duration_negative_phase - last_cycle.std.duration_negative_phase;
-SW_results.Difference.std.duration_positive_phase = first_cycle.std.duration_positive_phase - last_cycle.std.duration_positive_phase;
-
-
-
-
-
-
-
-
-
-
-
-% Extract the summary of slow waves as a Python DataFrame
-sw_summary_py = sws_detection_result.get_summary();
-
-% Convert the Python DataFrame to a MATLAB structure
-sw_summary = struct(py.pandas.DataFrame.to_dict(sw_summary_py, 'list'));
-
-
-
-
-
-
-   
 
 
 
