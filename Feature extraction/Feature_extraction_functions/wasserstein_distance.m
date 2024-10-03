@@ -64,6 +64,4 @@ function wasserstein_distance(EEG_clean, chan1, chan2, remove_channel_which, whi
     % Assign the Wasserstein distance to the workspace using the dynamically generated variable name
     assignin('base', variable_name, wasserstein_dist);
     
-    % Display the result
-    disp([variable_name, ' = ', num2str(wasserstein_dist)]);
 end

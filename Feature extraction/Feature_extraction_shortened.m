@@ -19,7 +19,7 @@ beta_b = [15, 30];
 gamma_b = [30, 40];
 spindle_b = [12, 16];
 
-for night = 1:1%length(all_mat_files)
+for i = 1:1%length(all_mat_files)
     % load the file
     load([all_mat_files(i).folder, '\', all_mat_files(i).name]);
     % extract the name of the file
@@ -205,15 +205,45 @@ for night = 1:1%length(all_mat_files)
     % Create the table
     cycle_table = table((1:n_cycles)', start_epochs, end_epochs, duration_minutes, ...
         'VariableNames', {'n_cycle', 'start_epoch', 'end_epoch', 'duration_min'});
+    
+
+
+    % Extract the last sleep stage before wakeup
+    last_stage_before_wakeup = extract_last_sleep_stage_before_wakeup(hypnogram);
 
 
 
+    % wasserstein interhemispheric spectral measure
+    % This function computes the Wasserstein distance between two EEG channels based on their power spectral density (PSD).
+    % The PSD is calculated using the Welch method over the specified window and overlap parameters. The function then calculates
+    % the cumulative distribution of the PSD in the frequency range of 0.5 to 40 Hz and compares the two channels using the
+    % Wasserstein distance metric.
+    % done over whole night
+    % remove no channels
+    remove_channel_which = zeros(1,8);
+    duration_window = 4*EEG_clean.srate;
+    which_window = hanning(duration_window);
+    overlap_window = duration_window*0.5;
+    % Saves it automatically with appropriate name, e.g. wasserstein_f3f4
+    wasserstein_distance(EEG_clean, 'F3', 'F4', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
+    wasserstein_distance(EEG_clean, 'C3', 'C4', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
+    wasserstein_distance(EEG_clean, 'P3', 'P4', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
+    wasserstein_distance(EEG_clean, 'O1', 'O2', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
+
+
+
+    % Calculate sleep 
+    ECG_results = calculate_ECG_by_cycles_and_stages(EEG_clean, cycle_table, collapsed_values);
+
+
+
+    %%% Calculations only on clean epochs
     % group the clean epochs by sleep stage
     % Extract necessary data from EEG_clean.clean_epochs
     epochs = EEG_clean.clean_epochs.epoch;
     stages = EEG_clean.clean_epochs.stage;
     start_indices = EEG_clean.clean_epochs.start_index;
-    end_indices = EEG_clean.clean_epochs.end_index
+    end_indices = EEG_clean.clean_epochs.end_index;
     % Initialize a struct to hold start and end indices grouped by stages
     stage_epochs = struct('NREM1', [], 'NREM2', [], 'NREM3', [], 'REM', []);
     % Loop through all epochs and group start and end indices by their stage
@@ -448,6 +478,175 @@ for night = 1:1%length(all_mat_files)
     end
 
 
+
+    % Slow wave detection on clean epochs
+    % Initialize an empty array to store clean data
+    clean_data = [];
+    % Loop through each clean epoch and concatenate the corresponding data
+    for i = 1:height(EEG_clean.clean_epochs)
+        start_idx = EEG_clean.clean_epochs.start_index(i);  % Get start index for current epoch
+        end_idx = EEG_clean.clean_epochs.end_index(i);      % Get end index for current epoch
+        clean_data = [clean_data, EEG_clean.data(:, start_idx:end_idx)];  % Concatenate clean data
+    end
+    % Store clean data in a new field in EEG_clean
+    EEG_clean.clean_data = clean_data;
+    % Convert the clean EEG data to Python-friendly format (NumPy array)
+    data_for_py = cell(1, size(EEG_clean.clean_data, 1));
+    for row = 1:size(EEG_clean.clean_data, 1)
+        data_for_py{row} = EEG_clean.clean_data(row, :);
+    end
+    data_for_py = py.numpy.array(data_for_py);
+    % Prepare hypnogram data (You need to ensure `hypnodata` corresponds to clean epochs)
+    sleep_stages_clean = EEG_clean.clean_epochs.stage;
+    % Determine the number of epochs (each epoch is 30 seconds)
+    num_epochs = length(sleep_stages_clean);
+    % Initialize the hypnogram vector to store sleep stages per epoch
+    hypnogram_clean = zeros(1, num_epochs);
+    % Loop over each epoch and assign the corresponding sleep stage to the hypnogram
+    % 0=wake, 1=NREM1, 2=NREM2, 3&4=NREM3, 5=REM, 6<=movement
+    for epoch = 1:num_epochs
+        stage = sleep_stages_clean(epoch);
+        if stage == 3 || stage == 4
+            % Combine stage 3 and 4 into NREM3 (using 3 as NREM3 code)
+            hypnogram_clean(epoch) = 3;
+        elseif stage >= 6
+            % Anything above 5 (movement) is set to 6
+            hypnogram_clean(epoch) = 6;
+        else
+            % Use the stage as it is for other sleep stages (0 to 5)
+            hypnogram_clean(epoch) = stage;
+        end
+    end
+    % Upsample scoring to match sampling frequency of data
+    epoch_duration_sec = 30;  % Duration of each epoch in seconds
+    srate = EEG_clean.srate;  % Sampling rate of the EEG data
+    % Repeat each entry in hypnogram_clean for 30 * srate times
+    repeats_per_epoch = epoch_duration_sec * srate;  % Number of samples per epoch
+    hypnogram_clean_upsampled = repelem(hypnogram_clean, repeats_per_epoch);
+    % Run the slow wave detection in YASA
+    sws_detection_results = py.yasa.sw_detect(data = data_for_py, ...
+        sf = py.float(EEG_clean.srate), ...
+        ch_names = py.list({EEG_clean.chanlocs.labels}), ...
+        hypno = py.numpy.array(hypnogram_clean_upsampled, 'int'), ...
+        include = py.numpy.array([2, 3], 'int'), ...  % stages to include in SWS detection (NREM2 and NREM3)
+        freq_sw = py.tuple([0.5, 4.5]), ...
+        dur_neg = py.tuple([0.1, 1.5]), ...
+        dur_pos = py.tuple([0.1, 1.5]), ...
+        amp_neg = py.tuple([5, 1000]), ...
+        amp_pos = py.tuple([5, 1000]), ...
+        amp_ptp = py.tuple([20, 1000]), ...
+        coupling = false, ...  % Disable phase coupling calculation
+        remove_outliers = false, ...  % Disable outlier removal
+        verbose = false);
+
+
+ if ~isempty(sws_detection_results)
+                sws_detection_info = sws_detection_results.summary();
+                sws_colnames = cellfun(@string,cell(sws_detection_info.columns.values.tolist()));
+                sws_detection_info = cell(sws_detection_info.values.tolist());
+                sws_detection_info = cellfun(@(xs)cell2table(cell(xs), 'VariableNames', sws_colnames),sws_detection_info, 'UniformOutput', false);
+                sws_detection_info = vertcat(sws_detection_info{:});
+                sws_detection_info.Stage = cellfun(@double, sws_detection_info.Stage);
+                sws_detection_info.Channel = string(sws_detection_info.Channel);
+                sws_detection_info.IdxChannel = cellfun(@double, sws_detection_info.IdxChannel);
+
+                sws_detection_info.neg_sw_peaks_ind = sws_detection_info.NegPeak*EEG_clean.srate;
+                sws_detection_info.duration_negative_phase = (sws_detection_info.MidCrossing - sws_detection_info.Start)*EEG_clean.srate;
+                sws_detection_info.duration_positive_phase = (sws_detection_info.End - sws_detection_info.MidCrossing)*EEG_clean.srate;
+                sws_detection_info.duration_start_to_neg = (sws_detection_info.NegPeak - sws_detection_info.Start)*EEG_clean.srate;
+                sws_detection_info.duration_neg_to_mid = (sws_detection_info.MidCrossing - sws_detection_info.NegPeak)*EEG_clean.srate;
+                sws_detection_info.duration_mid_to_pos = (sws_detection_info.PosPeak - sws_detection_info.MidCrossing)*EEG_clean.srate;
+                sws_detection_info.duration_pos_to_end = (sws_detection_info.End - sws_detection_info.PosPeak)*EEG_clean.srate;
+
+ end
+
+
+% Initialize an empty struct to hold the results for each cycle
+SW_results = struct();
+
+% Loop through each sleep cycle in the cycle_table
+for cycle_idx = 1:height(cycle_table)
+    start_epoch = cycle_table.start_epoch(cycle_idx) * 30;  % Convert to data points
+    end_epoch = cycle_table.end_epoch(cycle_idx) * 30;      % Convert to data points
+    
+    % Initialize arrays to hold slow wave data for this cycle (NREM stages only)
+    sw_cycle_data_NREM = [];
+    
+    % Loop through the detected slow waves in sws_detection_info
+    for sw_idx = 1:height(sws_detection_info)
+        sw_start = sws_detection_info.Start(sw_idx);  % Start of slow wave (in data points)
+        sw_stage = sws_detection_info.Stage(sw_idx);  % Stage of the slow wave
+        
+        % Check if the slow wave occurs within the current cycle and is in NREM (stage 2 or 3)
+        if sw_start >= start_epoch && sw_start <= end_epoch && (sw_stage == 2 || sw_stage == 3)
+            sw_cycle_data_NREM = [sw_cycle_data_NREM; sws_detection_info(sw_idx, :)];
+        end
+    end
+    
+    % For NREM slow waves, calculate mean and std of the relevant metrics
+    if ~isempty(sw_cycle_data_NREM)
+        SW_results.(['Cycle_' num2str(cycle_idx)]).mean.duration = mean(sw_cycle_data_NREM.Duration);
+        SW_results.(['Cycle_' num2str(cycle_idx)]).std.duration = std(sw_cycle_data_NREM.Duration);
+        SW_results.(['Cycle_' num2str(cycle_idx)]).mean.ValNegPeak = mean(sw_cycle_data_NREM.ValNegPeak);
+        SW_results.(['Cycle_' num2str(cycle_idx)]).std.ValNegPeak = std(sw_cycle_data_NREM.ValNegPeak);
+        SW_results.(['Cycle_' num2str(cycle_idx)]).mean.ValPosPeak = mean(sw_cycle_data_NREM.ValPosPeak);
+        SW_results.(['Cycle_' num2str(cycle_idx)]).std.ValPosPeak = std(sw_cycle_data_NREM.ValPosPeak);
+        SW_results.(['Cycle_' num2str(cycle_idx)]).mean.PTP = mean(sw_cycle_data_NREM.PTP);
+        SW_results.(['Cycle_' num2str(cycle_idx)]).std.PTP = std(sw_cycle_data_NREM.PTP);
+        SW_results.(['Cycle_' num2str(cycle_idx)]).mean.Slope = mean(sw_cycle_data_NREM.Slope);
+        SW_results.(['Cycle_' num2str(cycle_idx)]).std.Slope = std(sw_cycle_data_NREM.Slope);
+        SW_results.(['Cycle_' num2str(cycle_idx)]).mean.Frequency = mean(sw_cycle_data_NREM.Frequency);
+        SW_results.(['Cycle_' num2str(cycle_idx)]).std.Frequency = std(sw_cycle_data_NREM.Frequency);
+        SW_results.(['Cycle_' num2str(cycle_idx)]).mean.duration_negative_phase = mean(sw_cycle_data_NREM.duration_negative_phase);
+        SW_results.(['Cycle_' num2str(cycle_idx)]).std.duration_negative_phase = std(sw_cycle_data_NREM.duration_negative_phase);
+        SW_results.(['Cycle_' num2str(cycle_idx)]).mean.duration_positive_phase = mean(sw_cycle_data_NREM.duration_positive_phase);
+        SW_results.(['Cycle_' num2str(cycle_idx)]).std.duration_positive_phase = std(sw_cycle_data_NREM.duration_positive_phase);
+    else
+        % If no NREM slow waves found in this cycle, set fields to NaN
+        SW_results.(['Cycle_' num2str(cycle_idx)]).mean = NaN;
+        SW_results.(['Cycle_' num2str(cycle_idx)]).std = NaN;
+    end
+end
+
+% Calculate the difference between the first and last cycle
+first_cycle = SW_results.Cycle_1;
+last_cycle = SW_results.(['Cycle_' num2str(height(cycle_table))]);
+
+% Calculate the difference in mean values between the first and last cycle
+SW_results.Difference.mean.duration = first_cycle.mean.duration - last_cycle.mean.duration;
+SW_results.Difference.mean.ValNegPeak = first_cycle.mean.ValNegPeak - last_cycle.mean.ValNegPeak;
+SW_results.Difference.mean.ValPosPeak = first_cycle.mean.ValPosPeak - last_cycle.mean.ValPosPeak;
+SW_results.Difference.mean.PTP = first_cycle.mean.PTP - last_cycle.mean.PTP;
+SW_results.Difference.mean.Slope = first_cycle.mean.Slope - last_cycle.mean.Slope;
+SW_results.Difference.mean.Frequency = first_cycle.mean.Frequency - last_cycle.mean.Frequency;
+SW_results.Difference.mean.duration_negative_phase = first_cycle.mean.duration_negative_phase - last_cycle.mean.duration_negative_phase;
+SW_results.Difference.mean.duration_positive_phase = first_cycle.mean.duration_positive_phase - last_cycle.mean.duration_positive_phase;
+
+% Calculate the difference in standard deviation between the first and last cycle
+SW_results.Difference.std.duration = first_cycle.std.duration - last_cycle.std.duration;
+SW_results.Difference.std.ValNegPeak = first_cycle.std.ValNegPeak - last_cycle.std.ValNegPeak;
+SW_results.Difference.std.ValPosPeak = first_cycle.std.ValPosPeak - last_cycle.std.ValPosPeak;
+SW_results.Difference.std.PTP = first_cycle.std.PTP - last_cycle.std.PTP;
+SW_results.Difference.std.Slope = first_cycle.std.Slope - last_cycle.std.Slope;
+SW_results.Difference.std.Frequency = first_cycle.std.Frequency - last_cycle.std.Frequency;
+SW_results.Difference.std.duration_negative_phase = first_cycle.std.duration_negative_phase - last_cycle.std.duration_negative_phase;
+SW_results.Difference.std.duration_positive_phase = first_cycle.std.duration_positive_phase - last_cycle.std.duration_positive_phase;
+
+
+
+
+
+
+
+
+
+
+
+% Extract the summary of slow waves as a Python DataFrame
+sw_summary_py = sws_detection_result.get_summary();
+
+% Convert the Python DataFrame to a MATLAB structure
+sw_summary = struct(py.pandas.DataFrame.to_dict(sw_summary_py, 'list'));
 
 
 

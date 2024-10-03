@@ -21,8 +21,6 @@ function ECG_values = calculate_ECG_values(EEG_clean, indexs)
         
         % Normalize RR intervals
         RR_n = RR / mean(RR);
-        ECG_values.ecg_quant20 = quantile(60 ./ RR_n, 0.2);
-        ECG_values.ecg_quant80 = quantile(60 ./ RR_n, 0.8);
         
         % Time-domain measures
         ECG_values.ecg_rmssd = sqrt(mean(diff(RR_n) .^ 2));
@@ -40,60 +38,28 @@ function ECG_values = calculate_ECG_values(EEG_clean, indexs)
         [Pxx, F] = periodogram(RRi, [], [], Fs);
         
         % Frequency bands
-        ULF_band = F >= 0 & F <= 0.03;
-        VLF_band = F > 0.03 & F <= 0.05;
         LF_band = F > 0.05 & F <= 0.15;
         HF_band = F > 0.15 & F <= 0.4;
         
         % Power in each band
-        ECG_values.ecg_ULF = trapz(F(ULF_band), Pxx(ULF_band));
-        ECG_values.ecg_VLF = trapz(F(VLF_band), Pxx(VLF_band));
         ECG_values.ecg_LF = trapz(F(LF_band), Pxx(LF_band));
         ECG_values.ecg_HF = trapz(F(HF_band), Pxx(HF_band));
         
         % Complexity measures (if there are enough RR intervals)
         if length(RR) > 10
-            ECG_values.ecg_higuchi_fd = Higuchi_FD(zscore(RR), min(10, max(1, length(RR) - 2)));
-            ECG_values.ecg_katz_fd = Katz_FD(zscore(RR));
-            ECG_values.ecg_bubble_en = BubbEn(zscore(RR));
-            ECG_values.ecg_spect_en = SpecEn(zscore(RR));
-            ECG_values.ecg_sydy_en = SyDyEn(zscore(RR));
-            ECG_values.ecg_phase_en = PhasEn(zscore(RR));
-            ECG_values.ecg_slope_en = SlopEn(zscore(RR));
-            ECG_values.ecg_eoe_en = EnofEn(zscore(RR));
             ECG_values.ecg_att_en = AttnEn(zscore(RR));
         else
-            ECG_values.ecg_higuchi_fd = NaN;
-            ECG_values.ecg_katz_fd = NaN;
-            ECG_values.ecg_bubble_en = NaN;
-            ECG_values.ecg_spect_en = NaN;
-            ECG_values.ecg_sydy_en = NaN;
-            ECG_values.ecg_phase_en = NaN;
-            ECG_values.ecg_slope_en = NaN;
-            ECG_values.ecg_eoe_en = NaN;
             ECG_values.ecg_att_en = NaN;
         end
     else
         % Set all ECG measures to NaN if no RR intervals are detected
         ECG_values.ecg_mean = NaN;
-        ECG_values.ecg_quant20 = NaN;
-        ECG_values.ecg_quant80 = NaN;
         ECG_values.ecg_rmssd = NaN;
         ECG_values.ecg_sdnn = NaN;
         ECG_values.ecg_sdsd = NaN;
         ECG_values.ecg_pnn50 = NaN;
-        ECG_values.ecg_ULF = NaN;
-        ECG_values.ecg_VLF = NaN;
         ECG_values.ecg_LF = NaN;
         ECG_values.ecg_HF = NaN;
-        ECG_values.ecg_higuchi_fd = NaN;
-        ECG_values.ecg_katz_fd = NaN;
-        ECG_values.ecg_bubble_en = NaN;
-        ECG_values.ecg_spect_en = NaN;
-        ECG_values.ecg_sydy_en = NaN;
-        ECG_values.ecg_phase_en = NaN;
-        ECG_values.ecg_slope_en = NaN;
-        ECG_values.ecg_eoe_en = NaN;
         ECG_values.ecg_att_en = NaN;
     end
 

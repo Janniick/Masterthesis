@@ -19,7 +19,7 @@ beta_b = [15, 30];
 gamma_b = [30, 40];
 spindle_b = [12, 16];
 
-for night = 1:1%length(all_mat_files)
+for i = 1:1%length(all_mat_files)
     % load the file
     load([all_mat_files(i).folder, '\', all_mat_files(i).name]);
     % extract the name of the file
@@ -205,15 +205,45 @@ for night = 1:1%length(all_mat_files)
     % Create the table
     cycle_table = table((1:n_cycles)', start_epochs, end_epochs, duration_minutes, ...
         'VariableNames', {'n_cycle', 'start_epoch', 'end_epoch', 'duration_min'});
+    
+
+
+    % Extract the last sleep stage before wakeup
+    last_stage_before_wakeup = extract_last_sleep_stage_before_wakeup(hypnogram);
 
 
 
+    % wasserstein interhemispheric spectral measure
+    % This function computes the Wasserstein distance between two EEG channels based on their power spectral density (PSD).
+    % The PSD is calculated using the Welch method over the specified window and overlap parameters. The function then calculates
+    % the cumulative distribution of the PSD in the frequency range of 0.5 to 40 Hz and compares the two channels using the
+    % Wasserstein distance metric.
+    % done over whole night
+    % remove no channels
+    remove_channel_which = zeros(1,8);
+    duration_window = 4*EEG_clean.srate;
+    which_window = hanning(duration_window);
+    overlap_window = duration_window*0.5;
+    % Saves it automatically with appropriate name, e.g. wasserstein_f3f4
+    wasserstein_distance(EEG_clean, 'F3', 'F4', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
+    wasserstein_distance(EEG_clean, 'C3', 'C4', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
+    wasserstein_distance(EEG_clean, 'P3', 'P4', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
+    wasserstein_distance(EEG_clean, 'O1', 'O2', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
+
+
+
+    % Calculate sleep 
+    ECG_results = calculate_ECG_by_cycles_and_stages(EEG_clean, cycle_table, collapsed_values);
+
+
+
+    %%% Calculations only on clean epochs
     % group the clean epochs by sleep stage
     % Extract necessary data from EEG_clean.clean_epochs
     epochs = EEG_clean.clean_epochs.epoch;
     stages = EEG_clean.clean_epochs.stage;
     start_indices = EEG_clean.clean_epochs.start_index;
-    end_indices = EEG_clean.clean_epochs.end_index
+    end_indices = EEG_clean.clean_epochs.end_index;
     % Initialize a struct to hold start and end indices grouped by stages
     stage_epochs = struct('NREM1', [], 'NREM2', [], 'NREM3', [], 'REM', []);
     % Loop through all epochs and group start and end indices by their stage
@@ -254,24 +284,20 @@ for night = 1:1%length(all_mat_files)
     for stage_idx = 1:length(sleep_stages)
         stage_name = sleep_stages{stage_idx};  % Current stage (e.g., NREM1, NREM2, etc.)
         epochs = stage_epochs.(stage_name);    % Get epochs (start and end indices) for the current stage
-
         % Initialize arrays to hold power spectrum results for this stage and region
         stage_absolute_power.FC = [];
         stage_relative_power.FC = [];
         stage_absolute_power.PO = [];
         stage_relative_power.PO = [];
-
         % Loop over each region (FC and PO)
         for region_idx = 1:length(regions)
             region_name = regions{region_idx};
             region_chan = region_channels.(region_name);  % Get channel indices for this region
-
             % Loop over each epoch
             for epoch_idx = 1:size(epochs, 1)
                 start_idx = epochs(epoch_idx, 1);
                 end_idx = epochs(epoch_idx, 2);
                 indexs = start_idx:end_idx;  % Epoch indices
-
                 % Loop over each channel in the region
                 for chan = region_chan
                     % Calculate power spectrum for this channel and epoch
@@ -284,11 +310,9 @@ for night = 1:1%length(all_mat_files)
                     overall_relative_power.(region_name) = [overall_relative_power.(region_name); struct2array(relative_power)];
                 end
             end
-
             % Store results in the struct for each sleep stage and region
             power_spectrum_results.(stage_name).(region_name).absolute_power = stage_absolute_power.(region_name);
             power_spectrum_results.(stage_name).(region_name).relative_power = stage_relative_power.(region_name);
-
             % Calculate mean and standard deviation for each band and region
             for band_idx = 1:length(bands)
                 band_name = bands{band_idx};
@@ -301,7 +325,6 @@ for night = 1:1%length(all_mat_files)
             end
         end
     end
-
     % Now calculate the overall (whole night) values for each region
     for region_idx = 1:length(regions)
         region_name = regions{region_idx};
@@ -319,45 +342,30 @@ for night = 1:1%length(all_mat_files)
 
 
 
-
+    % FOOOF analysis
     % Channels grouped into FC and PO
-fc_channels = find(contains({EEG_clean.chanlocs.labels}, {'F', 'C'}));  % Find FC channels
-po_channels = find(contains({EEG_clean.chanlocs.labels}, {'P', 'O'}));  % Find PO channels
-
-% Initialize structs to hold FOOOF results for each stage and overall
-fooof_results = struct('NREM1', [], 'NREM2', [], 'NREM3', [], 'REM', [], 'Overall', []);
-bands = {'delta', 'theta', 'alpha', 'beta', 'spindle', 'gamma'};
-overall_fooof_offset = struct('FC', [], 'PO', []);
-overall_fooof_exponent = struct('FC', [], 'PO', []);
-overall_normalized_absolute_power = struct('FC', [], 'PO', []);
-overall_peak_values = struct('FC', [], 'PO', []);
-
-% Initialize arrays to accumulate FOOOF values across all stages for the "Overall" calculation
-overall_fooof_offset.FC = [];
-overall_fooof_offset.PO = [];
-overall_fooof_exponent.FC = [];
-overall_fooof_exponent.PO = [];
-overall_normalized_absolute_power.FC = [];
-overall_normalized_absolute_power.PO = [];
-overall_peak_values.FC = [];
-overall_peak_values.PO = [];
-stage_fooof_offset.FC = [];
-stage_fooof_offset.PO = [];
-stage_fooof_exponent.FC = [];
-stage_fooof_exponent.PO = [];
-stage_normalized_absolute_power.FC = [];
-stage_normalized_absolute_power.PO = [];
-stage_peak_values.FC = [];
-stage_peak_values.PO = [];
-
-% Loop through each sleep stage and perform FOOOF analysis for each epoch
-sleep_stages = fieldnames(stage_epochs);  % NREM1, NREM2, NREM3, REM
-
-for stage_idx = 1:length(sleep_stages)
-    stage_name = sleep_stages{stage_idx};  % Current stage (e.g., NREM1, NREM2, etc.)
-    epochs = stage_epochs.(stage_name);    % Get epochs (start and end indices) for the current stage
-
-    % Initialize arrays to hold FOOOF results for FC and PO channels separately
+    fc_channels = find(contains({EEG_clean.chanlocs.labels}, {'F', 'C'}));  % Find FC channels
+    po_channels = find(contains({EEG_clean.chanlocs.labels}, {'P', 'O'}));  % Find PO channels
+    % Initialize structs to hold FOOOF results for each stage and overall
+    fooof_results = struct('NREM1', [], 'NREM2', [], 'NREM3', [], 'REM', [], 'Overall', []);
+    bands = {'delta', 'theta', 'alpha', 'beta', 'spindle', 'gamma'};
+    overall_fooof_offset = struct('FC', [], 'PO', []);
+    overall_fooof_exponent = struct('FC', [], 'PO', []);
+    overall_normalized_absolute_power = struct('FC', [], 'PO', []);
+    overall_peak_values = struct('FC', [], 'PO', []);
+    stage_fooof_offset = struct('FC', [], 'PO', []);
+    stage_fooof_exponent = struct('FC', [], 'PO', []);
+    stage_normalized_absolute_power = struct('FC', [], 'PO', []);
+    stage_peak_values = struct('FC', [], 'PO', []);
+    % Initialize arrays to accumulate FOOOF values across all stages for the "Overall" calculation
+    overall_fooof_offset.FC = [];
+    overall_fooof_offset.PO = [];
+    overall_fooof_exponent.FC = [];
+    overall_fooof_exponent.PO = [];
+    overall_normalized_absolute_power.FC = [];
+    overall_normalized_absolute_power.PO = [];
+    overall_peak_values.FC = [];
+    overall_peak_values.PO = [];
     stage_fooof_offset.FC = [];
     stage_fooof_offset.PO = [];
     stage_fooof_exponent.FC = [];
@@ -366,120 +374,299 @@ for stage_idx = 1:length(sleep_stages)
     stage_normalized_absolute_power.PO = [];
     stage_peak_values.FC = [];
     stage_peak_values.PO = [];
-
-    for epoch_idx = 1:size(epochs, 1)
-        start_idx = epochs(epoch_idx, 1);
-        end_idx = epochs(epoch_idx, 2);
-        indexs = start_idx:end_idx;  % Epoch indices
-
-        % Process FC channels
-        for chan = fc_channels
-            % Calculate power spectrum for this channel and epoch (needed for FOOOF)
-            [~, ~, freq, psd] = calculate_power_spectrum(EEG_clean, chan, indexs, srate, freq_res, delta_b, theta_b, alpha_b, beta_b, spindle_b);
-
-            % Run FOOOF and detect strongest peaks
-            [fooof_offset, fooof_exponent, peak_table, normalized_absolute_power] = run_fooof_and_detect_strongest_peaks(freq, psd, delta_b, theta_b, alpha_b, beta_b, spindle_b, gamma_b);
-
-            % Store the results for FC channels
-            stage_fooof_offset.FC = [stage_fooof_offset.FC; fooof_offset];
-            stage_fooof_exponent.FC = [stage_fooof_exponent.FC; fooof_exponent];
-            stage_normalized_absolute_power.FC = [stage_normalized_absolute_power.FC; struct2array(normalized_absolute_power)];
-            stage_peak_values.FC = [stage_peak_values.FC; struct2array(peak_table)];
-
-            % Accumulate results for the overall calculation (FC)
-            overall_fooof_offset.FC = [overall_fooof_offset.FC; fooof_offset];
-            overall_fooof_exponent.FC = [overall_fooof_exponent.FC; fooof_exponent];
-            overall_normalized_absolute_power.FC = [overall_normalized_absolute_power.FC; struct2array(normalized_absolute_power)];
-            overall_peak_values.FC = [overall_peak_values.FC; struct2array(peak_table)];
+    % Loop through each sleep stage and perform FOOOF analysis for each epoch
+    sleep_stages = fieldnames(stage_epochs);  % NREM1, NREM2, NREM3, REM
+    for stage_idx = 1:length(sleep_stages)
+        stage_name = sleep_stages{stage_idx};  % Current stage (e.g., NREM1, NREM2, etc.)
+        epochs = stage_epochs.(stage_name);    % Get epochs (start and end indices) for the current stage
+        % Initialize arrays to hold FOOOF results for FC and PO channels separately
+        stage_fooof_offset.FC = [];
+        stage_fooof_offset.PO = [];
+        stage_fooof_exponent.FC = [];
+        stage_fooof_exponent.PO = [];
+        stage_normalized_absolute_power.FC = [];
+        stage_normalized_absolute_power.PO = [];
+        stage_peak_values.FC = [];
+        stage_peak_values.PO = [];
+        for epoch_idx = 1:size(epochs, 1)
+            start_idx = epochs(epoch_idx, 1);
+            end_idx = epochs(epoch_idx, 2);
+            indexs = start_idx:end_idx;  % Epoch indices
+            % Process FC channels
+            for chan = fc_channels
+                % Calculate power spectrum for this channel and epoch (needed for FOOOF)
+                [~, ~, freq, psd] = calculate_power_spectrum(EEG_clean, chan, indexs, srate, freq_res, delta_b, theta_b, alpha_b, beta_b, spindle_b);
+                % Run FOOOF and detect strongest peaks
+                [fooof_offset, fooof_exponent, peak_table, normalized_absolute_power] = run_fooof_and_detect_strongest_peaks(freq, psd, delta_b, theta_b, alpha_b, beta_b, spindle_b, gamma_b);
+                % Store the results for FC channels
+                stage_fooof_offset.FC = [stage_fooof_offset.FC; fooof_offset];
+                stage_fooof_exponent.FC = [stage_fooof_exponent.FC; fooof_exponent];
+                stage_normalized_absolute_power.FC = [stage_normalized_absolute_power.FC; struct2array(normalized_absolute_power)];
+                stage_peak_values.FC = [stage_peak_values.FC; struct2array(peak_table)];
+                % Accumulate results for the overall calculation (FC)
+                overall_fooof_offset.FC = [overall_fooof_offset.FC; fooof_offset];
+                overall_fooof_exponent.FC = [overall_fooof_exponent.FC; fooof_exponent];
+                overall_normalized_absolute_power.FC = [overall_normalized_absolute_power.FC; struct2array(normalized_absolute_power)];
+                overall_peak_values.FC = [overall_peak_values.FC; struct2array(peak_table)];
+            end
+            % Process PO channels
+            for chan = po_channels
+                % Calculate power spectrum for this channel and epoch (needed for FOOOF)
+                [~, ~, freq, psd] = calculate_power_spectrum(EEG_clean, chan, indexs, srate, freq_res, delta_b, theta_b, alpha_b, beta_b, spindle_b);
+                % Run FOOOF and detect strongest peaks
+                [fooof_offset, fooof_exponent, peak_table, normalized_absolute_power] = run_fooof_and_detect_strongest_peaks(freq, psd, delta_b, theta_b, alpha_b, beta_b, spindle_b, gamma_b);
+                % Store the results for PO channels
+                stage_fooof_offset.PO = [stage_fooof_offset.PO; fooof_offset];
+                stage_fooof_exponent.PO = [stage_fooof_exponent.PO; fooof_exponent];
+                stage_normalized_absolute_power.PO = [stage_normalized_absolute_power.PO; struct2array(normalized_absolute_power)];
+                stage_peak_values.PO = [stage_peak_values.PO; struct2array(peak_table)];
+                % Accumulate results for the overall calculation (PO)
+                overall_fooof_offset.PO = [overall_fooof_offset.PO; fooof_offset];
+                overall_fooof_exponent.PO = [overall_fooof_exponent.PO; fooof_exponent];
+                overall_normalized_absolute_power.PO = [overall_normalized_absolute_power.PO; struct2array(normalized_absolute_power)];
+                overall_peak_values.PO = [overall_peak_values.PO; struct2array(peak_table)];
+            end
         end
-
-        % Process PO channels
-        for chan = po_channels
-            % Calculate power spectrum for this channel and epoch (needed for FOOOF)
-            [~, ~, freq, psd] = calculate_power_spectrum(EEG_clean, chan, indexs, srate, freq_res, delta_b, theta_b, alpha_b, beta_b, spindle_b);
-
-            % Run FOOOF and detect strongest peaks
-            [fooof_offset, fooof_exponent, peak_table, normalized_absolute_power] = run_fooof_and_detect_strongest_peaks(freq, psd, delta_b, theta_b, alpha_b, beta_b, spindle_b, gamma_b);
-
-            % Store the results for PO channels
-            stage_fooof_offset.PO = [stage_fooof_offset.PO; fooof_offset];
-            stage_fooof_exponent.PO = [stage_fooof_exponent.PO; fooof_exponent];
-            stage_normalized_absolute_power.PO = [stage_normalized_absolute_power.PO; struct2array(normalized_absolute_power)];
-            stage_peak_values.PO = [stage_peak_values.PO; struct2array(peak_table)];
-
-            % Accumulate results for the overall calculation (PO)
-            overall_fooof_offset.PO = [overall_fooof_offset.PO; fooof_offset];
-            overall_fooof_exponent.PO = [overall_fooof_exponent.PO; fooof_exponent];
-            overall_normalized_absolute_power.PO = [overall_normalized_absolute_power.PO; struct2array(normalized_absolute_power)];
-            overall_peak_values.PO = [overall_peak_values.PO; struct2array(peak_table)];
+        % Store results in the struct for each sleep stage
+        % For FC channels
+        fooof_results.(stage_name).FC.fooof_offset = stage_fooof_offset.FC;
+        fooof_results.(stage_name).FC.fooof_exponent = stage_fooof_exponent.FC;
+        fooof_results.(stage_name).FC.normalized_absolute_power = stage_normalized_absolute_power.FC;
+        fooof_results.(stage_name).FC.peak_values = stage_peak_values.FC;
+        % For PO channels
+        fooof_results.(stage_name).PO.fooof_offset = stage_fooof_offset.PO;
+        fooof_results.(stage_name).PO.fooof_exponent = stage_fooof_exponent.PO;
+        fooof_results.(stage_name).PO.normalized_absolute_power = stage_normalized_absolute_power.PO;
+        fooof_results.(stage_name).PO.peak_values = stage_peak_values.PO;
+        % Calculate mean and standard deviation for each parameter and overall
+        % FC Channels
+        fooof_results.(stage_name).FC.mean_fooof_offset = mean(stage_fooof_offset.FC, 'omitnan');
+        fooof_results.(stage_name).FC.std_fooof_offset = std(stage_fooof_offset.FC, 0, 'omitnan');
+        fooof_results.(stage_name).FC.mean_fooof_exponent = mean(stage_fooof_exponent.FC, 'omitnan');
+        fooof_results.(stage_name).FC.std_fooof_exponent = std(stage_fooof_exponent.FC, 0, 'omitnan');
+        % Mean and SD for normalized absolute power for each band for FC
+        for band_idx = 1:length(bands)
+            band_name = bands{band_idx};
+            fooof_results.(stage_name).FC.mean_normalized_absolute_power.(band_name) = mean(stage_normalized_absolute_power.FC(:, band_idx), 'omitnan');
+            fooof_results.(stage_name).FC.std_normalized_absolute_power.(band_name) = std(stage_normalized_absolute_power.FC(:, band_idx), 0, 'omitnan');
+        end
+        % Mean and SD for peak values (frequency, amplitude, bandwidth) for FC
+        for field = fieldnames(peak_table)'  % Loop over all field names in peak_table
+            field_name = field{1};  % Get the current field name as a string
+            % Extract the column corresponding to the current field from the peak values
+            peak_values_column = stage_peak_values.FC(:, ismember(fieldnames(peak_table), field_name));
+            % Calculate the mean and standard deviation, ignoring NaNs
+            fooof_results.(stage_name).FC.mean_peak_values.(field_name) = mean(peak_values_column, 'omitnan');
+            fooof_results.(stage_name).FC.std_peak_values.(field_name) = std(peak_values_column, 0, 'omitnan');
+        end
+        % PO Channels (same process as above)
+        fooof_results.(stage_name).PO.mean_fooof_offset = mean(stage_fooof_offset.PO, 'omitnan');
+        fooof_results.(stage_name).PO.std_fooof_offset = std(stage_fooof_offset.PO, 0, 'omitnan');
+        fooof_results.(stage_name).PO.mean_fooof_exponent = mean(stage_fooof_exponent.PO, 'omitnan');
+        fooof_results.(stage_name).PO.std_fooof_exponent = std(stage_fooof_exponent.PO, 0, 'omitnan');
+        for band_idx = 1:length(bands)
+            band_name = bands{band_idx};
+            fooof_results.(stage_name).PO.mean_normalized_absolute_power.(band_name) = mean(stage_normalized_absolute_power.PO(:, band_idx), 'omitnan');
+            fooof_results.(stage_name).PO.std_normalized_absolute_power.(band_name) = std(stage_normalized_absolute_power.PO(:, band_idx), 0, 'omitnan');
+        end
+        for field = fieldnames(peak_table)'
+            field_name = field{1};
+            peak_values_column = stage_peak_values.PO(:, ismember(fieldnames(peak_table), field_name));
+            fooof_results.(stage_name).PO.mean_peak_values.(field_name) = mean(peak_values_column, 'omitnan');
+            fooof_results.(stage_name).PO.std_peak_values.(field_name) = std(peak_values_column, 0, 'omitnan');
         end
     end
 
-    % Store results in the struct for each sleep stage
-    % For FC channels
-    fooof_results.(stage_name).FC.fooof_offset = stage_fooof_offset.FC;
-    fooof_results.(stage_name).FC.fooof_exponent = stage_fooof_exponent.FC;
-    fooof_results.(stage_name).FC.normalized_absolute_power = stage_normalized_absolute_power.FC;
-    fooof_results.(stage_name).FC.peak_values = stage_peak_values.FC;
 
-    % For PO channels
-    fooof_results.(stage_name).PO.fooof_offset = stage_fooof_offset.PO;
-    fooof_results.(stage_name).PO.fooof_exponent = stage_fooof_exponent.PO;
-    fooof_results.(stage_name).PO.normalized_absolute_power = stage_normalized_absolute_power.PO;
-    fooof_results.(stage_name).PO.peak_values = stage_peak_values.PO;
 
-    % Calculate mean and standard deviation for each parameter and overall
-    % FC Channels
-    fooof_results.(stage_name).FC.mean_fooof_offset = mean(stage_fooof_offset.FC, 'omitnan');
-    fooof_results.(stage_name).FC.std_fooof_offset = std(stage_fooof_offset.FC, 0, 'omitnan');
+    % Slow wave detection on clean epochs
+    % Initialize an empty array to store clean data
+    clean_data = [];
+    % Loop through each clean epoch and concatenate the corresponding data
+    for i = 1:height(EEG_clean.clean_epochs)
+        start_idx = EEG_clean.clean_epochs.start_index(i);  % Get start index for current epoch
+        end_idx = EEG_clean.clean_epochs.end_index(i);      % Get end index for current epoch
+        clean_data = [clean_data, EEG_clean.data(:, start_idx:end_idx)];  % Concatenate clean data
+    end
+    % Store clean data in a new field in EEG_clean
+    EEG_clean.clean_data = clean_data;
+    % Convert the clean EEG data to Python-friendly format (NumPy array)
+    data_for_py = cell(1, size(EEG_clean.clean_data, 1));
+    for row = 1:size(EEG_clean.clean_data, 1)
+        data_for_py{row} = EEG_clean.clean_data(row, :);
+    end
+    data_for_py = py.numpy.array(data_for_py);
+    % Prepare hypnogram data (You need to ensure `hypnodata` corresponds to clean epochs)
+    sleep_stages_clean = EEG_clean.clean_epochs.stage;
+    % Determine the number of epochs (each epoch is 30 seconds)
+    num_epochs = length(sleep_stages_clean);
+    % Initialize the hypnogram vector to store sleep stages per epoch
+    hypnogram_clean = zeros(1, num_epochs);
+    % Loop over each epoch and assign the corresponding sleep stage to the hypnogram
+    % 0=wake, 1=NREM1, 2=NREM2, 3&4=NREM3, 5=REM, 6<=movement
+    for epoch = 1:num_epochs
+        stage = sleep_stages_clean(epoch);
+        if stage == 3 || stage == 4
+            % Combine stage 3 and 4 into NREM3 (using 3 as NREM3 code)
+            hypnogram_clean(epoch) = 3;
+        elseif stage >= 6
+            % Anything above 5 (movement) is set to 6
+            hypnogram_clean(epoch) = 6;
+        else
+            % Use the stage as it is for other sleep stages (0 to 5)
+            hypnogram_clean(epoch) = stage;
+        end
+    end
+    % Upsample scoring to match sampling frequency of data
+    epoch_duration_sec = 30;  % Duration of each epoch in seconds
+    srate = EEG_clean.srate;  % Sampling rate of the EEG data
+    % Repeat each entry in hypnogram_clean for 30 * srate times
+    repeats_per_epoch = epoch_duration_sec * srate;  % Number of samples per epoch
+    hypnogram_clean_upsampled = repelem(hypnogram_clean, repeats_per_epoch);
+    % Run the slow wave detection in YASA
+    sws_detection_info = py.yasa.sw_detect(data = data_for_py, ...
+        sf = py.float(EEG_clean.srate), ...
+        ch_names = py.list({EEG_clean.chanlocs.labels}), ...
+        hypno = py.numpy.array(hypnogram_clean_upsampled, 'int'), ...
+        include = py.numpy.array([2, 3], 'int'), ...  % stages to include in SWS detection (NREM2 and NREM3)
+        freq_sw = py.tuple([0.5, 4.5]), ...
+        dur_neg = py.tuple([0.1, 1.5]), ...
+        dur_pos = py.tuple([0.1, 1.5]), ...
+        amp_neg = py.tuple([5, 1000]), ...
+        amp_pos = py.tuple([5, 1000]), ...
+        amp_ptp = py.tuple([20, 1000]), ...
+        coupling = false, ...  % Disable phase coupling calculation
+        remove_outliers = false, ...  % Disable outlier removal
+        verbose = false);
 
-    fooof_results.(stage_name).FC.mean_fooof_exponent = mean(stage_fooof_exponent.FC, 'omitnan');
-    fooof_results.(stage_name).FC.std_fooof_exponent = std(stage_fooof_exponent.FC, 0, 'omitnan');
+% Extract the detected slow waves as a Pandas DataFrame
+sw_summary_py = sws_detection_info.sw;  % Access the 'sw' attribute to get the slow waves
 
-    % Mean and SD for normalized absolute power for each band for FC
-    for band_idx = 1:length(bands)
-        band_name = bands{band_idx};
+% Convert the Python DataFrame to a MATLAB structure
+sw_summary = struct(py.pandas.DataFrame.to_dict(sw_summary_py, 'list'));
 
-        fooof_results.(stage_name).FC.mean_normalized_absolute_power.(band_name) = mean(stage_normalized_absolute_power.FC(:, band_idx), 'omitnan');
-        fooof_results.(stage_name).FC.std_normalized_absolute_power.(band_name) = std(stage_normalized_absolute_power.FC(:, band_idx), 0, 'omitnan');
+
+
+   % Define channel regions based on their labels
+frontal_channels = {'F3', 'F4'};  % Modify according to your channel labels
+central_channels = {'C3', 'C4'};
+parietal_channels = {'P3', 'P4'};
+occipital_channels = {'O1', 'O2'};
+
+% Initialize an empty struct to hold the results for each cycle
+SW_results = struct();
+
+% Loop through each sleep cycle in the cycle_table
+for cycle_idx = 1:height(cycle_table)
+    start_epoch = cycle_table.start_epoch(cycle_idx) * 30;  % Convert to data points
+    end_epoch = cycle_table.end_epoch(cycle_idx) * 30;      % Convert to data points
+    
+    % Initialize arrays to hold slow wave data for each region in this cycle (NREM stages only)
+    region_data = struct('F', [], 'C', [], 'P', [], 'O', []);
+
+    % Loop through the detected slow waves in sws_detection_info
+    for sw_idx = 1:height(sws_detection_info)
+        sw_start = sws_detection_info.Start(sw_idx);  % Start of slow wave (in data points)
+        sw_stage = sws_detection_info.Stage(sw_idx);  % Stage of the slow wave
+        sw_channel = sws_detection_info.Channel{sw_idx};  % Channel name
+        
+        % Check if the slow wave occurs within the current cycle and is in NREM (stage 2 or 3)
+        if sw_start >= start_epoch && sw_start <= end_epoch && (sw_stage == 2 || sw_stage == 3)
+            % Categorize the slow wave into regions based on the channel
+            if ismember(sw_channel, frontal_channels)
+                region_data.F = [region_data.F; sws_detection_info(sw_idx, :)];
+            elseif ismember(sw_channel, central_channels)
+                region_data.C = [region_data.C; sws_detection_info(sw_idx, :)];
+            elseif ismember(sw_channel, parietal_channels)
+                region_data.P = [region_data.P; sws_detection_info(sw_idx, :)];
+            elseif ismember(sw_channel, occipital_channels)
+                region_data.O = [region_data.O; sws_detection_info(sw_idx, :)];
+            end
+        end
     end
 
-    % Mean and SD for peak values (frequency, amplitude, bandwidth) for FC
-    for field = fieldnames(peak_table)'  % Loop over all field names in peak_table
-        field_name = field{1};  % Get the current field name as a string
-
-        % Extract the column corresponding to the current field from the peak values
-        peak_values_column = stage_peak_values.FC(:, ismember(fieldnames(peak_table), field_name));
-
-        % Calculate the mean and standard deviation, ignoring NaNs
-        fooof_results.(stage_name).FC.mean_peak_values.(field_name) = mean(peak_values_column, 'omitnan');
-        fooof_results.(stage_name).FC.std_peak_values.(field_name) = std(peak_values_column, 0, 'omitnan');
-    end
-
-    % PO Channels (same process as above)
-    fooof_results.(stage_name).PO.mean_fooof_offset = mean(stage_fooof_offset.PO, 'omitnan');
-    fooof_results.(stage_name).PO.std_fooof_offset = std(stage_fooof_offset.PO, 0, 'omitnan');
-
-    fooof_results.(stage_name).PO.mean_fooof_exponent = mean(stage_fooof_exponent.PO, 'omitnan');
-    fooof_results.(stage_name).PO.std_fooof_exponent = std(stage_fooof_exponent.PO, 0, 'omitnan');
-
-    for band_idx = 1:length(bands)
-        band_name = bands{band_idx};
-
-        fooof_results.(stage_name).PO.mean_normalized_absolute_power.(band_name) = mean(stage_normalized_absolute_power.PO(:, band_idx), 'omitnan');
-        fooof_results.(stage_name).PO.std_normalized_absolute_power.(band_name) = std(stage_normalized_absolute_power.PO(:, band_idx), 0, 'omitnan');
-    end
-
-    for field = fieldnames(peak_table)'
-        field_name = field{1};
-        peak_values_column = stage_peak_values.PO(:, ismember(fieldnames(peak_table), field_name));
-
-        fooof_results.(stage_name).PO.mean_peak_values.(field_name) = mean(peak_values_column, 'omitnan');
-        fooof_results.(stage_name).PO.std_peak_values.(field_name) = std(peak_values_column, 0, 'omitnan');
+    % Process and store results for each region (F, C, P, O)
+    regions = fieldnames(region_data);
+    for region_idx = 1:length(regions)
+        region_name = regions{region_idx};
+        region_sw_data = region_data.(region_name);
+        
+        if ~isempty(region_sw_data)
+            SW_results.(['Cycle_' num2str(cycle_idx)]).(region_name).mean.duration = mean(region_sw_data.Duration);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).(region_name).std.duration = std(region_sw_data.Duration);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).(region_name).mean.ValNegPeak = mean(region_sw_data.ValNegPeak);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).(region_name).std.ValNegPeak = std(region_sw_data.ValNegPeak);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).(region_name).mean.ValPosPeak = mean(region_sw_data.ValPosPeak);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).(region_name).std.ValPosPeak = std(region_sw_data.ValPosPeak);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).(region_name).mean.PTP = mean(region_sw_data.PTP);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).(region_name).std.PTP = std(region_sw_data.PTP);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).(region_name).mean.Slope = mean(region_sw_data.Slope);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).(region_name).std.Slope = std(region_sw_data.Slope);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).(region_name).mean.Frequency = mean(region_sw_data.Frequency);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).(region_name).std.Frequency = std(region_sw_data.Frequency);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).(region_name).mean.duration_negative_phase = mean(region_sw_data.duration_negative_phase);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).(region_name).std.duration_negative_phase = std(region_sw_data.duration_negative_phase);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).(region_name).mean.duration_positive_phase = mean(region_sw_data.duration_positive_phase);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).(region_name).std.duration_positive_phase = std(region_sw_data.duration_positive_phase);
+        else
+            % If no slow waves found for this region, set fields to NaN
+            SW_results.(['Cycle_' num2str(cycle_idx)]).(region_name).mean = NaN;
+            SW_results.(['Cycle_' num2str(cycle_idx)]).(region_name).std = NaN;
+        end
     end
 end
 
+% Calculate the difference between the first and last cycle for each region
+first_cycle = SW_results.Cycle_1;
+last_cycle = SW_results.(['Cycle_' num2str(height(cycle_table))]);
 
+% Calculate the difference in mean values between the first and last cycle for each region
+regions = fieldnames(first_cycle);
+for region_idx = 1:length(regions)
+    region_name = regions{region_idx};
+    SW_results.Difference.(region_name).mean.duration = first_cycle.(region_name).mean.duration - last_cycle.(region_name).mean.duration;
+    SW_results.Difference.(region_name).mean.ValNegPeak = first_cycle.(region_name).mean.ValNegPeak - last_cycle.(region_name).mean.ValNegPeak;
+    SW_results.Difference.(region_name).mean.ValPosPeak = first_cycle.(region_name).mean.ValPosPeak - last_cycle.(region_name).mean.ValPosPeak;
+    SW_results.Difference.(region_name).mean.PTP = first_cycle.(region_name).mean.PTP - last_cycle.(region_name).mean.PTP;
+    SW_results.Difference.(region_name).mean.Slope = first_cycle.(region_name).mean.Slope - last_cycle.(region_name).mean.Slope;
+    SW_results.Difference.(region_name).mean.Frequency = first_cycle.(region_name).mean.Frequency - last_cycle.(region_name).mean.Frequency;
+    SW_results.Difference.(region_name).mean.duration_negative_phase = first_cycle.(region_name).mean.duration_negative_phase - last_cycle.(region_name).mean.duration_negative_phase;
+    SW_results.Difference.(region_name).mean.duration_positive_phase = first_cycle.(region_name).mean.duration_positive_phase - last_cycle.(region_name).mean.duration_positive_phase;
+
+    % Difference in standard deviation
+    SW_results.Difference.(region_name).std.duration = first_cycle.(region_name).std.duration - last_cycle.(region_name).std.duration;
+    SW_results.Difference.(region_name).std.ValNegPeak = first_cycle.(region_name).std.ValNegPeak - last_cycle.(region_name).std.ValNegPeak;
+    SW_results.Difference.(region_name).std.ValPosPeak = first_cycle.(region_name).std.ValPosPeak - last_cycle.(region_name).std.ValPosPeak;
+    SW_results.Difference.(region_name).std.PTP = first_cycle.(region_name).std.PTP - last_cycle.(region_name).std.PTP;
+    SW_results.Difference.(region_name).std.Slope = first_cycle.(region_name).std.Slope - last_cycle.(region_name).std.Slope;
+    SW_results.Difference.(region_name).std.Frequency = first_cycle.(region_name).std.Frequency - last_cycle.(region_name).std.Frequency;
+    SW_results.Difference.(region_name).std.duration_negative_phase = first_cycle.(region_name).std.duration_negative_phase - last_cycle.(region_name).std.duration_negative_phase;
+    SW_results.Difference.(region_name).std.duration_positive_phase = first_cycle.(region_name).std.duration_positive_phase - last_cycle.(region_name).std.duration_positive_phase;
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% Extract the summary of slow waves as a Python DataFrame
+sw_summary_py = sws_detection_result.get_summary();
+
+% Convert the Python DataFrame to a MATLAB structure
+sw_summary = struct(py.pandas.DataFrame.to_dict(sw_summary_py, 'list'));
 
 
 
