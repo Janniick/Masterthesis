@@ -527,6 +527,7 @@ for i = 1:1%length(all_mat_files)
 
 
     % Run the slow wave detection in YASA
+    coupling_py = py.dict(pyargs('freq_sp', 12:16, 'p', 0.05, 'time', 1));
     sws_detection_results = py.yasa.sw_detect(data = data_for_py, ...
         sf = py.float(EEG_clean.srate), ...
         ch_names = py.list({EEG_clean.chanlocs.labels}), ...
@@ -538,26 +539,26 @@ for i = 1:1%length(all_mat_files)
         amp_neg = py.tuple([5, 1000]), ...
         amp_pos = py.tuple([5, 1000]), ...
         amp_ptp = py.tuple([20, 1000]), ...
-        coupling = false, ...  % Disable phase coupling calculation
+        coupling = coupling_py, ...  % Disable phase coupling calculation
         remove_outliers = false, ...  % Disable outlier removal
         verbose = false);
     % Make the python structure accessible for MATLAB
     if ~isempty(sws_detection_results)
         sws_detection_info = sws_detection_results.summary();
-        sws_colnames = cellfun(@string,cell(sws_detection_info.columns.values.tolist()));
+        sws_colnames = cellfun(@string, cell(sws_detection_info.columns.values.tolist()));
         sws_detection_info = cell(sws_detection_info.values.tolist());
-        sws_detection_info = cellfun(@(xs)cell2table(cell(xs), 'VariableNames', sws_colnames),sws_detection_info, 'UniformOutput', false);
+        sws_detection_info = cellfun(@(xs)cell2table(cell(xs), 'VariableNames', sws_colnames), sws_detection_info, 'UniformOutput', false);
         sws_detection_info = vertcat(sws_detection_info{:});
         sws_detection_info.Stage = cellfun(@double, sws_detection_info.Stage);
         sws_detection_info.Channel = string(sws_detection_info.Channel);
         sws_detection_info.IdxChannel = cellfun(@double, sws_detection_info.IdxChannel);
-        sws_detection_info.neg_sw_peaks_ind = sws_detection_info.NegPeak*EEG_clean.srate;
-        sws_detection_info.duration_negative_phase = (sws_detection_info.MidCrossing - sws_detection_info.Start)*EEG_clean.srate;
-        sws_detection_info.duration_positive_phase = (sws_detection_info.End - sws_detection_info.MidCrossing)*EEG_clean.srate;
-        sws_detection_info.duration_start_to_neg = (sws_detection_info.NegPeak - sws_detection_info.Start)*EEG_clean.srate;
-        sws_detection_info.duration_neg_to_mid = (sws_detection_info.MidCrossing - sws_detection_info.NegPeak)*EEG_clean.srate;
-        sws_detection_info.duration_mid_to_pos = (sws_detection_info.PosPeak - sws_detection_info.MidCrossing)*EEG_clean.srate;
-        sws_detection_info.duration_pos_to_end = (sws_detection_info.End - sws_detection_info.PosPeak)*EEG_clean.srate;
+        sws_detection_info.neg_sw_peaks_ind = sws_detection_info.NegPeak * EEG_clean.srate;
+        sws_detection_info.duration_negative_phase = (sws_detection_info.MidCrossing - sws_detection_info.Start) * EEG_clean.srate;
+        sws_detection_info.duration_positive_phase = (sws_detection_info.End - sws_detection_info.MidCrossing) * EEG_clean.srate;
+        sws_detection_info.duration_start_to_neg = (sws_detection_info.NegPeak - sws_detection_info.Start) * EEG_clean.srate;
+        sws_detection_info.duration_neg_to_mid = (sws_detection_info.MidCrossing - sws_detection_info.NegPeak) * EEG_clean.srate;
+        sws_detection_info.duration_mid_to_pos = (sws_detection_info.PosPeak - sws_detection_info.MidCrossing) * EEG_clean.srate;
+        sws_detection_info.duration_pos_to_end = (sws_detection_info.End - sws_detection_info.PosPeak) * EEG_clean.srate;
     end
     % Initialize an empty struct to hold the results for each cycle
     SW_results = struct();
@@ -571,7 +572,6 @@ for i = 1:1%length(all_mat_files)
         for sw_idx = 1:height(sws_detection_info)
             sw_start = sws_detection_info.Start(sw_idx);  % Start of slow wave (in data points)
             sw_stage = sws_detection_info.Stage(sw_idx);  % Stage of the slow wave
-
             % Check if the slow wave occurs within the current cycle and is in NREM (stage 2 or 3)
             if sw_start >= start_epoch && sw_start <= end_epoch && (sw_stage == 2 || sw_stage == 3)
                 sw_cycle_data_NREM = [sw_cycle_data_NREM; sws_detection_info(sw_idx, :)];
@@ -591,6 +591,13 @@ for i = 1:1%length(all_mat_files)
             SW_results.(['Cycle_' num2str(cycle_idx)]).std.Slope = std(sw_cycle_data_NREM.Slope);
             SW_results.(['Cycle_' num2str(cycle_idx)]).mean.Frequency = mean(sw_cycle_data_NREM.Frequency);
             SW_results.(['Cycle_' num2str(cycle_idx)]).std.Frequency = std(sw_cycle_data_NREM.Frequency);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).mean.SigmaPeak = mean(sw_cycle_data_NREM.SigmaPeak);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).std.SigmaPeak = std(sw_cycle_data_NREM.SigmaPeak);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).mean.PhaseAtSigmaPeak = mean(sw_cycle_data_NREM.PhaseAtSigmaPeak);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).std.PhaseAtSigmaPeak = std(sw_cycle_data_NREM.PhaseAtSigmaPeak);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).mean.ndPAC = mean(sw_cycle_data_NREM.ndPAC);
+            SW_results.(['Cycle_' num2str(cycle_idx)]).std.ndPAC = std(sw_cycle_data_NREM.ndPAC);
+            % Durations
             SW_results.(['Cycle_' num2str(cycle_idx)]).mean.duration_negative_phase = mean(sw_cycle_data_NREM.duration_negative_phase);
             SW_results.(['Cycle_' num2str(cycle_idx)]).std.duration_negative_phase = std(sw_cycle_data_NREM.duration_negative_phase);
             SW_results.(['Cycle_' num2str(cycle_idx)]).mean.duration_positive_phase = mean(sw_cycle_data_NREM.duration_positive_phase);
@@ -605,23 +612,35 @@ for i = 1:1%length(all_mat_files)
     first_cycle = SW_results.Cycle_1;
     last_cycle = SW_results.(['Cycle_' num2str(height(cycle_table))]);
     % Calculate the difference in mean values between the first and last cycle
-    SW_results.Difference.mean.duration = first_cycle.mean.duration - last_cycle.mean.duration;
-    SW_results.Difference.mean.ValNegPeak = first_cycle.mean.ValNegPeak - last_cycle.mean.ValNegPeak;
-    SW_results.Difference.mean.ValPosPeak = first_cycle.mean.ValPosPeak - last_cycle.mean.ValPosPeak;
-    SW_results.Difference.mean.PTP = first_cycle.mean.PTP - last_cycle.mean.PTP;
-    SW_results.Difference.mean.Slope = first_cycle.mean.Slope - last_cycle.mean.Slope;
-    SW_results.Difference.mean.Frequency = first_cycle.mean.Frequency - last_cycle.mean.Frequency;
-    SW_results.Difference.mean.duration_negative_phase = first_cycle.mean.duration_negative_phase - last_cycle.mean.duration_negative_phase;
-    SW_results.Difference.mean.duration_positive_phase = first_cycle.mean.duration_positive_phase - last_cycle.mean.duration_positive_phase;
+    SW_results.Difference_first_last_cycle.mean.duration = first_cycle.mean.duration - last_cycle.mean.duration;
+    SW_results.Difference_first_last_cycle.mean.ValNegPeak = first_cycle.mean.ValNegPeak - last_cycle.mean.ValNegPeak;
+    SW_results.Difference_first_last_cycle.mean.ValPosPeak = first_cycle.mean.ValPosPeak - last_cycle.mean.ValPosPeak;
+    SW_results.Difference_first_last_cycle.mean.PTP = first_cycle.mean.PTP - last_cycle.mean.PTP;
+    SW_results.Difference_first_last_cycle.mean.Slope = first_cycle.mean.Slope - last_cycle.mean.Slope;
+    SW_results.Difference_first_last_cycle.mean.Frequency = first_cycle.mean.Frequency - last_cycle.mean.Frequency;
+    SW_results.Difference_first_last_cycle.mean.SigmaPeak = first_cycle.mean.SigmaPeak - last_cycle.mean.SigmaPeak;
+    SW_results.Difference_first_last_cycle.mean.PhaseAtSigmaPeak = first_cycle.mean.PhaseAtSigmaPeak - last_cycle.mean.PhaseAtSigmaPeak;
+    SW_results.Difference_first_last_cycle.mean.ndPAC = first_cycle.mean.ndPAC - last_cycle.mean.ndPAC;
+    SW_results.Difference_first_last_cycle.mean.duration_negative_phase = first_cycle.mean.duration_negative_phase - last_cycle.mean.duration_negative_phase;
+    SW_results.Difference_first_last_cycle.mean.duration_positive_phase = first_cycle.mean.duration_positive_phase - last_cycle.mean.duration_positive_phase;
+
     % Calculate the difference in standard deviation between the first and last cycle
-    SW_results.Difference.std.duration = first_cycle.std.duration - last_cycle.std.duration;
-    SW_results.Difference.std.ValNegPeak = first_cycle.std.ValNegPeak - last_cycle.std.ValNegPeak;
-    SW_results.Difference.std.ValPosPeak = first_cycle.std.ValPosPeak - last_cycle.std.ValPosPeak;
-    SW_results.Difference.std.PTP = first_cycle.std.PTP - last_cycle.std.PTP;
-    SW_results.Difference.std.Slope = first_cycle.std.Slope - last_cycle.std.Slope;
-    SW_results.Difference.std.Frequency = first_cycle.std.Frequency - last_cycle.std.Frequency;
-    SW_results.Difference.std.duration_negative_phase = first_cycle.std.duration_negative_phase - last_cycle.std.duration_negative_phase;
-    SW_results.Difference.std.duration_positive_phase = first_cycle.std.duration_positive_phase - last_cycle.std.duration_positive_phase;
+    SW_results.Difference_first_last_cycle.std.duration = first_cycle.std.duration - last_cycle.std.duration;
+    SW_results.Difference_first_last_cycle.std.ValNegPeak = first_cycle.std.ValNegPeak - last_cycle.std.ValNegPeak;
+    SW_results.Difference_first_last_cycle.std.ValPosPeak = first_cycle.std.ValPosPeak - last_cycle.std.ValPosPeak;
+    SW_results.Difference_first_last_cycle.std.PTP = first_cycle.std.PTP - last_cycle.std.PTP;
+    SW_results.Difference_first_last_cycle.std.Slope = first_cycle.std.Slope - last_cycle.std.Slope;
+    SW_results.Difference_first_last_cycle.std.Frequency = first_cycle.std.Frequency - last_cycle.std.Frequency;
+    SW_results.Difference_first_last_cycle.std.SigmaPeak = first_cycle.std.SigmaPeak - last_cycle.std.SigmaPeak;
+    SW_results.Difference_first_last_cycle.std.PhaseAtSigmaPeak = first_cycle.std.PhaseAtSigmaPeak - last_cycle.std.PhaseAtSigmaPeak;
+    SW_results.Difference_first_last_cycle.std.ndPAC = first_cycle.std.ndPAC - last_cycle.std.ndPAC;
+    SW_results.Difference_first_last_cycle.std.duration_negative_phase = first_cycle.std.duration_negative_phase - last_cycle.std.duration_negative_phase;
+    SW_results.Difference_first_last_cycle.std.duration_positive_phase = first_cycle.std.duration_positive_phase - last_cycle.std.duration_positive_phase;
+
+
+
+
+
 
 
 
@@ -714,23 +733,23 @@ for i = 1:1%length(all_mat_files)
     first_cycle = Spindle_results.Cycle_1;
     last_cycle = Spindle_results.(['Cycle_' num2str(height(cycle_table))]);
     % Calculate the difference in mean values between the first and last cycle
-    Spindle_results.Difference.mean.duration = first_cycle.mean.duration - last_cycle.mean.duration;
-    Spindle_results.Difference.mean.Amplitude = first_cycle.mean.Amplitude - last_cycle.mean.Amplitude;
-    Spindle_results.Difference.mean.RMS = first_cycle.mean.RMS - last_cycle.mean.RMS;
-    Spindle_results.Difference.mean.AbsPower = first_cycle.mean.AbsPower - last_cycle.mean.AbsPower;
-    Spindle_results.Difference.mean.RelPower = first_cycle.mean.RelPower - last_cycle.mean.RelPower;
-    Spindle_results.Difference.mean.Frequency = first_cycle.mean.Frequency - last_cycle.mean.Frequency;
-    Spindle_results.Difference.mean.Oscillations = first_cycle.mean.Oscillations - last_cycle.mean.Oscillations;
-    Spindle_results.Difference.mean.Symmetry = first_cycle.mean.Symmetry - last_cycle.mean.Symmetry;
+    Spindle_results.Difference_first_last_cycle.mean.duration = first_cycle.mean.duration - last_cycle.mean.duration;
+    Spindle_results.Difference_first_last_cycle.mean.Amplitude = first_cycle.mean.Amplitude - last_cycle.mean.Amplitude;
+    Spindle_results.Difference_first_last_cycle.mean.RMS = first_cycle.mean.RMS - last_cycle.mean.RMS;
+    Spindle_results.Difference_first_last_cycle.mean.AbsPower = first_cycle.mean.AbsPower - last_cycle.mean.AbsPower;
+    Spindle_results.Difference_first_last_cycle.mean.RelPower = first_cycle.mean.RelPower - last_cycle.mean.RelPower;
+    Spindle_results.Difference_first_last_cycle.mean.Frequency = first_cycle.mean.Frequency - last_cycle.mean.Frequency;
+    Spindle_results.Difference_first_last_cycle.mean.Oscillations = first_cycle.mean.Oscillations - last_cycle.mean.Oscillations;
+    Spindle_results.Difference_first_last_cycle.mean.Symmetry = first_cycle.mean.Symmetry - last_cycle.mean.Symmetry;
     % Calculate the difference in standard deviation between the first and last cycle
-    Spindle_results.Difference.std.duration = first_cycle.std.duration - last_cycle.std.duration;
-    Spindle_results.Difference.std.Amplitude = first_cycle.std.Amplitude - last_cycle.std.Amplitude;
-    Spindle_results.Difference.std.RMS = first_cycle.std.RMS - last_cycle.std.RMS;
-    Spindle_results.Difference.std.AbsPower = first_cycle.std.AbsPower - last_cycle.std.AbsPower;
-    Spindle_results.Difference.std.RelPower = first_cycle.std.RelPower - last_cycle.std.RelPower;
-    Spindle_results.Difference.std.Frequency = first_cycle.std.Frequency - last_cycle.std.Frequency;
-    Spindle_results.Difference.std.Oscillations = first_cycle.std.Oscillations - last_cycle.std.Oscillations;
-    Spindle_results.Difference.std.Symmetry = first_cycle.std.Symmetry - last_cycle.std.Symmetry;
+    Spindle_results.Difference_first_last_cycle.std.duration = first_cycle.std.duration - last_cycle.std.duration;
+    Spindle_results.Difference_first_last_cycle.std.Amplitude = first_cycle.std.Amplitude - last_cycle.std.Amplitude;
+    Spindle_results.Difference_first_last_cycle.std.RMS = first_cycle.std.RMS - last_cycle.std.RMS;
+    Spindle_results.Difference_first_last_cycle.std.AbsPower = first_cycle.std.AbsPower - last_cycle.std.AbsPower;
+    Spindle_results.Difference_first_last_cycle.std.RelPower = first_cycle.std.RelPower - last_cycle.std.RelPower;
+    Spindle_results.Difference_first_last_cycle.std.Frequency = first_cycle.std.Frequency - last_cycle.std.Frequency;
+    Spindle_results.Difference_first_last_cycle.std.Oscillations = first_cycle.std.Oscillations - last_cycle.std.Oscillations;
+    Spindle_results.Difference_first_last_cycle.std.Symmetry = first_cycle.std.Symmetry - last_cycle.std.Symmetry;
 
 
 
