@@ -20,8 +20,8 @@ function EEG_clean = scoring_clean_epochs(EEG_clean)
     % Loop through each epoch and check if it contains any bad signal (1's)
     for i = 1:num_epochs
         % Get the start and end indices for this epoch in EEG_clean.rem_ind_all
-        start_idx = (i - 1) * samples_per_epoch + 1;
-        end_idx = i * samples_per_epoch;
+        start_idx = EEG_clean.scoring_long_30s.start_index(i);
+        end_idx = EEG_clean.scoring_long_30s.end_index(i);
         
         % Extract the data for this epoch from rem_ind_all
         epoch_data = EEG_clean.rem_ind_all(start_idx:end_idx);

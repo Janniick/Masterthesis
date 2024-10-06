@@ -7,7 +7,6 @@ function EEG_clean = scoring_expansion(EEG_clean)
     % Check for the presence of different column headers to detect the format
     if all(ismember({'epoch', 'stage', 'duration_s', 'sample_rate_hz'}, scoring.Properties.VariableNames))
         % ACJ format
-        fprintf('Detected ACJ format.\n');
         
         % Initialize an empty table for the expanded epochs
         expanded_scoring = table([], [], [], [], 'VariableNames', scoring.Properties.VariableNames);
@@ -30,8 +29,7 @@ function EEG_clean = scoring_expansion(EEG_clean)
 
     elseif all(ismember({'nr', 'segment', 'epoch', 'starttime_s', 'duration_s', 'interval_s', 'stage'}, scoring.Properties.VariableNames))
         % ASD format
-        fprintf('Detected ASD format.\n');
-
+        
         % Initialize an empty table for the expanded epochs
         expanded_scoring = table([], [], [], [], [], [], [], 'VariableNames', scoring.Properties.VariableNames);
 

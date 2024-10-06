@@ -11,8 +11,6 @@ pyrun("import yasa", "yasa");
 base_folder = 'D:\Masterarbeit Jannick\Data';  % Replace with your folder path
 % Search for all files ending with '_preprocessed.mat' in all subdirectories
 all_mat_files = dir(fullfile(base_folder, '**', '*_preprocessed_EOG.mat'));
-% Initialize a structure to hold results for all files
-all_results = struct();
 %% bands
 delta_b = [0.5, 4];
 theta_b = [4, 8];
@@ -22,7 +20,6 @@ gamma_b = [30, 40];
 spindle_b = [12, 16];
 
 for i = 1:1%length(all_mat_files)
-    try
     % load the file
     load([all_mat_files(i).folder, '\', all_mat_files(i).name]);
     % extract the name of the file
@@ -32,10 +29,19 @@ for i = 1:1%length(all_mat_files)
     % Extract the study and participant variables
     study = split_parts{1};
     participant = split_parts{2};
-
-    % Do the scoring
-    EEG_clean = process_scoring(EEG_clean);
-    
+    % Expand the scoring if it's condensed
+    % Generates EEG_clean.scoring_long
+    EEG_clean = scoring_expansion(EEG_clean);
+    % Standardize the scoring
+    % Only keep epoch, stage and duration
+    % Generates EEG_clean.scoring_long_standardized
+    EEG_clean = scoring_standardization(EEG_clean);
+    % convert 20s to 30s duration if needed
+    % Generates EEG_clean.scoring_long_30s
+    EEG_clean = scoring_convert20sTo30s(EEG_clean);
+    % add indexes of every epoch to the scoring
+    % Updates EEG_clean.scoring_long_30s
+    EEG_clean = scoring_add_start_end_indices(EEG_clean);
     % compare data length and scoring length
     data_duration = length(EEG_clean.data)/EEG_clean.srate/60/60;
     scoring_duration = height(EEG_clean.scoring_long_30s)*30/60/60;
@@ -47,7 +53,9 @@ for i = 1:1%length(all_mat_files)
     if abs(data_duration - scoring_duration) > tolerance
         error(['Duration mismatch: The scoring duration is not within 1% of the data duration. Stopping execution.']);
     end
-    
+    % Check for clean epochs
+    % Generates EEG_clean.clean_epochs
+    EEG_clean = scoring_clean_epochs(EEG_clean);
     % initialize things for spectrum and so on
     srate = EEG_clean.srate;                 % signal rate
     duration_window = 4*srate;               % 4 second windows
@@ -74,14 +82,41 @@ for i = 1:1%length(all_mat_files)
     % Making the hypnogram
     % Extract the sleep stages from the whole night
     sleep_stages_whole = EEG_clean.scoring_long_30s.stage; 
-    hypnogram = create_hypnogram(sleep_stages_whole);
+    % Determine the number of epochs (each epoch is 30 seconds)
+    num_epochs = length(sleep_stages_whole);
+    % Initialize the hypnogram vector to store sleep stages per epoch
+    hypnogram = zeros(1, num_epochs);
+    % Loop over each epoch and assign the corresponding sleep stage to the hypnogram
+    % 0=wake, 1=NREM1, 2=NREM2, 3&4=NREM3, 5=REM, 6<=movement
+    for epoch = 1:num_epochs
+        stage = sleep_stages_whole(epoch);
+        if stage == 3 || stage == 4
+            % Combine stage 3 and 4 into NREM3 (using 3 as NREM3 code)
+            hypnogram(epoch) = 3;
+        elseif stage >= 6
+            % Anything above 5 (movement) is set to 6
+            hypnogram(epoch) = 6;
+        else
+            % Use the stage as it is for other sleep stages (0 to 5)
+            hypnogram(epoch) = stage;
+        end
+    end
+    % Extraction of whole night features
     % Convert MATLAB hypnogram to Python format using py.numpy.array
     hypnogram_py = py.numpy.array(hypnogram);
-
-
-
-    %% Extraction of whole night features
     % Call YASA's sleep statistics function
+    % TIB (Total Time in Bed)
+    % SPT (Sleep Period Time): The time between sleep onset and the final awakening
+    % WASO (Wake After Sleep Onset):
+    % TST (Total Sleep Time): The sum of time spent in all sleep stages (NREM and REM).
+    % N1, N2, N3: The duration (in minutes) spent in different non-REM (NREM) sleep stages:
+    % REM: The duration (in minutes) spent in Rapid Eye Movement (REM) sleep.
+    % NREM: The total duration of all NREM stages (N1 + N2 + N3), measured in minutes.
+    % SOL (Sleep Onset Latency): The amount of time (in minutes) it takes to fall asleep from the moment the person goes to bed.
+    % Lat_N1, Lat_N2, Lat_N3, Lat_REM: The latency (time taken) to reach each of the respective stages after sleep onset, measured in minutes:
+    % %N1, %N2, %N3, %REM, %NREM: The percentage of total sleep time spent in each sleep stage:
+    % SE (Sleep Efficiency): The ratio of Total Sleep Time (TST) to Time in Bed (TIB), expressed as a percentage. It shows how efficiently the person is sleeping.
+    % SME (Sleep Maintenance Efficiency): The percentage of the Sleep Period Time (SPT) that the person spends asleep. It's another measure of sleep efficiency but excludes wakefulness before sleep onset.
     sleep_stats = py.yasa.sleep_statistics(hypnogram_py, sf_hyp=1/30);
     sleep_stats = dictionary(sleep_stats);
 
@@ -100,8 +135,77 @@ for i = 1:1%length(all_mat_files)
     probs_mat = double(probs_np);    % Convert to MATLAB numeric matrix
     
 
+    
     % Calculate sleep cycles
-    cycle_table = calculate_sleep_cycles(hypnogram_py);
+    % values = sleep stage
+    % start = start epoch
+    % length = how many epochs
+    sleep_cycles = py.yasa.hypno_find_periods(hypnogram_py, sf_hypno = 1/30, equal_length = false);
+    % Extract data from the Python sleep_cycles DataFrame
+    % Extract data from the Python sleep_cycles DataFrame
+    values = double(sleep_cycles.values);  % Sleep stages
+    % Initialize a new array to store the collapsed values
+    collapsed_values = [];
+    current_stage = values(1, 1);
+    current_start = values(1, 2);
+    current_length = values(1, 3);
+    for i = 2:size(values, 1)
+        % Check if the stage is the same as the previous one
+        if values(i, 1) == current_stage
+            % If the stage is the same, just add to the current length
+            current_length = current_length + values(i, 3);
+        else
+            % If the stage changes, save the current stage, start, and length
+            collapsed_values = [collapsed_values; current_stage, current_start, current_length];
+            % Update the current stage, start, and length to the new one
+            current_stage = values(i, 1);
+            current_start = values(i, 2);
+            current_length = values(i, 3);
+        end
+    end
+    % Add the last stage to the collapsed array
+    collapsed_values = [collapsed_values; current_stage, current_start, current_length];
+    % Initialize variables
+    sleep_cycles = [];
+    start_cycle = 0;
+    end_cycle = 0;
+    % Loop through collapsed values and find sleep cycles
+    for i = 1:size(collapsed_values, 1)
+        stage = collapsed_values(i, 1);
+        start_epoch = collapsed_values(i, 2);
+        length_epoch = collapsed_values(i, 3);
+        if stage == 5
+            % When REM stage (5) is encountered, mark it as the end of a potential cycle
+            if start_cycle > 0
+                % Wait until the next NREM stage (2 or 3) to define the end of the cycle
+                if i < size(collapsed_values, 1) && (collapsed_values(i + 1, 1) == 2 || collapsed_values(i + 1, 1) == 3)
+                    end_cycle = collapsed_values(i + 1, 2)-1;  % Start epoch of next NREM
+                    % Calculate the duration of the cycle in epochs
+                    duration_in_epochs = end_cycle - start_cycle;
+                    % Store the start, end, and duration
+                    sleep_cycles = [sleep_cycles; start_cycle, end_cycle, duration_in_epochs];
+                    % Reset start_cycle for the next sleep cycle
+                    start_cycle = 0;
+                end
+            end
+        elseif stage == 2 || stage == 3
+            % If the stage is NREM (2 or 3), mark it as the potential start of a cycle
+            if start_cycle == 0
+                start_cycle = start_epoch;
+            end
+        end
+    end
+    % Convert duration from epochs to minutes (assuming each epoch is 30 seconds)
+    duration_in_minutes = (sleep_cycles(:, 3) * 30) / 60;
+    % Create a table with appropriate column names
+    n_cycles = size(sleep_cycles, 1);  % Number of sleep cycles
+    start_epochs = sleep_cycles(:, 1);  % Start epochs of each cycle
+    end_epochs = sleep_cycles(:, 2);  % End epochs of each cycle
+    duration_minutes = (sleep_cycles(:, 3) * 30) / 60;  % Duration of each cycle in minutes
+    % Create the table
+    cycle_table = table((1:n_cycles)', start_epochs, end_epochs, duration_minutes, ...
+        'VariableNames', {'n_cycle', 'start_epoch', 'end_epoch', 'duration_min'});
+    
 
 
     % Extract the last sleep stage before wakeup
@@ -133,12 +237,31 @@ for i = 1:1%length(all_mat_files)
 
 
 
-    %% Calculations only on clean epochs
-    % group the clean epochs by sleep stage for further sleep stage specific analysis
-    stage_epochs = group_epochs_by_stage(EEG_clean.clean_epochs);
+    %%% Calculations only on clean epochs
+    % group the clean epochs by sleep stage
+    % Extract necessary data from EEG_clean.clean_epochs
+    epochs = EEG_clean.clean_epochs.epoch;
+    stages = EEG_clean.clean_epochs.stage;
+    start_indices = EEG_clean.clean_epochs.start_index;
+    end_indices = EEG_clean.clean_epochs.end_index;
+    % Initialize a struct to hold start and end indices grouped by stages
+    stage_epochs = struct('NREM1', [], 'NREM2', [], 'NREM3', [], 'REM', []);
+    % Loop through all epochs and group start and end indices by their stage
+    for i = 1:length(stages)
+        % Ignore stage 0 (wake) and other undefined stages
+        if stages(i) == 1
+            stage_epochs.NREM1 = [stage_epochs.NREM1; start_indices(i), end_indices(i)];
+        elseif stages(i) == 2
+            stage_epochs.NREM2 = [stage_epochs.NREM2; start_indices(i), end_indices(i)];
+        elseif stages(i) == 3 || stages(i) == 4
+            stage_epochs.NREM3 = [stage_epochs.NREM3; start_indices(i), end_indices(i)];
+        elseif stages(i) == 5
+            stage_epochs.REM = [stage_epochs.REM; start_indices(i), end_indices(i)];
+        end
+    end
+
+
    
-
-
     % Power spectrum analysis
     % Initialize structs to hold power spectrum results
     power_spectrum_results = struct('NREM1', [], 'NREM2', [], 'NREM3', [], 'REM', [], 'Overall', []);
@@ -670,37 +793,7 @@ EOG_events = py.yasa.rem_detect( ...
     remove_outliers=false, ...
     verbose=false);
 
- % Store results in the all_results structure
-    all_results(i).filename = filename;
-    all_results(i).study = study;
-    all_results(i).participant = participant;
-    all_results(i).sleep_stats = sleep_stats;
-    all_results(i).stage_transitions = struct('counts', counts_mat, 'probs', probs_mat);
-    all_results(i).cycle_table = cycle_table;
-    all_results(i).SW_results = SW_results;
-    all_results(i).Spindle_results = Spindle_results;
-    all_results(i).fooof_results = fooof_results;
-    all_results(i).power_spectrum_results = power_spectrum_results;
-    all_results(i).EOG_events = EOG_events;
 
-
-%% Calculate complexity measures
-complexity_measures = extract_complexity_measures(EEG_clean, srate, delta_b, theta_b, alpha_b, beta_b, spindle_b);
-
-
-
-
-    catch ME
-        warning('Error processing file %d (%s): %s', i, all_mat_files(i).name, ME.message);
-        % Optionally, store the error information
-        all_results(i).error = ME.message;
-        continue;  % Proceed to the next file
-    end
-     % Optionally, save individual results to a file
-    save_filename = fullfile(all_mat_files(i).folder, [split_parts{1}, '_', split_parts{2}, '_results.mat']);
-    save(save_filename, 'all_results', '-append');
-    
-    fprintf('Processed file %d/%d: %s\n', i, length(all_mat_files), filename);
 
 
 end
@@ -766,20 +859,25 @@ end
 
 
 
-% Extract the lengths for comparison
-eeg_data_start = eeg_data_C3(1:length(hypnogram_upsampled));  % Align hypnogram at the start
-eeg_data_end = eeg_data_C3(end-length(hypnogram_upsampled)+1:end);  % Align hypnogram at the end
+% Extract C3 channel data (or use a representative channel for alignment)
+channel_idx_C3 = find(strcmpi({EEG_clean.chanlocs.labels}, 'C3'));
+eeg_data_C3 = EEG_clean.data(channel_idx_C3, :);  % Extract C3 channel data
 
-% Compute correlation for start alignment
-corr_start = corr(eeg_data_start', hypnogram_upsampled');
+% Downsample the EEG data if needed to match the hypnogram's sampling rate
+eeg_srate = EEG_clean.srate;  % EEG sampling rate
+hypnogram_srate = 1 / 30;  % Hypnogram is typically in 30-second epochs
 
-% Compute correlation for end alignment
-corr_end = corr(eeg_data_end', hypnogram_upsampled');
+% Resample EEG data to match the hypnogram
+eeg_data_resampled = resample(eeg_data_C3, hypnogram_srate * eeg_srate, eeg_srate);
 
-% Compare and decide best alignment
-if corr_start > corr_end
-    disp('Better alignment at the start.');
-else
-    disp('Better alignment at the end.');
-end
+% Compute cross-correlation between the resampled EEG data and the hypnogram
+[cross_corr, lags] = xcorr(eeg_data_resampled, hypnogram_upsampled);
 
+% Find the lag with the maximum correlation (best alignment)
+[~, max_lag_idx] = max(cross_corr);
+best_shift = lags(max_lag_idx);
+
+% Shift EEG data by the best alignment
+eeg_data_aligned = circshift(eeg_data_C3, best_shift);
+
+% You can now trim the EEG data or hypnogram to make them the same length
