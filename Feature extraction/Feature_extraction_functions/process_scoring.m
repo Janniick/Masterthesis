@@ -12,7 +12,4 @@ function EEG_clean = process_scoring(EEG_clean)
     % add indexes of every epoch to the scoring
     % Updates EEG_clean.scoring_long_30s
     EEG_clean = scoring_add_start_end_indices(EEG_clean);
-    % Check for clean epochs
-    % Generates EEG_clean.clean_epochs
-    EEG_clean = scoring_clean_epochs(EEG_clean);
 end

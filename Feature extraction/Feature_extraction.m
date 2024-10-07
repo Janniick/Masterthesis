@@ -122,7 +122,6 @@ parfor chan = 1:1%nr_chan %loops over all channels
         % a measure of the interaction between the phase of low-frequency brain oscillations and the amplitude of higher-frequency oscillations
         % PACTool Matlab Add on
         % https://github.com/sccn/PACTools/tree/develop
-        tic;
         % Create a new EEG structure with only the necessary fields
         EEG_cleant = struct();  % Create a new empty structure for EEG_cleant
         EEG_cleant.srate = EEG_clean.srate;  % Copy over only the required fields
@@ -137,8 +136,6 @@ parfor chan = 1:1%nr_chan %loops over all channels
         EEG_cleant.etc.eegpac = [];
         EEG_cleant.etc.pacplotopt = [];
 
-        duration_coupl = toc;
-        disp(duration_coupl);
 
         % Complexity measures
         % Entropy calculations

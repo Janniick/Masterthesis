@@ -40,37 +40,61 @@ function cycle_table = calculate_sleep_cycles(hypnogram_py)
 
     %% Step 3: Extract Values from the sleep_cycles DataFrame
     try
-       values = double(sleep_cycles.values);
+        % Extract the values from the DataFrame
+        data_flat = double(py.array.array('d', py.numpy.ravel(sleep_cycles.values)));
+
+        % Reshape the flattened data into the correct dimensions
+        num_rows = double(sleep_cycles.shape{1});
+        num_cols = double(sleep_cycles.shape{2});
+        data_matrix = reshape(data_flat, [num_cols, num_rows])';  % Transpose to align with MATLAB's row-major order
+
+        % Extract column names for the table
+        column_names_py = sleep_cycles.columns.tolist();
+        column_names = cellfun(@char, cell(column_names_py), 'UniformOutput', false);
+
+        % Convert to MATLAB table with appropriate column names
+        values = array2table(data_matrix, 'VariableNames', column_names);
     catch ME
         error('Error extracting values from sleep_cycles: %s', ME.message);
     end
 
     %% Step 4: Collapse Consecutive Stages
+    % Check if values table is empty
     if isempty(values)
         warning('No sleep cycles detected in the hypnogram.');
         cycle_table = table();
         return;
     end
 
+    % Initialize collapsed values storage
     collapsed_values = [];
-    current_stage = values(1, 1);
-    current_start = values(1, 2);
-    current_length = values(1, 3);
+    current_stage = values.values(1);  % Access the 'values' column
+    current_start = values.start(1);   % Access the 'start' column
+    current_length = values.length(1); % Access the 'length' column
 
-    for idx = 2:size(values, 1)
-        if values(idx, 1) == current_stage
-            current_length = current_length + values(idx, 3);
+    % Loop through the rows to collapse consecutive stages
+    for idx = 2:height(values)
+        if values.values(idx) == current_stage
+            % Same stage, accumulate length
+            current_length = current_length + values.length(idx);
         else
+            % Different stage, store the previous stage
             collapsed_values = [collapsed_values; current_stage, current_start, current_length];
-            current_stage = values(idx, 1);
-            current_start = values(idx, 2);
-            current_length = values(idx, 3);
+
+            % Update to new stage details
+            current_stage = values.values(idx);
+            current_start = values.start(idx);
+            current_length = values.length(idx);
         end
     end
-    % Add the last stage
+
+    % Add the last stage to collapsed values
     collapsed_values = [collapsed_values; current_stage, current_start, current_length];
 
-    %% Step 5: Identify Sleep Cycles Based on Stage Transitions
+    % Convert to table with appropriate column names
+    collapsed_values_table = array2table(collapsed_values, 'VariableNames', {'Stage', 'Start', 'Length'});
+
+     %% Step 5: Identify Sleep Cycles Based on Stage Transitions
     sleep_cycles_struct = struct('start_epoch', {}, 'end_epoch', {}, 'duration_epochs', {});
 
     start_cycle = 0;
