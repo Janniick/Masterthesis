@@ -10,6 +10,10 @@ function ECG_results = calculate_ECG_by_cycles_and_stages(EEG_clean, cycle_table
     first_cycle_data = struct();
     last_cycle_data = struct();
     
+    % Initialize storage for all cycles
+    all_NREM_data = [];
+    all_REM_data = [];
+    
     % Loop through each sleep cycle
     for cycle_idx = 1:nr_cycles
         cycle_name = ['Cycle_' num2str(cycle_idx)];
@@ -51,6 +55,10 @@ function ECG_results = calculate_ECG_by_cycles_and_stages(EEG_clean, cycle_table
                 end
             end
         end
+
+        % Collect all cycle data for overall mean calculations
+        all_NREM_data = [all_NREM_data; NREM_data];
+        all_REM_data = [all_REM_data; REM_data];
 
         % Calculate mean and standard deviation for NREM and REM
         if ~isempty(NREM_data)
@@ -100,5 +108,29 @@ function ECG_results = calculate_ECG_by_cycles_and_stages(EEG_clean, cycle_table
             'REM_ecg_mean_diff', last_cycle_data.REM_mean.ecg_mean - first_cycle_data.REM_mean.ecg_mean, ...
             'REM_ecg_att_en_diff', last_cycle_data.REM_mean.ecg_att_en - first_cycle_data.REM_mean.ecg_att_en, ...
             'REM_br_permin_diff', last_cycle_data.REM_mean.br_permin - first_cycle_data.REM_mean.br_permin);
+    end
+
+    % Calculate overall means and standard deviations across all cycles
+    if ~isempty(all_NREM_data)
+        all_NREM_mean = mean(all_NREM_data, 1, 'omitnan');
+        all_NREM_std = std(all_NREM_data, 0, 1, 'omitnan');
+        ECG_results.Overall.NREM.mean = struct('ecg_mean', all_NREM_mean(1), 'ecg_rmssd', all_NREM_mean(2), ...
+            'ecg_sdnn', all_NREM_mean(3), 'ecg_sdsd', all_NREM_mean(4), 'ecg_pnn50', all_NREM_mean(5), ...
+            'ecg_LF', all_NREM_mean(6), 'ecg_HF', all_NREM_mean(7), 'ecg_att_en', all_NREM_mean(8), 'br_permin', all_NREM_mean(9));
+        ECG_results.Overall.NREM.std = struct('ecg_mean', all_NREM_std(1), 'ecg_LF', all_NREM_std(6), ...
+            'ecg_HF', all_NREM_std(7), 'ecg_att_en', all_NREM_std(8), 'br_permin', all_NREM_std(9));
+    end
+
+    if ~isempty(all_REM_data)
+        all_REM_mean = mean(all_REM_data, 1, 'omitnan');
+        all_REM_std = std(all_REM_data, 0, 1, 'omitnan');
+        ECG_results.Overall.REM.mean = struct('ecg_mean', all_REM_mean(1), 'ecg_rmssd', all_REM_mean(2), ...
+            'ecg_sdnn', all_REM_mean(3), 'ecg_sdsd', all_REM_mean(4), 'ecg_pnn50', all_REM_mean(5), ...
+            'ecg_LF', all_REM_mean(6), 'ecg_HF', all_REM_mean(7), 'ecg_att_en', all_REM_mean(8), 'br_permin', all_REM_mean(9));
+        ECG_results.Overall.REM.std = struct('ecg_mean', all_REM_std(1), 'ecg_LF', all_REM_std(6), ...
+            'ecg_HF', all_REM_std(7), 'ecg_att_en', all_REM_std(8), 'br_permin', all_REM_std(9));
+        ECG_results.Overall.NREM_REM_differences = struct('ecg_mean_diff', ECG_results.Overall.NREM.mean.ecg_mean - ECG_results.Overall.REM.mean.ecg_mean, ...
+                'ecg_att_en_diff', ECG_results.Overall.NREM.mean.ecg_att_en - ECG_results.Overall.REM.mean.ecg_att_en, ...
+                'br_permin_diff', ECG_results.Overall.NREM.mean.br_permin - ECG_results.Overall.REM.mean.br_permin);
     end
 end

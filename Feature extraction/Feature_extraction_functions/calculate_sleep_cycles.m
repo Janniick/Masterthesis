@@ -1,7 +1,7 @@
-function cycle_table = calculate_sleep_cycles(hypnogram_py)
+function [cycle_table, collapsed_values] = calculate_sleep_cycles(hypnogram_py)
     % calculate_sleep_cycles - Calculate sleep cycles from a hypnogram using YASA.
     %
-    % Syntax: cycle_table = calculate_sleep_cycles(hypnogram_py)
+    % Syntax: [cycle_table, collapsed_values] = calculate_sleep_cycles(hypnogram_py)
     %
     % Inputs:
     %    hypnogram_py - Python NumPy array of sleep stages per epoch.
@@ -9,10 +9,12 @@ function cycle_table = calculate_sleep_cycles(hypnogram_py)
     % Outputs:
     %    cycle_table - MATLAB table containing sleep cycle information:
     %                 n_cycle, start_epoch, end_epoch, duration_min.
+    %    collapsed_values - MATLAB array containing collapsed stages: 
+    %                       [Stage, Start, Length] per row.
     %
     % Example:
     %    hypnogram_py = py.numpy.array([0,1,2,2,3,5,2,3,5,2]);
-    %    cycle_table = calculate_sleep_cycles(hypnogram_py);
+    %    [cycle_table, collapsed_values] = calculate_sleep_cycles(hypnogram_py);
     %
     % Author:
     %    Jannick (Adapted by ChatGPT)
@@ -63,6 +65,7 @@ function cycle_table = calculate_sleep_cycles(hypnogram_py)
     if isempty(values)
         warning('No sleep cycles detected in the hypnogram.');
         cycle_table = table();
+        collapsed_values = [];
         return;
     end
 
@@ -91,10 +94,7 @@ function cycle_table = calculate_sleep_cycles(hypnogram_py)
     % Add the last stage to collapsed values
     collapsed_values = [collapsed_values; current_stage, current_start, current_length];
 
-    % Convert to table with appropriate column names
-    collapsed_values_table = array2table(collapsed_values, 'VariableNames', {'Stage', 'Start', 'Length'});
-
-     %% Step 5: Identify Sleep Cycles Based on Stage Transitions
+    %% Step 5: Identify Sleep Cycles Based on Stage Transitions
     sleep_cycles_struct = struct('start_epoch', {}, 'end_epoch', {}, 'duration_epochs', {});
 
     start_cycle = 0;

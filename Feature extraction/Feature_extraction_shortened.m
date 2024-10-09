@@ -6,13 +6,13 @@ eeglab nogui;
 
 %% load python
 pyenv('Version', 'C:\Users\janni\AppData\Local\Programs\Python\Python311\python.EXE');
-pyrun("import yasa", "yasa");
+% pyrun("import yasa", "yasa");
 %% Define the base folder where the search should start
 base_folder = 'D:\Masterarbeit Jannick\Data';  % Replace with your folder path
 % Search for all files ending with '_preprocessed.mat' in all subdirectories
 all_mat_files = dir(fullfile(base_folder, '**', '*_preprocessed_EOG.mat'));
-% Initialize a structure to hold results for all files
-all_results = struct();
+% Initialize results_row as a struct
+results_row = struct();
 %% bands
 delta_b = [0.5, 4];
 theta_b = [4, 8];
@@ -21,7 +21,7 @@ beta_b = [15, 30];
 gamma_b = [30, 40];
 spindle_b = [12, 16];
 
-for i = 1:1%length(all_mat_files)
+for i = 1:length(all_mat_files)
     try
         % load the file
         load([all_mat_files(i).folder, '\', all_mat_files(i).name]);
@@ -32,6 +32,9 @@ for i = 1:1%length(all_mat_files)
         % Extract the study and participant variables
         study = split_parts{1};
         participant = split_parts{2};
+        % Save study and participant
+        results_row.study = study;
+        results_row.participant = participant;
 
 
         % initialize things for spectrum and so on
@@ -96,6 +99,18 @@ for i = 1:1%length(all_mat_files)
         hypnogram = create_hypnogram(sleep_stages_whole);
         % Convert MATLAB hypnogram to Python format using py.numpy.array
         hypnogram_py = py.numpy.array(hypnogram);
+        % Upsample the whole night hypnogram
+        epoch_duration_sec = 30;
+        repeats_per_epoch = epoch_duration_sec * EEG_clean.srate;  % Number of samples per epoch
+        hypnogram_upsampled = repelem(hypnogram, repeats_per_epoch);  % Upsample the hypnogram
+        hypnogram_upsampled_py = py.numpy.array(hypnogram_upsampled);  % Convert to Python numpy array
+
+
+
+        % Calculate sleep cycles
+        [cycle_table, collapsed_values] = calculate_sleep_cycles(hypnogram_py);
+        % Save the amount of cycles
+        results_row.n_cycles = cycle_table.n_cycle(end);
 
 
 
@@ -126,78 +141,13 @@ for i = 1:1%length(all_mat_files)
         end
         % Store clean data in a new field in EEG_clean
         EEG_clean.clean_times = clean_times;
-
-
-
-        %% Extraction of whole night features
-        % Call YASA's sleep statistics function
-        sleep_stats = py.yasa.sleep_statistics(hypnogram_py, sf_hyp=1/30);
-        sleep_stats = dictionary(sleep_stats);
-
-
-
-        % Calculate stage transitions
-        stage_transitions = py.yasa.transition_matrix(hypnogram_py);
-        % Extract counts and probabilities from the result
-        counts = stage_transitions{1};  % Transition counts
-        probs = stage_transitions{2};   % Transition probabilities
-        % Convert counts and probs to NumPy arrays
-        counts_np = counts.to_numpy();
-        probs_np = probs.to_numpy();
-        % Convert Python counts and probabilities to MATLAB arrays
-        counts_mat = double(counts_np);  % Convert to MATLAB numeric matrix
-        probs_mat = double(probs_np);    % Convert to MATLAB numeric matrix
-
-
-        % Calculate sleep cycles
-        cycle_table = calculate_sleep_cycles(hypnogram_py);
-
-
-        % Extract the last sleep stage before wakeup
-        last_stage_before_wakeup = extract_last_sleep_stage_before_wakeup(hypnogram);
-
-
-
-        % wasserstein interhemispheric spectral measure
-        % This function computes the Wasserstein distance between two EEG channels based on their power spectral density (PSD).
-        % The PSD is calculated using the Welch method over the specified window and overlap parameters. The function then calculates
-        % the cumulative distribution of the PSD in the frequency range of 0.5 to 40 Hz and compares the two channels using the
-        % Wasserstein distance metric.
-        % done over whole night
-        % remove no channels
-        remove_channel_which = zeros(1,8);
-        duration_window = 4*EEG_clean.srate;
-        which_window = hanning(duration_window);
-        overlap_window = duration_window*0.5;
-        % Saves it automatically with appropriate name, e.g. wasserstein_f3f4
-        wasserstein_distance(EEG_clean, 'F3', 'F4', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
-        wasserstein_distance(EEG_clean, 'C3', 'C4', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
-        wasserstein_distance(EEG_clean, 'P3', 'P4', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
-        wasserstein_distance(EEG_clean, 'O1', 'O2', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
-
-
-
-        % Calculate ECG values during sleep
-        ECG_results = calculate_ECG_by_cycles_and_stages(EEG_clean, cycle_table, collapsed_values);
-
-
-        % Calculate complexity measures
-        complexity_measures = extract_complexity_measures(EEG_clean, srate, delta_b, theta_b, alpha_b, beta_b, spindle_b);
-
-
-
-        %% Calculations only on clean epochs
-        % group the clean epochs by sleep stage for further sleep stage specific analysis
-        stage_epochs = group_epochs_by_stage(EEG_clean.clean_epochs);
-
-
-
         % Convert the clean EEG data to Python-friendly format (NumPy array)
-        data_for_py = cell(1, size(EEG_clean.clean_data, 1));
+        clean_data_for_py = cell(1, size(EEG_clean.clean_data, 1));
         for row = 1:size(EEG_clean.clean_data, 1)
-            data_for_py{row} = EEG_clean.clean_data(row, :);
+            clean_data_for_py{row} = EEG_clean.clean_data(row, :);
         end
-        data_for_py = py.numpy.array(data_for_py);
+        clean_data_for_py = py.numpy.array(clean_data_for_py);
+
 
 
 
@@ -222,7 +172,7 @@ for i = 1:1%length(all_mat_files)
                 hypnogram_clean(epoch) = stage;
             end
         end
-        % Upsample scoring to match sampling frequency of data
+        % Upsample hypnogram_clean
         epoch_duration_sec = 30;  % Duration of each epoch in seconds
         srate = EEG_clean.srate;  % Sampling rate of the EEG data
         % Repeat each entry in hypnogram_clean for 30 * srate times
@@ -230,8 +180,95 @@ for i = 1:1%length(all_mat_files)
         hypnogram_clean_upsampled = repelem(hypnogram_clean, repeats_per_epoch);
 
 
+        %% Extraction of whole night features
+        % Call YASA's sleep statistics function
+        sleep_stats = py.yasa.sleep_statistics(hypnogram_py, sf_hyp=1/30);
+        sleep_stats = dictionary(sleep_stats);
+        % Save the generated values
+        sleep_stat_keys = keys(sleep_stats);
+        for i = 1:length(sleep_stat_keys)
+            % Get the key
+            key = sleep_stat_keys{i};  % Original key from the dictionary
+            % Replace '%' with 'perc_' and ensure the name is valid
+            if startsWith(key, '%')
+                valid_key = ['perc_' key(2:end)];  % Replace '%' with 'perc_' only at the start
+            else
+                valid_key = key;
+            end
+            valid_key = matlab.lang.makeValidName(valid_key);  % Ensure the modified key is valid as a field name
+            % Get the corresponding value
+            value = sleep_stats(key);
+            % Assign to the structure with the modified key as the field name
+            results_row.(valid_key) = value;
+        end
 
-        %% Power spectrum analysis
+
+
+        % Calculate stage transitions
+        stage_transitions = py.yasa.transition_matrix(hypnogram_py);
+        % Extract counts and probabilities from the result
+        counts = stage_transitions{1};  % Transition counts
+        probs = stage_transitions{2};   % Transition probabilities
+        % Convert counts and probs to NumPy arrays
+        counts_np = counts.to_numpy();
+        probs_np = probs.to_numpy();
+        % Convert Python counts and probabilities to MATLAB arrays
+        counts_mat = double(counts_np);  % Convert to MATLAB numeric matrix
+        probs_mat = double(probs_np);    % Convert to MATLAB numeric matrix
+
+
+
+        % Extract the last sleep stage before wakeup
+        last_stage_before_wakeup = extract_last_sleep_stage_before_wakeup(hypnogram);
+        % Save
+        results_row.last_stage_before_wakeup = last_stage_before_wakeup;
+
+
+
+        % wasserstein interhemispheric spectral measure
+        % This function computes the Wasserstein distance between two EEG channels based on their power spectral density (PSD).
+        % The PSD is calculated using the Welch method over the specified window and overlap parameters. The function then calculates
+        % the cumulative distribution of the PSD in the frequency range of 0.5 to 40 Hz and compares the two channels using the
+        % Wasserstein distance metric.
+        % done over whole night
+        % remove no channels
+        remove_channel_which = zeros(1,8);
+        duration_window = 4*EEG_clean.srate;
+        which_window = hanning(duration_window);
+        overlap_window = duration_window*0.5;
+        % Saves it automatically with appropriate name, e.g. wasserstein_f3f4
+        wasserstein_distance(EEG_clean, 'F3', 'F4', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
+        wasserstein_distance(EEG_clean, 'C3', 'C4', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
+        wasserstein_distance(EEG_clean, 'P3', 'P4', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
+        wasserstein_distance(EEG_clean, 'O1', 'O2', remove_channel_which, which_window, overlap_window, duration_window, EEG_clean.srate);
+        results_row.wasserstein_F3F4 = wasserstein_f3f4;
+        results_row.wasserstein_C3C4 = wasserstein_c3c4;
+        results_row.wasserstein_P3P4 = wasserstein_p3p4;
+        results_row.wasserstein_O1O2 = wasserstein_o1o2;
+
+
+
+        % Calculate ECG values during sleep
+        ECG_results = calculate_ECG_by_cycles_and_stages(EEG_clean, cycle_table, collapsed_values);
+        % Save
+        results_row = addNestedFieldsToResultsRow(ECG_results.Cycle_First_Last_Differences, 'ECG_results.Cycle_First_Last_Differences', results_row);
+        results_row = addNestedFieldsToResultsRow(ECG_results.Overall, 'ECG.Overall', results_row);
+
+
+        % Calculate complexity measures
+        complexity_measures = extract_complexity_measures(EEG_clean, srate, delta_b, theta_b, alpha_b, beta_b, spindle_b);
+        % Save
+        results_row = addNestedFieldsToResultsRow(complexity_measures, 'comp', results_row);
+
+
+
+        %% Calculations only on clean epochs
+        % group the clean epochs by sleep stage for further sleep stage specific analysis
+        stage_epochs = group_epochs_by_stage(EEG_clean.clean_epochs);
+
+
+
+        % Power spectrum analysis
         % Initialize structs to hold power spectrum results
         power_spectrum_results = struct('NREM1', [], 'NREM2', [], 'NREM3', [], 'REM', [], 'Overall', []);
         bands = {'delta', 'theta', 'alpha', 'beta', 'spindle'};
@@ -308,10 +345,11 @@ for i = 1:1%length(all_mat_files)
                 power_spectrum_results.Overall.(region_name).std_relative.(band_name) = std(overall_relative_power.(region_name)(:, band_idx), 0, 'all');
             end
         end
+        % Save
+        results_row = addNestedFieldsToResultsRow(power_spectrum_results, 'power_spect', results_row);
 
 
-
-        %% FOOOF analysis
+        % FOOOF analysis
         % Channels grouped into FC and PO
         fc_channels = find(contains({EEG_clean.chanlocs.labels}, {'F', 'C'}));  % Find FC channels
         po_channels = find(contains({EEG_clean.chanlocs.labels}, {'P', 'O'}));  % Find PO channels
@@ -445,16 +483,14 @@ for i = 1:1%length(all_mat_files)
                 fooof_results.(stage_name).PO.std_peak_values.(field_name) = std(peak_values_column, 0, 'omitnan');
             end
         end
+        % Save
+        results_row = addNestedFieldsToResultsRow(fooof_results, 'fooof', results_row);
 
 
 
-
-
-
-
-        %% Run the slow wave detection in YASA
+        % Run the slow wave detection in YASA
         coupling_py = py.dict(pyargs('freq_sp', 12:16, 'p', 0.05, 'time', 1));
-        sws_detection_results = py.yasa.sw_detect(data = data_for_py, ...
+        sws_detection_results = py.yasa.sw_detect(data = clean_data_for_py, ...
             sf = py.float(EEG_clean.srate), ...
             ch_names = py.list({EEG_clean.chanlocs.labels}), ...
             hypno = py.numpy.array(hypnogram_clean_upsampled, 'int'), ...
@@ -561,13 +597,57 @@ for i = 1:1%length(all_mat_files)
         SW_results.Difference_first_last_cycle.std.ndPAC = first_cycle.std.ndPAC - last_cycle.std.ndPAC;
         SW_results.Difference_first_last_cycle.std.duration_negative_phase = first_cycle.std.duration_negative_phase - last_cycle.std.duration_negative_phase;
         SW_results.Difference_first_last_cycle.std.duration_positive_phase = first_cycle.std.duration_positive_phase - last_cycle.std.duration_positive_phase;
+        % Initialize empty matrices to store all cycle data for overall calculation
+        all_cycle_data_mean = [];
+        all_cycle_data_std = [];
+        % Loop through each cycle and aggregate the data
+        for cycle_idx = 1:height(cycle_table)
+            cycle_name = ['Cycle_' num2str(cycle_idx)];
+            if isfield(SW_results, cycle_name)
+                if ~isempty(SW_results.(cycle_name).mean) && ~isnan(SW_results.(cycle_name).mean.duration)
+                    % Concatenate the data for overall calculation
+                    all_cycle_data_mean = [all_cycle_data_mean; struct2array(SW_results.(cycle_name).mean)];
+                    all_cycle_data_std = [all_cycle_data_std; struct2array(SW_results.(cycle_name).std)];
+                end
+            end
+        end
+        % Calculate the overall mean across all cycles
+        if ~isempty(all_cycle_data_mean)
+            overall_mean_values = mean(all_cycle_data_mean, 1, 'omitnan');
+            overall_std_values = std(all_cycle_data_mean, 0, 1, 'omitnan');
+            % Store in the SW_results structure
+            SW_results.Overall.mean.duration = overall_mean_values(1);
+            SW_results.Overall.mean.ValNegPeak = overall_mean_values(2);
+            SW_results.Overall.mean.ValPosPeak = overall_mean_values(3);
+            SW_results.Overall.mean.PTP = overall_mean_values(4);
+            SW_results.Overall.mean.Slope = overall_mean_values(5);
+            SW_results.Overall.mean.Frequency = overall_mean_values(6);
+            SW_results.Overall.mean.SigmaPeak = overall_mean_values(7);
+            SW_results.Overall.mean.PhaseAtSigmaPeak = overall_mean_values(8);
+            SW_results.Overall.mean.ndPAC = overall_mean_values(9);
+            SW_results.Overall.mean.duration_negative_phase = overall_mean_values(10);
+            SW_results.Overall.mean.duration_positive_phase = overall_mean_values(11);
+            % Store the overall standard deviation
+            SW_results.Overall.std.duration = overall_std_values(1);
+            SW_results.Overall.std.ValNegPeak = overall_std_values(2);
+            SW_results.Overall.std.ValPosPeak = overall_std_values(3);
+            SW_results.Overall.std.PTP = overall_std_values(4);
+            SW_results.Overall.std.Slope = overall_std_values(5);
+            SW_results.Overall.std.Frequency = overall_std_values(6);
+            SW_results.Overall.std.SigmaPeak = overall_std_values(7);
+            SW_results.Overall.std.PhaseAtSigmaPeak = overall_std_values(8);
+            SW_results.Overall.std.ndPAC = overall_std_values(9);
+            SW_results.Overall.std.duration_negative_phase = overall_std_values(10);
+            SW_results.Overall.std.duration_positive_phase = overall_std_values(11);
+        end
+        % Save
+        results_row = addNestedFieldsToResultsRow(SW_results.Difference_first_last_cycle, 'SW_diff_first_last', results_row);
+        results_row = addNestedFieldsToResultsRow(SW_results.Overall, 'SW_overall', results_row);
 
-
-
-        %% Run the spindle detection from YASA
+        % Run the spindle detection from YASA
         % Correct the 'thresh' parameter to be a Python dictionary
         thresh_py = py.dict(pyargs('corr', 0.65, 'rel_pow', 0.2, 'rms', 1.5));
-        spindles_detection_results = py.yasa.spindles_detect(data = data_for_py, ...
+        spindles_detection_results = py.yasa.spindles_detect(data = clean_data_for_py, ...
             sf = py.float(EEG_clean.srate), ...
             ch_names = py.list({EEG_clean.chanlocs.labels}), ...
             hypno = py.numpy.array(hypnogram_clean_upsampled, 'int'), ...
@@ -670,63 +750,46 @@ for i = 1:1%length(all_mat_files)
         Spindle_results.Difference_first_last_cycle.std.Frequency = first_cycle.std.Frequency - last_cycle.std.Frequency;
         Spindle_results.Difference_first_last_cycle.std.Oscillations = first_cycle.std.Oscillations - last_cycle.std.Oscillations;
         Spindle_results.Difference_first_last_cycle.std.Symmetry = first_cycle.std.Symmetry - last_cycle.std.Symmetry;
-
-
-
-
-        %% Arousal detection using adapted version of YASA
-
-
-
-
-
-        %% Detect EOG features during REM
-        % % Check the number of EOG channels available
-        % % only works for 2 EOG channels
-        % num_EOG_channels = size(EEG_clean.data_EOG, 1);
-        % % Convert EOG data to Python array(s)
-        % if num_EOG_channels == 1
-        %     % Single EOG channel
-        %     EOG1_py = py.numpy.array(EEG_clean.data_EOG(1, :));
-        %     EOG2_py = py.numpy.array(EEG_clean.data_EOG(1, :));% Convert the single channel
-        % elseif num_EOG_channels >= 2
-        %     % Two EOG channels, use the first two channels
-        %     EOG1_py = py.numpy.array(EEG_clean.data_EOG(1, :));
-        %     EOG2_py = py.numpy.array(EEG_clean.data_EOG(2, :));
-        % else
-        %     error('No EOG data found in EEG_clean.data_EOG.');
-        % end
-        % % Set parameters for upsampling the hypnogram
-        % epoch_duration_sec = 30;
-        % repeats_per_epoch = epoch_duration_sec * EEG_clean.srate;  % Number of samples per epoch
-        % hypnogram_upsampled = repelem(hypnogram, repeats_per_epoch);  % Upsample the hypnogram
-        % hypnogram_upsampled_py = py.numpy.array(hypnogram_upsampled);  % Convert to Python numpy array
-        % % Call with two EOG channels
-        % EOG_events = py.yasa.rem_detect( ...
-        %     EOG1_py, ...
-        %     EOG2_py, ...
-        %     EEG_clean.srate, ...
-        %     pyargs('hypno', hypnogram_upsampled_py, ...
-        %     'include', int32(5), ...
-        %     'amplitude', py.tuple([50, 325]), ...
-        %     'duration', py.tuple([0.3, 1.2]), ...
-        %     'relative_prominence', 0.8, ...
-        %     'freq_rem', py.tuple([0.5, 5]), ...
-        %     'remove_outliers', false, ...
-        %     'verbose', false));
-        % % Access and convert the REM detection summary
-        % summary_py = EOG_events.summary();
-        % % Extract only the data values (no index)
-        % data_matrix = double(py.array.array('d', py.numpy.ravel(summary_py.values.flatten())));
-        % data_matrix = reshape(data_matrix, int32(summary_py.shape{2}), int32(summary_py.shape{1}));
-        % data_matrix = data_matrix(:,:)';
-        % % Extract column names
-        % column_names_py = summary_py.columns.tolist();
-        % column_names = cellfun(@char, cell(column_names_py), 'UniformOutput', false);
-        % % Convert the reshaped matrix to a MATLAB table with the column names
-        % EOG_summary_2_chan = array2table(data_matrix, 'VariableNames', column_names);
-
-
+        % Initialize empty matrices to store all cycle data for overall calculation
+        all_cycle_data_mean = [];
+        all_cycle_data_std = [];
+        % Loop through each cycle and aggregate the data
+        for cycle_idx = 1:height(cycle_table)
+            cycle_name = ['Cycle_' num2str(cycle_idx)];
+            if isfield(Spindle_results, cycle_name)
+                if ~isempty(Spindle_results.(cycle_name).mean) && ~isnan(Spindle_results.(cycle_name).mean.duration)
+                    % Concatenate the data for overall calculation
+                    all_cycle_data_mean = [all_cycle_data_mean; struct2array(Spindle_results.(cycle_name).mean)];
+                    all_cycle_data_std = [all_cycle_data_std; struct2array(Spindle_results.(cycle_name).std)];
+                end
+            end
+        end
+        % Calculate the overall mean and standard deviation across all cycles
+        if ~isempty(all_cycle_data_mean)
+            overall_mean_values = mean(all_cycle_data_mean, 1, 'omitnan');
+            overall_std_values = std(all_cycle_data_mean, 0, 1, 'omitnan');
+            % Store in the Spindle_results structure
+            Spindle_results.Overall.mean.duration = overall_mean_values(1);
+            Spindle_results.Overall.mean.Amplitude = overall_mean_values(2);
+            Spindle_results.Overall.mean.RMS = overall_mean_values(3);
+            Spindle_results.Overall.mean.AbsPower = overall_mean_values(4);
+            Spindle_results.Overall.mean.RelPower = overall_mean_values(5);
+            Spindle_results.Overall.mean.Frequency = overall_mean_values(6);
+            Spindle_results.Overall.mean.Oscillations = overall_mean_values(7);
+            Spindle_results.Overall.mean.Symmetry = overall_mean_values(8);
+            % Store the overall standard deviation
+            Spindle_results.Overall.std.duration = overall_std_values(1);
+            Spindle_results.Overall.std.Amplitude = overall_std_values(2);
+            Spindle_results.Overall.std.RMS = overall_std_values(3);
+            Spindle_results.Overall.std.AbsPower = overall_std_values(4);
+            Spindle_results.Overall.std.RelPower = overall_std_values(5);
+            Spindle_results.Overall.std.Frequency = overall_std_values(6);
+            Spindle_results.Overall.std.Oscillations = overall_std_values(7);
+            Spindle_results.Overall.std.Symmetry = overall_std_values(8);
+        end
+        % Save
+        results_row = addNestedFieldsToResultsRow(Spindle_results.Difference_first_last_cycle, 'Spindle_diff_first_last', results_row);
+        results_row = addNestedFieldsToResultsRow(Spindle_results.Overall, 'Spindle_overall', results_row);
 
 
 
@@ -787,7 +850,7 @@ for i = 1:1%length(all_mat_files)
             % Calculate the phasic-to-tonic ratio difference
             first_cycle_ratio = rem_analysis.Cycle_1.phasic_to_tonic_ratio;
             last_cycle_ratio = rem_analysis.(['Cycle_' num2str(height(cycle_table))]).phasic_to_tonic_ratio;
-            rem_analysis.Difference_first_last_cycle.phasic_to_tonic_ratio_diff = last_cycle_ratio - first_cycle_ratio;
+            rem_analysis.Difference_first_last_cycle.phasic_to_tonic_ratio_ratio = last_cycle_ratio / first_cycle_ratio;
             % Calculate the ratio of total REM duration between the first and last cycle
             first_cycle_rem_duration = rem_analysis.Cycle_1.total_rem_duration_min;
             last_cycle_rem_duration = rem_analysis.(['Cycle_' num2str(height(cycle_table))]).total_rem_duration_min;
@@ -797,20 +860,68 @@ for i = 1:1%length(all_mat_files)
             rem_analysis.Difference_first_last_cycle.phasic_to_tonic_ratio_diff = NaN;
             rem_analysis.Difference_first_last_cycle.total_rem_duration_ratio = NaN;
         end
+        % Save
+        results_row = addNestedFieldsToResultsRow(rem_analysis.Difference_first_last_cycle, 'REM_diff_first_last', results_row);
+        results_row = addNestedFieldsToResultsRow(rem_analysis.Overall, 'REM_overall', results_row);
 
 
 
 
+        % % Plot amplitude distribution
+        % % Define the amplitude threshold for phasic REM
+        % amp_threshold = 1.5 * mean(eog_envelope_rem);  % Example threshold calculation
+        % % Plot the histogram of the amplitude envelope
+        % figure;
+        % histogram(eog_envelope_rem, 'BinWidth', 0.5);  % Adjust BinWidth as needed
+        % hold on;
+        % % Plot the cutoff line
+        % y_limits = ylim;  % Get the current y-axis limits
+        % plot([amp_threshold, amp_threshold], y_limits, 'r--', 'LineWidth', 2);
+        % % Add title and labels
+        % title('Histogram of Amplitude Envelope in REM EOG Signal');
+        % xlabel('Amplitude');
+        % ylabel('Count');
+        % % Add legend
+        % legend('Amplitude', 'Cutoff for Phasic REM');
+        % % Release hold
+        % hold off;
+        %
+        %
+        % % Plot timedistribution tonic phasic
+        % % Define the time vector for the REM-only signal
+        % time_rem = (1:length(eog_envelope_rem)) / fs;
+        % % Define the amplitude threshold
+        % amp_threshold = 1.5 * mean(eog_envelope_rem);  % Example threshold calculation
+        % % Create binary data (1 for phasic, 0 for tonic)
+        % phasic_tonic_binary = eog_envelope_rem > amp_threshold;
+        % % Define the indices for the 4 to 6-minute interval
+        % start_idx = round(240 * fs);  % 4 minutes in samples
+        % end_idx = min(round(300 * fs), length(phasic_tonic_binary));  % 6 minutes in samples, limited by data length
+        % % Extract the data for this interval
+        % time_interval = time_rem(start_idx:end_idx);
+        % phasic_tonic_interval = phasic_tonic_binary(start_idx:end_idx);
+        % % Plot the binary hypnogram-like data for the 4-6 min interval
+        % figure;
+        % plot(time_interval, phasic_tonic_interval, 'LineWidth', 1.5);  % Line plot for the selected interval
+        % % Set axis limits and labels
+        % ylim([-0.1, 1.1]);  % Limits for binary plot
+        % yticks([0 1]);      % Set y-axis ticks to 0 and 1
+        % yticklabels({'Tonic REM', 'Phasic REM'});
+        % xlabel('Time (s)');
+        % title('1 min Window of Phasic and Tonic REM Segments');
+        % % Add a grid for clarity
+        % grid on;
 
-        %% Calculate Phase Locking Value, Modulation Index and Mean Vektor Length
+
+
+        % Calculate Phase Locking Value, Modulation Index and Mean Vektor Length
         % PLV is a measure that quantifies the consistency of the phase relationship between two signals over time
         % MI tells you about the strength and specificity of the coupling
         % MVL provides insight into the directionality or phase preference of the amplitude modulation
         % Initialize the main structure to store PAC results for each channel
+        % Initialize the main structure to store PAC results for each channel
         pac_results = struct();
         n_channels = size(EEG_clean.clean_data, 1);  % Number of channels in the cleaned data
-        n_bins = 18;  % Number of phase bins
-        bin_edges = linspace(-pi, pi, n_bins + 1);  % Define phase bins
         % Initialize arrays to store overall values for averaging
         plv_values = zeros(n_channels, 1);
         mi_values = zeros(n_channels, 1);
@@ -831,6 +942,8 @@ for i = 1:1%length(all_mat_files)
             plv = abs(mean(exp(1i * phase_diff)));
             plv_values(chan) = plv;  % Store for overall calculation
             % Bin the phases and calculate the mean amplitude in each bin
+            n_bins = 18;
+            bin_edges = linspace(-pi, pi, n_bins + 1);
             amp_binned = zeros(1, n_bins);
             for bin = 1:n_bins
                 idx = phase_low >= bin_edges(bin) & phase_low < bin_edges(bin + 1);
@@ -841,38 +954,23 @@ for i = 1:1%length(all_mat_files)
             mi = (log(n_bins) + sum(p .* log(p))) / log(n_bins);
             mi_values(chan) = mi;  % Store for overall calculation
             % Calculate Mean Vector Length (MVL)
-            phase_centers = bin_edges(1:end-1) + diff(bin_edges) / 2;  % Bin centers
+            phase_centers = bin_edges(1:end-1) + diff(bin_edges) / 2;
             mvl = abs(sum(amp_binned .* exp(1i * phase_centers)) / sum(amp_binned));
             mvl_values(chan) = mvl;  % Store for overall calculation
-            % Store results in the structure for the specific channel
+            % Store essential results in the structure for the specific channel
             pac_results.(chan_name).plv = plv;
             pac_results.(chan_name).mi = mi;
             pac_results.(chan_name).mvl = mvl;
-            pac_results.(chan_name).amp_binned = amp_binned;
-            pac_results.(chan_name).phase_bins = phase_centers;  % Bin centers
         end
         % Compute overall (mean) values across all channels
-        overall_plv = mean(plv_values);
-        overall_mi = mean(mi_values);
-        overall_mvl = mean(mvl_values);
-        % Store the overall average results
-        pac_results.overall.plv = overall_plv;
-        pac_results.overall.mi = overall_mi;
-        pac_results.overall.mvl = overall_mvl;
+        pac_results.overall.plv = mean(plv_values);
+        pac_results.overall.mi = mean(mi_values);
+        pac_results.overall.mvl = mean(mvl_values);
+        % Save
+        results_row = addNestedFieldsToResultsRow(pac_results, 'PAC', results_row);
 
-        %% Save the data
-        % Store results in the all_results structure
-        all_results(i).filename = filename;
-        all_results(i).study = study;
-        all_results(i).participant = participant;
-        all_results(i).sleep_stats = sleep_stats;
-        all_results(i).stage_transitions = struct('counts', counts_mat, 'probs', probs_mat);
-        all_results(i).cycle_table = cycle_table;
-        all_results(i).SW_results = SW_results;
-        all_results(i).Spindle_results = Spindle_results;
-        all_results(i).fooof_results = fooof_results;
-        all_results(i).power_spectrum_results = power_spectrum_results;
-        all_results(i).EOG_events = EOG_events;
+
+        results_table = struct2table(results_row, 'AsArray', true);    
 
     catch ME
         warning('Error processing file %d (%s): %s', i, all_mat_files(i).name, ME.message);
@@ -880,11 +978,11 @@ for i = 1:1%length(all_mat_files)
         all_results(i).error = ME.message;
         continue;  % Proceed to the next file
     end
-    % Optionally, save individual results to a file
-    save_filename = fullfile(all_mat_files(i).folder, [split_parts{1}, '_', split_parts{2}, '_results.mat']);
-    save(save_filename, 'all_results', '-append');
-
-    fprintf('Processed file %d/%d: %s\n', i, length(all_mat_files), filename);
+    % % Optionally, save individual results to a file
+    % save_filename = fullfile(all_mat_files(i).folder, [split_parts{1}, '_', split_parts{2}, '_results.mat']);
+    % save(save_filename, 'all_results', '-append');
+    %
+    % fprintf('Processed file %d/%d: %s\n', i, length(all_mat_files), filename);
 
 
 end
