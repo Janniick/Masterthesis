@@ -11,8 +11,14 @@ pyenv('Version', 'C:\Users\janni\AppData\Local\Programs\Python\Python311\python.
 base_folder = 'D:\Masterarbeit Jannick\Data';  % Replace with your folder path
 % Search for all files ending with '_preprocessed.mat' in all subdirectories
 all_mat_files = dir(fullfile(base_folder, '**', '*_preprocessed_EOG.mat'));
-% Initialize results_row as a struct
-results_row = struct();
+%% Load existing results_table if it exists
+results_table_file = fullfile(base_folder, 'results_table.mat');  % Save in base_folder
+if exist(results_table_file, 'file')
+    load(results_table_file, 'results_table');
+else
+    results_table = table();
+end
+
 %% bands
 delta_b = [0.5, 4];
 theta_b = [4, 8];
@@ -21,18 +27,34 @@ beta_b = [15, 30];
 gamma_b = [30, 40];
 spindle_b = [12, 16];
 
-for i = 1:length(all_mat_files)
+for i = 1:2%length(all_mat_files)
     try
+        tic;
         % load the file
         load([all_mat_files(i).folder, '\', all_mat_files(i).name]);
         % extract the name of the file
         filename = all_mat_files(i).name;
+        disp(['------------------------ Analysing File: ', filename]);
         % Split the filename by underscores ('_') and periods ('.')
         split_parts = split(filename, {'_', '.'});
         % Extract the study and participant variables
         study = split_parts{1};
         participant = split_parts{2};
+
+          % Check if the file has already been processed
+        if ~isempty(results_table)
+            existing_entries = strcmp(results_table.study, study) & strcmp(results_table.participant, participant);
+            if any(existing_entries)
+                disp(['File ', filename, ' already processed. Skipping.']);
+                continue; % Skip to next file
+            end
+        end
+
+        % Initialize results_row as a struct
+        results_row = struct();
+
         % Save study and participant
+        results_row.i = i;
         results_row.study = study;
         results_row.participant = participant;
 
@@ -182,6 +204,7 @@ for i = 1:length(all_mat_files)
 
         %% Extraction of whole night features
         % Call YASA's sleep statistics function
+        disp('- Extract whole night sleep statistics');
         sleep_stats = py.yasa.sleep_statistics(hypnogram_py, sf_hyp=1/30);
         sleep_stats = dictionary(sleep_stats);
         % Save the generated values
@@ -215,6 +238,26 @@ for i = 1:length(all_mat_files)
         % Convert Python counts and probabilities to MATLAB arrays
         counts_mat = double(counts_np);  % Convert to MATLAB numeric matrix
         probs_mat = double(probs_np);    % Convert to MATLAB numeric matrix
+        % Define the stage numbers
+        stages = [0, 1, 2, 3, 5, 6];
+        % Loop through the transition probabilities matrix
+        for row = 1:size(probs_mat, 1)
+            for col = 1:size(probs_mat, 2)
+                % Construct a valid field name using the specific stage numbers
+                field_name = sprintf('prob_%d_to_%d', stages(row), stages(col));
+                % Store the transition probability in results_row
+                results_row.(field_name) = probs_mat(row, col);
+            end
+        end
+        % Loop through the transition count matrix to store the values
+        for row = 1:size(counts_mat, 1)
+            for col = 1:size(counts_mat, 2)
+                % Construct a valid field name for the transition
+                field_name = sprintf('count_%d_to_%d', stages(row), stages(col));
+                % Store the transition probability in results_row
+                results_row.(field_name) = counts_mat(row, col);
+            end
+        end
 
 
 
@@ -232,6 +275,7 @@ for i = 1:length(all_mat_files)
         % Wasserstein distance metric.
         % done over whole night
         % remove no channels
+        disp('- Calculate wasserstein distance');
         remove_channel_which = zeros(1,8);
         duration_window = 4*EEG_clean.srate;
         which_window = hanning(duration_window);
@@ -249,6 +293,7 @@ for i = 1:length(all_mat_files)
 
 
         % Calculate ECG values during sleep
+        disp('- Calculate ECG values');
         ECG_results = calculate_ECG_by_cycles_and_stages(EEG_clean, cycle_table, collapsed_values);
         % Save
         results_row = addNestedFieldsToResultsRow(ECG_results.Cycle_First_Last_Differences, 'ECG_results.Cycle_First_Last_Differences', results_row);
@@ -270,6 +315,7 @@ for i = 1:length(all_mat_files)
 
         % Power spectrum analysis
         % Initialize structs to hold power spectrum results
+        disp('- Extract power spectrum features');
         power_spectrum_results = struct('NREM1', [], 'NREM2', [], 'NREM3', [], 'REM', [], 'Overall', []);
         bands = {'delta', 'theta', 'alpha', 'beta', 'spindle'};
         regions = {'FC', 'PO'};  % Define two regions: Fronto-central (FC) and Parieto-occipital (PO)
@@ -351,6 +397,7 @@ for i = 1:length(all_mat_files)
 
         % FOOOF analysis
         % Channels grouped into FC and PO
+        disp('- Extract fooof spectrum features');
         fc_channels = find(contains({EEG_clean.chanlocs.labels}, {'F', 'C'}));  % Find FC channels
         po_channels = find(contains({EEG_clean.chanlocs.labels}, {'P', 'O'}));  % Find PO channels
         % Initialize structs to hold FOOOF results for each stage and overall
@@ -489,6 +536,7 @@ for i = 1:length(all_mat_files)
 
 
         % Run the slow wave detection in YASA
+        disp('- Extract SW features');
         coupling_py = py.dict(pyargs('freq_sp', 12:16, 'p', 0.05, 'time', 1));
         sws_detection_results = py.yasa.sw_detect(data = clean_data_for_py, ...
             sf = py.float(EEG_clean.srate), ...
@@ -644,8 +692,11 @@ for i = 1:length(all_mat_files)
         results_row = addNestedFieldsToResultsRow(SW_results.Difference_first_last_cycle, 'SW_diff_first_last', results_row);
         results_row = addNestedFieldsToResultsRow(SW_results.Overall, 'SW_overall', results_row);
 
+
+
         % Run the spindle detection from YASA
         % Correct the 'thresh' parameter to be a Python dictionary
+        disp('- Extract spindle features');
         thresh_py = py.dict(pyargs('corr', 0.65, 'rel_pow', 0.2, 'rms', 1.5));
         spindles_detection_results = py.yasa.spindles_detect(data = clean_data_for_py, ...
             sf = py.float(EEG_clean.srate), ...
@@ -675,18 +726,6 @@ for i = 1:length(all_mat_files)
             spindles_detection_info.Stage = cellfun(@double, spindles_detection_info.Stage);  % Convert 'Stage' to double
             spindles_detection_info.Channel = string(spindles_detection_info.Channel);        % Convert 'Channel' to string
             spindles_detection_info.IdxChannel = cellfun(@double, spindles_detection_info.IdxChannel);  % Convert 'IdxChannel' to double
-            % Convert other numeric columns if necessary
-            spindles_detection_info.Start = cellfun(@double, spindles_detection_info.Start);
-            spindles_detection_info.Peak = cellfun(@double, spindles_detection_info.Peak);
-            spindles_detection_info.End = cellfun(@double, spindles_detection_info.End);
-            spindles_detection_info.Duration = cellfun(@double, spindles_detection_info.Duration);
-            spindles_detection_info.Amplitude = cellfun(@double, spindles_detection_info.Amplitude);
-            spindles_detection_info.RMS = cellfun(@double, spindles_detection_info.RMS);
-            spindles_detection_info.AbsPower = cellfun(@double, spindles_detection_info.AbsPower);
-            spindles_detection_info.RelPower = cellfun(@double, spindles_detection_info.RelPower);
-            spindles_detection_info.Frequency = cellfun(@double, spindles_detection_info.Frequency);
-            spindles_detection_info.Oscillations = cellfun(@double, spindles_detection_info.Oscillations);
-            spindles_detection_info.Symmetry = cellfun(@double, spindles_detection_info.Symmetry);
         end
         % Initialize an empty struct to hold the spindle results for each cycle
         Spindle_results = struct();
@@ -795,6 +834,7 @@ for i = 1:length(all_mat_files)
 
         % Detect phasic and tonic REM
         % Define parameters
+        disp('- Detect phasic and tonic REM');
         fs = EEG_clean.srate;  % Sampling rate
         eog_signal = EEG_clean.data_EOG(1, :);  % Single EOG channel
         freq_range = [0.5, 5];  % Frequency range for REM eye movements
@@ -920,6 +960,7 @@ for i = 1:length(all_mat_files)
         % MVL provides insight into the directionality or phase preference of the amplitude modulation
         % Initialize the main structure to store PAC results for each channel
         % Initialize the main structure to store PAC results for each channel
+        disp('- Calculate Phase Locking values');
         pac_results = struct();
         n_channels = size(EEG_clean.clean_data, 1);  % Number of channels in the cleaned data
         % Initialize arrays to store overall values for averaging
@@ -970,20 +1011,69 @@ for i = 1:length(all_mat_files)
         results_row = addNestedFieldsToResultsRow(pac_results, 'PAC', results_row);
 
 
-        results_table = struct2table(results_row);
-    
+         
+        % Convert results_row to table
+        new_row_table = struct2table(results_row, 'AsArray', true);
+        % Merge new_row_table into results_table
+        if isempty(results_table)
+            results_table = new_row_table;
+        else
+            % Combine variable names
+            all_var_names = unique([results_table.Properties.VariableNames, new_row_table.Properties.VariableNames]);
+            % Ensure both tables have all variables
+            for varIdx = 1:length(all_var_names)
+                varName = all_var_names{varIdx};
+                if ~ismember(varName, results_table.Properties.VariableNames)
+                    % Add missing variable to results_table
+                    results_table.(varName) = repmat({NaN}, height(results_table), 1);
+                end
+                if ~ismember(varName, new_row_table.Properties.VariableNames)
+                    % Add missing variable to new_row_table
+                    new_row_table.(varName) = {NaN};
+                end
+            end
+            % Now append new_row_table to results_table
+            results_table = [results_table; new_row_table];
+        end
+        % Save the updated results_table
+        save(results_table_file, 'results_table');
+       
 
     catch ME
-        warning('Error processing file %d (%s): %s', i, all_mat_files(i).name, ME.message);
+        warning('Error processing file %d (%s): %s', idx, all_mat_files(idx).name, ME.message);
         % Optionally, store the error information
-        all_results(i).error = ME.message;
-        continue;  % Proceed to the next file
+        results_row.error = ME.message;
+        % Convert results_row to table
+        new_row_table = struct2table(results_row, 'AsArray', true);
+        % Merge new_row_table into results_table
+        if isempty(results_table)
+            results_table = new_row_table;
+        else
+            % Combine variable names
+            all_var_names = unique([results_table.Properties.VariableNames, new_row_table.Properties.VariableNames]);
+            % Ensure both tables have all variables
+            for varIdx = 1:length(all_var_names)
+                varName = all_var_names{varIdx};
+                if ~ismember(varName, results_table.Properties.VariableNames)
+                    % Add missing variable to results_table
+                    results_table.(varName) = repmat({NaN}, height(results_table), 1);
+                end
+                if ~ismember(varName, new_row_table.Properties.VariableNames)
+                    % Add missing variable to new_row_table
+                    new_row_table.(varName) = {NaN};
+                end
+            end
+            % Now append new_row_table to results_table
+            results_table = [results_table; new_row_table];
+        end
+        % Save the updated results_table
+        save(results_table_file, 'results_table');
     end
-    % % Optionally, save individual results to a file
-    % save_filename = fullfile(all_mat_files(i).folder, [split_parts{1}, '_', split_parts{2}, '_results.mat']);
-    % save(save_filename, 'all_results', '-append');
-    %
-    % fprintf('Processed file %d/%d: %s\n', i, length(all_mat_files), filename);
-
-
+    elapsed_time = toc;  % Capture the elapsed time
+    fprintf('Elapsed time: %.2f seconds\n', elapsed_time);
 end
+
+ % Write to CSV in base_folder
+        csv_filename = fullfile(base_folder, 'results_table.csv');
+        writetable(results_table, csv_filename);
+       
