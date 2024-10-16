@@ -33,12 +33,12 @@ function complexity_measures = extract_complexity_measures(EEG_clean, srate, del
     complexity_measures.full_night.whole_data = struct();
     
     % 1. Hurst Exponent
-    %fprintf(' - Computing Hurst Exponent...\n');
-    %complexity_measures.full_night.whole_data.hurst = hurst_estimate(zscore(EEG_clean.data(:)), 'absval', 0, 1);
+    fprintf(' - Computing Hurst Exponent...\n');
+    complexity_measures.full_night.whole_data.hurst = hurst_estimate(zscore(EEG_clean.data(:)), 'absval', 0, 1);
     
     % 2. Hjorth Parameters
     fprintf(' - Computing Hjorth Parameters...\n');
-    [hjorth_activity, hjorth_mobility, hjorth_complexity] = hjorth(zscore(EEG_clean.data(:)), 0);
+    [hjorth_activity, hjorth_mobility, hjorth_complexity] = hjorth(EEG_clean.data(:)', 0);
     complexity_measures.full_night.whole_data.hjorth_activity = hjorth_activity;
     complexity_measures.full_night.whole_data.hjorth_mobility = hjorth_mobility;
     complexity_measures.full_night.whole_data.hjorth_complexity = hjorth_complexity;
@@ -52,10 +52,11 @@ function complexity_measures = extract_complexity_measures(EEG_clean, srate, del
     fprintf(' - Computing Slope Entropy...\n');
     complexity_measures.full_night.whole_data.slope_entropy = SlopEn(zscore(EEG_clean.data(:)));
     
-    % 5. Multiscale Measures
-    fprintf(' - Computing Multiscale Sample Entropy and Multiscale Lempel-Ziv Complexity...\n');
-    % complexity_measures.full_night.whole_data.multiscale_sample_entropy = MSEn(EEG_clean.data(:), MSobject('SampEn'));
-    scalz = unique(2 * floor(linspace(srate/30, srate/0.7, 5)/2) + 1); 
+    % % 5. Multiscale Measures
+    % dauert unendlich lange
+    % fprintf(' - Computing Multiscale Sample Entropy and Multiscale Lempel-Ziv Complexity...\n');
+    % %complexity_measures.full_night.whole_data.multiscale_sample_entropy = MSEn(EEG_clean.data(:), MSobject('SampEn'));
+    % scalz = unique(2 * floor(linspace(srate/30, srate/0.7, 5)/2) + 1); 
     % complexity_measures.full_night.whole_data.multiscale_lz_complexity = sum(getMultiscaleLZ(EEG_clean.data(:), scalz));
     
     %% B. Full Night, Channel-Specific
@@ -84,13 +85,14 @@ function complexity_measures = extract_complexity_measures(EEG_clean, srate, del
         % spect_en = SpecEn(zscore(EEG_clean.data(ch, :)));
         % complexity_measures.full_night.channel_specific.(channel_label).spectral_entropy = spect_en;
        
-        % 3. Fractal Dimensions
-        fprintf('   * Computing Fractal Dimensions (Katz)...\n');
-        complexity_measures.full_night.channel_specific.(channel_label).katz_fd = Katz_FD(zscore(EEG_clean.data(ch, :)));
+        % % 3. Fractal Dimensions
+        % dauert lange
+        % fprintf('   * Computing Fractal Dimensions (Katz)...\n');
+        % complexity_measures.full_night.channel_specific.(channel_label).katz_fd = Katz_FD(zscore(EEG_clean.data(ch, :)));
         
         % 4. Hjorth Parameters
         fprintf('   * Computing Hjorth Parameters...\n');
-        [hj_act, hj_mob, hj_comp] = hjorth(zscore(EEG_clean.data(ch, :)), 0);
+        [hj_act, hj_mob, hj_comp] = hjorth(EEG_clean.data(ch, :)', 0);
         complexity_measures.full_night.channel_specific.(channel_label).hjorth_activity = hj_act;
         complexity_measures.full_night.channel_specific.(channel_label).hjorth_mobility = hj_mob;
         complexity_measures.full_night.channel_specific.(channel_label).hjorth_complexity = hj_comp;
@@ -99,10 +101,6 @@ function complexity_measures = extract_complexity_measures(EEG_clean, srate, del
         fprintf('   * Computing Slope Entropy with Levels [0.5, 20]...\n');
         complexity_measures.full_night.channel_specific.(channel_label).slope_entropy_z_05_20 = SlopEn(zscore(EEG_clean.data(ch, :)), 'Lvls', [0.5, 20]);
         
-        % 6. Hurst Exponent
-        % doesnt work
-        % fprintf('   * Computing Hurst Exponent...\n');
-        % complexity_measures.full_night.channel_specific.(channel_label).hurst_exponent = hurst_estimate(zscore(EEG_clean.data(ch, :)), 'absval', 0, 1);
     end
     
     %% C. Full Night, Band-Specific
@@ -133,9 +131,8 @@ function complexity_measures = extract_complexity_measures(EEG_clean, srate, del
         % complexity_measures.full_night.band_specific.(band).spectral_entropy = spect_en_band(7);
         
         % 3. Hurst Exponent per Band
-        % geht nicht
-        % fprintf('   * Computing Hurst Exponent for %s Band...\n', band);
-        % complexity_measures.full_night.band_specific.(band).hurst_exponent = hurst_estimate(zscore(band_signal(:)), 'absval', 0, 1);
+        fprintf('   * Computing Hurst Exponent for %s Band...\n', band);
+        complexity_measures.full_night.band_specific.(band).hurst_exponent = hurst_estimate(zscore(band_signal(:)), 'absval', 0, 1);
         
         % 4. Lagged Coherence per Band
         fprintf('   * Computing Lagged Coherence for %s Band...\n', band);

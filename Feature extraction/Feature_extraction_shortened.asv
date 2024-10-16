@@ -19,6 +19,16 @@ else
     results_table = table();
 end
 
+% Load existing error_log if it exists
+error_log_file = fullfile(base_folder, 'error_log.mat');  % Save in base_folder
+if exist(error_log_file, 'file')
+    load(error_log_file, 'error_log');
+else
+    error_log = table('Size', [0, 4], ...
+                  'VariableTypes', {'double', 'string', 'string', 'string'}, ...
+                  'VariableNames', {'i', 'study', 'participant', 'error_message'});
+end
+
 %% bands
 delta_b = [0.5, 4];
 theta_b = [4, 8];
@@ -27,21 +37,19 @@ beta_b = [15, 30];
 gamma_b = [30, 40];
 spindle_b = [12, 16];
 
-for i = 1:2%length(all_mat_files)
+for idx = 1:2%length(all_mat_files)
     try
         tic;
-        % load the file
-        load([all_mat_files(i).folder, '\', all_mat_files(i).name]);
         % extract the name of the file
-        filename = all_mat_files(i).name;
-        disp(['------------------------ Analysing File: ', filename]);
+        filename = all_mat_files(idx).name;
+        disp(['------------------------ Analysing File ', num2str(idx), ' of ', num2str(length(all_mat_files)), ': ', filename]);
         % Split the filename by underscores ('_') and periods ('.')
         split_parts = split(filename, {'_', '.'});
         % Extract the study and participant variables
         study = split_parts{1};
         participant = split_parts{2};
 
-          % Check if the file has already been processed
+        % Check if the file has already been processed
         if ~isempty(results_table)
             existing_entries = strcmp(results_table.study, study) & strcmp(results_table.participant, participant);
             if any(existing_entries)
@@ -50,11 +58,23 @@ for i = 1:2%length(all_mat_files)
             end
         end
 
+        % Check if the file has already encountered an error in error_log
+        if exist('error_log', 'var') && ~isempty(error_log)
+            error_entries = strcmp({error_log.study}, study) & strcmp({error_log.participant}, participant);
+            if any(error_entries)
+                disp(['File ', filename, ' already logged with an error. Skipping.']);
+                continue; % Skip to next file
+            end
+        end
+        
+        % load the file
+        load([all_mat_files(idx).folder, '\', all_mat_files(idx).name]);
+
         % Initialize results_row as a struct
         results_row = struct();
 
         % Save study and participant
-        results_row.i = i;
+        results_row.i = idx;
         results_row.study = study;
         results_row.participant = participant;
 
@@ -205,7 +225,11 @@ for i = 1:2%length(all_mat_files)
         %% Extraction of whole night features
         % Call YASA's sleep statistics function
         disp('- Extract whole night sleep statistics');
-        sleep_stats = py.yasa.sleep_statistics(hypnogram_py, sf_hyp=1/30);
+        % Slightly modify hypnogram for yasa function
+        new_hypnogram = hypnogram;
+        new_hypnogram(new_hypnogram == 5) = 4;
+        new_hypnogram_py = py.numpy.array(new_hypnogram);
+        sleep_stats = py.yasa.sleep_statistics(new_hypnogram_py, sf_hyp=1/30);
         sleep_stats = dictionary(sleep_stats);
         % Save the generated values
         sleep_stat_keys = keys(sleep_stats);
@@ -403,8 +427,6 @@ for i = 1:2%length(all_mat_files)
         % Initialize structs to hold FOOOF results for each stage and overall
         fooof_results = struct('NREM1', [], 'NREM2', [], 'NREM3', [], 'REM', [], 'Overall', []);
         bands = {'delta', 'theta', 'alpha', 'beta', 'spindle', 'gamma'};
-        overall_fooof_offset = struct('FC', [], 'PO', []);
-        overall_fooof_exponent = struct('FC', [], 'PO', []);
         overall_normalized_absolute_power = struct('FC', [], 'PO', []);
         overall_peak_values = struct('FC', [], 'PO', []);
         stage_fooof_offset = struct('FC', [], 'PO', []);
@@ -412,14 +434,6 @@ for i = 1:2%length(all_mat_files)
         stage_normalized_absolute_power = struct('FC', [], 'PO', []);
         stage_peak_values = struct('FC', [], 'PO', []);
         % Initialize arrays to accumulate FOOOF values across all stages for the "Overall" calculation
-        overall_fooof_offset.FC = [];
-        overall_fooof_offset.PO = [];
-        overall_fooof_exponent.FC = [];
-        overall_fooof_exponent.PO = [];
-        overall_normalized_absolute_power.FC = [];
-        overall_normalized_absolute_power.PO = [];
-        overall_peak_values.FC = [];
-        overall_peak_values.PO = [];
         stage_fooof_offset.FC = [];
         stage_fooof_offset.PO = [];
         stage_fooof_exponent.FC = [];
@@ -457,11 +471,6 @@ for i = 1:2%length(all_mat_files)
                     stage_fooof_exponent.FC = [stage_fooof_exponent.FC; fooof_exponent];
                     stage_normalized_absolute_power.FC = [stage_normalized_absolute_power.FC; struct2array(normalized_absolute_power)];
                     stage_peak_values.FC = [stage_peak_values.FC; struct2array(peak_table)];
-                    % Accumulate results for the overall calculation (FC)
-                    overall_fooof_offset.FC = [overall_fooof_offset.FC; fooof_offset];
-                    overall_fooof_exponent.FC = [overall_fooof_exponent.FC; fooof_exponent];
-                    overall_normalized_absolute_power.FC = [overall_normalized_absolute_power.FC; struct2array(normalized_absolute_power)];
-                    overall_peak_values.FC = [overall_peak_values.FC; struct2array(peak_table)];
                 end
                 % Process PO channels
                 for chan = po_channels
@@ -474,11 +483,6 @@ for i = 1:2%length(all_mat_files)
                     stage_fooof_exponent.PO = [stage_fooof_exponent.PO; fooof_exponent];
                     stage_normalized_absolute_power.PO = [stage_normalized_absolute_power.PO; struct2array(normalized_absolute_power)];
                     stage_peak_values.PO = [stage_peak_values.PO; struct2array(peak_table)];
-                    % Accumulate results for the overall calculation (PO)
-                    overall_fooof_offset.PO = [overall_fooof_offset.PO; fooof_offset];
-                    overall_fooof_exponent.PO = [overall_fooof_exponent.PO; fooof_exponent];
-                    overall_normalized_absolute_power.PO = [overall_normalized_absolute_power.PO; struct2array(normalized_absolute_power)];
-                    overall_peak_values.PO = [overall_peak_values.PO; struct2array(peak_table)];
                 end
             end
             % Store results in the struct for each sleep stage
@@ -614,13 +618,51 @@ for i = 1:2%length(all_mat_files)
                 SW_results.(['Cycle_' num2str(cycle_idx)]).std.duration_positive_phase = std(sw_cycle_data_NREM.duration_positive_phase);
             else
                 % If no NREM slow waves found in this cycle, set fields to NaN
-                SW_results.(['Cycle_' num2str(cycle_idx)]).mean = NaN;
-                SW_results.(['Cycle_' num2str(cycle_idx)]).std = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).mean.duration = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).std.duration = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).mean.ValNegPeak = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).std.ValNegPeak = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).mean.ValPosPeak = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).std.ValPosPeak = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).mean.PTP = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).std.PTP = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).mean.Slope = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).std.Slope = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).mean.Frequency = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).std.Frequency = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).mean.SigmaPeak = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).std.SigmaPeak = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).mean.PhaseAtSigmaPeak = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).std.PhaseAtSigmaPeak = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).mean.ndPAC = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).std.ndPAC = NaN;
+                % Durations
+                SW_results.(['Cycle_' num2str(cycle_idx)]).mean.duration_negative_phase = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).std.duration_negative_phase = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).mean.duration_positive_phase = NaN;
+                SW_results.(['Cycle_' num2str(cycle_idx)]).std.duration_positive_phase = NaN;
             end
         end
         % Calculate the difference between the first and last cycle
         first_cycle = SW_results.Cycle_1;
-        last_cycle = SW_results.(['Cycle_' num2str(height(cycle_table))]);
+        % Get the last cycle data
+        % Loop through all cycles from the end to find the last valid one
+        for cycle_idx = height(cycle_table):-1:1
+            % Access the current cycle
+            current_cycle = SW_results.(['Cycle_' num2str(cycle_idx)]);
+            % Check if mean is a struct and has fields
+            if isstruct(current_cycle.mean) && ~isempty(fieldnames(current_cycle.mean))
+                % Check if all entries in current_cycle.mean are NaN
+                if ~all(structfun(@(x) all(isnan(x)), current_cycle.mean))
+                    % If any entry is not NaN, assign it to last_cycle and break the loop
+                    last_cycle = current_cycle;
+                    break;
+                end
+            else
+                % If mean is NaN, skip to the next cycle
+                continue;
+            end
+        end
         % Calculate the difference in mean values between the first and last cycle
         SW_results.Difference_first_last_cycle.mean.duration = first_cycle.mean.duration - last_cycle.mean.duration;
         SW_results.Difference_first_last_cycle.mean.ValNegPeak = first_cycle.mean.ValNegPeak - last_cycle.mean.ValNegPeak;
@@ -652,10 +694,18 @@ for i = 1:2%length(all_mat_files)
         for cycle_idx = 1:height(cycle_table)
             cycle_name = ['Cycle_' num2str(cycle_idx)];
             if isfield(SW_results, cycle_name)
-                if ~isempty(SW_results.(cycle_name).mean) && ~isnan(SW_results.(cycle_name).mean.duration)
-                    % Concatenate the data for overall calculation
-                    all_cycle_data_mean = [all_cycle_data_mean; struct2array(SW_results.(cycle_name).mean)];
-                    all_cycle_data_std = [all_cycle_data_std; struct2array(SW_results.(cycle_name).std)];
+                % Check if 'mean' is a struct with fields, indicating a valid cycle
+                if isstruct(SW_results.(cycle_name).mean)
+                    % Extract and concatenate the data for overall calculation, ignoring NaNs
+                    mean_values = struct2array(SW_results.(cycle_name).mean);
+                    std_values = struct2array(SW_results.(cycle_name).std);
+                    % Append non-NaN data to the overall data matrices
+                    if ~isempty(mean_values)
+                        all_cycle_data_mean = [all_cycle_data_mean; mean_values];
+                    end
+                    if ~isempty(std_values)
+                        all_cycle_data_std = [all_cycle_data_std; std_values];
+                    end
                 end
             end
         end
@@ -764,13 +814,43 @@ for i = 1:2%length(all_mat_files)
                 Spindle_results.(['Cycle_' num2str(cycle_idx)]).std.Symmetry = std(spindle_cycle_data_NREM.Symmetry);
             else
                 % If no NREM spindles found in this cycle, set fields to NaN
-                Spindle_results.(['Cycle_' num2str(cycle_idx)]).mean = NaN;
-                Spindle_results.(['Cycle_' num2str(cycle_idx)]).std = NaN;
+                Spindle_results.(['Cycle_' num2str(cycle_idx)]).mean.duration = NaN;
+                Spindle_results.(['Cycle_' num2str(cycle_idx)]).std.duration = NaN;
+                Spindle_results.(['Cycle_' num2str(cycle_idx)]).mean.Amplitude = NaN;
+                Spindle_results.(['Cycle_' num2str(cycle_idx)]).std.Amplitude = NaN;
+                Spindle_results.(['Cycle_' num2str(cycle_idx)]).mean.RMS = NaN;
+                Spindle_results.(['Cycle_' num2str(cycle_idx)]).std.RMS = NaN;
+                Spindle_results.(['Cycle_' num2str(cycle_idx)]).mean.AbsPower = NaN;
+                Spindle_results.(['Cycle_' num2str(cycle_idx)]).std.AbsPower = NaN;
+                Spindle_results.(['Cycle_' num2str(cycle_idx)]).mean.RelPower = NaN;
+                Spindle_results.(['Cycle_' num2str(cycle_idx)]).std.RelPower = NaN;
+                Spindle_results.(['Cycle_' num2str(cycle_idx)]).mean.Frequency = NaN;
+                Spindle_results.(['Cycle_' num2str(cycle_idx)]).std.Frequency = NaN;
+                Spindle_results.(['Cycle_' num2str(cycle_idx)]).mean.Oscillations = NaN;
+                Spindle_results.(['Cycle_' num2str(cycle_idx)]).std.Oscillations = NaN;
+                Spindle_results.(['Cycle_' num2str(cycle_idx)]).mean.Symmetry = NaN;
+                Spindle_results.(['Cycle_' num2str(cycle_idx)]).std.Symmetry = NaN;
             end
         end
         % Calculate the difference between the first and last cycle
         first_cycle = Spindle_results.Cycle_1;
-        last_cycle = Spindle_results.(['Cycle_' num2str(height(cycle_table))]);
+        % Loop through all cycles from the end to find the last valid one
+        for cycle_idx = height(cycle_table):-1:1
+            % Access the current cycle
+            current_cycle = Spindle_results.(['Cycle_' num2str(cycle_idx)]);
+            % Check if mean is a struct and has fields
+            if isstruct(current_cycle.mean) && ~isempty(fieldnames(current_cycle.mean))
+                % Check if all entries in current_cycle.mean are NaN
+                if ~all(structfun(@(x) all(isnan(x)), current_cycle.mean))
+                    % If any entry is not NaN, assign it to last_cycle and break the loop
+                    last_cycle = current_cycle;
+                    break;
+                end
+            else
+                % If mean is NaN, skip to the next cycle
+                continue;
+            end
+        end
         % Calculate the difference in mean values between the first and last cycle
         Spindle_results.Difference_first_last_cycle.mean.duration = first_cycle.mean.duration - last_cycle.mean.duration;
         Spindle_results.Difference_first_last_cycle.mean.Amplitude = first_cycle.mean.Amplitude - last_cycle.mean.Amplitude;
@@ -792,14 +872,21 @@ for i = 1:2%length(all_mat_files)
         % Initialize empty matrices to store all cycle data for overall calculation
         all_cycle_data_mean = [];
         all_cycle_data_std = [];
-        % Loop through each cycle and aggregate the data
-        for cycle_idx = 1:height(cycle_table)
+         for cycle_idx = 1:height(cycle_table)
             cycle_name = ['Cycle_' num2str(cycle_idx)];
             if isfield(Spindle_results, cycle_name)
-                if ~isempty(Spindle_results.(cycle_name).mean) && ~isnan(Spindle_results.(cycle_name).mean.duration)
-                    % Concatenate the data for overall calculation
-                    all_cycle_data_mean = [all_cycle_data_mean; struct2array(Spindle_results.(cycle_name).mean)];
-                    all_cycle_data_std = [all_cycle_data_std; struct2array(Spindle_results.(cycle_name).std)];
+                % Check if 'mean' is a struct with fields, indicating a valid cycle
+                if isstruct(Spindle_results.(cycle_name).mean)
+                    % Extract and concatenate the data for overall calculation, ignoring NaNs
+                    mean_values = struct2array(Spindle_results.(cycle_name).mean);
+                    std_values = struct2array(Spindle_results.(cycle_name).std);
+                    % Append non-NaN data to the overall data matrices
+                    if ~isempty(mean_values)
+                        all_cycle_data_mean = [all_cycle_data_mean; mean_values];
+                    end
+                    if ~isempty(std_values)
+                        all_cycle_data_std = [all_cycle_data_std; std_values];
+                    end
                 end
             end
         end
@@ -887,13 +974,25 @@ for i = 1:2%length(all_mat_files)
         rem_analysis.Overall.phasic_to_tonic_ratio = overall_phasic_to_tonic_ratio;
         % Calculate difference values based on the first and last cycle
         if height(cycle_table) > 1
-            % Calculate the phasic-to-tonic ratio difference
+            % Initialize variables to store the last valid values
+            last_cycle_ratio = NaN;
+            last_cycle_rem_duration = NaN;
+            % Loop from the end to find the last valid cycle where both values are not NaN
+            for cycle_idx = height(cycle_table):-1:1
+                % Access the current cycle
+                current_cycle = rem_analysis.(['Cycle_' num2str(cycle_idx)]);
+                % Check if both fields are not NaN
+                if ~isnan(current_cycle.phasic_to_tonic_ratio) && ~isnan(current_cycle.total_rem_duration_min)
+                    last_cycle_ratio = current_cycle.phasic_to_tonic_ratio;
+                    last_cycle_rem_duration = current_cycle.total_rem_duration_min;
+                    break;
+                end
+            end
+            % Calculate the phasic-to-tonic ratio difference with the first cycle
             first_cycle_ratio = rem_analysis.Cycle_1.phasic_to_tonic_ratio;
-            last_cycle_ratio = rem_analysis.(['Cycle_' num2str(height(cycle_table))]).phasic_to_tonic_ratio;
             rem_analysis.Difference_first_last_cycle.phasic_to_tonic_ratio_ratio = last_cycle_ratio / first_cycle_ratio;
-            % Calculate the ratio of total REM duration between the first and last cycle
+            % Similarly, calculate the total REM duration ratio
             first_cycle_rem_duration = rem_analysis.Cycle_1.total_rem_duration_min;
-            last_cycle_rem_duration = rem_analysis.(['Cycle_' num2str(height(cycle_table))]).total_rem_duration_min;
             rem_analysis.Difference_first_last_cycle.total_rem_duration_ratio = last_cycle_rem_duration / first_cycle_rem_duration;
         else
             warning('Only one cycle detected; cannot calculate difference between first and last cycle.');
@@ -1039,38 +1138,25 @@ for i = 1:2%length(all_mat_files)
         save(results_table_file, 'results_table');
        
 
-    catch ME
-        warning('Error processing file %d (%s): %s', idx, all_mat_files(idx).name, ME.message);
-        % Optionally, store the error information
-        results_row.error = ME.message;
-        % Convert results_row to table
-        new_row_table = struct2table(results_row, 'AsArray', true);
-        % Merge new_row_table into results_table
-        if isempty(results_table)
-            results_table = new_row_table;
-        else
-            % Combine variable names
-            all_var_names = unique([results_table.Properties.VariableNames, new_row_table.Properties.VariableNames]);
-            % Ensure both tables have all variables
-            for varIdx = 1:length(all_var_names)
-                varName = all_var_names{varIdx};
-                if ~ismember(varName, results_table.Properties.VariableNames)
-                    % Add missing variable to results_table
-                    results_table.(varName) = repmat({NaN}, height(results_table), 1);
-                end
-                if ~ismember(varName, new_row_table.Properties.VariableNames)
-                    % Add missing variable to new_row_table
-                    new_row_table.(varName) = {NaN};
-                end
-            end
-            % Now append new_row_table to results_table
-            results_table = [results_table; new_row_table];
-        end
-        % Save the updated results_table
-        save(results_table_file, 'results_table');
+   catch ME
+     warning('Error processing file %d (%s): %s', idx, all_mat_files(idx).name, ME.message);
+
+        % Extract study, participant, and error message
+        error_i = results_row.i;  % File index
+        error_study = results_row.study;  % Study name
+        error_participant = results_row.participant;  % Participant name
+        error_message = string(ME.message);  % Error message as string
+
+        % Add the new error row to the table
+        new_error = {error_i, error_study, error_participant, error_message};
+        error_log = [error_log; new_error];
+
+        % Save the error log after each error, in case the script stops
+        save(error_log_file, 'error_log');
+
+        % Continue to the next file in the loop
+        continue;
     end
-    elapsed_time = toc;  % Capture the elapsed time
-    fprintf('Elapsed time: %.2f seconds\n', elapsed_time);
 end
 
  % Write to CSV in base_folder
