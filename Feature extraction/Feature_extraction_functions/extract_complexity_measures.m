@@ -36,13 +36,6 @@ function complexity_measures = extract_complexity_measures(EEG_clean, srate, del
     fprintf(' - Computing Hurst Exponent...\n');
     complexity_measures.full_night.whole_data.hurst = hurst_estimate(zscore(EEG_clean.data(:)), 'absval', 0, 1);
     
-    % 2. Hjorth Parameters
-    fprintf(' - Computing Hjorth Parameters...\n');
-    [hjorth_activity, hjorth_mobility, hjorth_complexity] = hjorth(EEG_clean.data(:)', 0);
-    complexity_measures.full_night.whole_data.hjorth_activity = hjorth_activity;
-    complexity_measures.full_night.whole_data.hjorth_mobility = hjorth_mobility;
-    complexity_measures.full_night.whole_data.hjorth_complexity = hjorth_complexity;
-    
     % 3. Statistical Measures
     fprintf(' - Computing Statistical Measures (Kurtosis & Skewness)...\n');
     complexity_measures.full_night.whole_data.kurtosis = kurtosis(EEG_clean.data(:));

@@ -60,7 +60,7 @@ for idx = 1:length(all_mat_files)
 
         % Check if the file has already encountered an error in error_log
         if exist('error_log', 'var') && ~isempty(error_log)
-            error_entries = strcmp({error_log.study}, study) & strcmp({error_log.participant}, participant);
+            error_entries = strcmp(error_log.study, study) & strcmp(error_log.participant, participant);
             if any(error_entries)
                 disp(['File ', filename, ' already logged with an error. Skipping.']);
                 continue; % Skip to next file
@@ -150,10 +150,9 @@ for idx = 1:length(all_mat_files)
 
 
         % Calculate sleep cycles
-        [cycle_table, collapsed_values] = calculate_sleep_cycles(hypnogram_py);
+        [cycle_table, collapsed_values] = calculate_sleep_cycles_scoring(EEG_clean.scoring_long_30s);
         % Save the amount of cycles
         results_row.n_cycles = cycle_table.n_cycle(end);
-
 
 
         % Check for clean epochs by checking if no disturbance was found in rem_ind_all
@@ -1158,7 +1157,8 @@ for idx = 1:length(all_mat_files)
         continue;
     end
     time = toc;
-    disp('Duration for this file = ', time]);
+    fprintf('Duration for this file = %.2f\n', time);
+
 end
 
  % Write to CSV in base_folder

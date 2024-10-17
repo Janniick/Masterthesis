@@ -34,7 +34,7 @@ function ECG_results = calculate_ECG_by_cycles_and_stages(EEG_clean, cycle_table
                 epoch_end = epoch_start + collapsed_values(i, 3) - 1;  % End epoch
                 epoch_indices = epoch_start:epoch_end;
 
-                if stage == 2 || stage == 3  % NREM stages (2 = NREM2, 3 = NREM3)
+                if stage == 1 || stage == 2 || stage == 3  % NREM stages (1 = NREM1, 2 = NREM2, 3 = NREM3)
                     % Calculate ECG for NREM stages
                     for idx = epoch_indices
                         if idx <= nr_epochs

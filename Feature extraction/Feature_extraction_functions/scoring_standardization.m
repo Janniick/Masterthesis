@@ -145,6 +145,10 @@ end
 % Store the standardized scoring table back into EEG_clean
 EEG_clean.scoring_long_standardized = scoring_standardized;
 
+% Replace stage 4 with stage 3 in the standardized scoring table
+EEG_clean.scoring_long_standardized.stage(EEG_clean.scoring_long_standardized.stage == 4) = 3;
+
 % Display the result
 disp('Scoring table has been standardized with columns: epoch, stage, and duration.');
+disp('All instances of stage 4 have been replaced with stage 3.');
 end
