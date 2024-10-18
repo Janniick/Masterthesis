@@ -37,7 +37,7 @@ beta_b = [15, 30];
 gamma_b = [30, 40];
 spindle_b = [12, 16];
 
-for idx = 1:2%length(all_mat_files)
+for idx = 1:length(all_mat_files)
     try
         tic;
         % extract the name of the file
@@ -60,7 +60,7 @@ for idx = 1:2%length(all_mat_files)
 
         % Check if the file has already encountered an error in error_log
         if exist('error_log', 'var') && ~isempty(error_log)
-            error_entries = strcmp({error_log.study}, study) & strcmp({error_log.participant}, participant);
+            error_entries = strcmp(error_log.study, study) & strcmp(error_log.participant, participant);
             if any(error_entries)
                 disp(['File ', filename, ' already logged with an error. Skipping.']);
                 continue; % Skip to next file
@@ -150,10 +150,9 @@ for idx = 1:2%length(all_mat_files)
 
 
         % Calculate sleep cycles
-        [cycle_table, collapsed_values] = calculate_sleep_cycles(hypnogram_py);
+        [cycle_table, collapsed_values] = calculate_sleep_cycles_scoring(EEG_clean.scoring_long_30s);
         % Save the amount of cycles
         results_row.n_cycles = cycle_table.n_cycle(end);
-
 
 
         % Check for clean epochs by checking if no disturbance was found in rem_ind_all
@@ -1130,6 +1129,20 @@ for idx = 1:2%length(all_mat_files)
                     % Add missing variable to new_row_table
                     new_row_table.(varName) = {NaN};
                 end
+              % Loop through each column in new_row_table
+for col = 1:width(new_row_table)
+    % Check if the column is a cell array
+    if iscell(new_row_table{:, col})
+        % Loop through each row in the column
+        for row = 1:height(new_row_table)
+            % Check if the cell contains NaN and replace it with numeric NaN
+            if isempty(new_row_table{row, col}) || (iscell(new_row_table{row, col}) && any(isnan(new_row_table{row, col}{:})))
+                % Replace the cell with a numeric NaN
+                new_row_table{row, col} = NaN;
+            end
+        end
+    end
+end
             end
             % Now append new_row_table to results_table
             results_table = [results_table; new_row_table];
@@ -1157,6 +1170,9 @@ for idx = 1:2%length(all_mat_files)
         % Continue to the next file in the loop
         continue;
     end
+    time = toc;
+    fprintf('Duration for this file = %.2f\n', time);
+
 end
 
  % Write to CSV in base_folder

@@ -1127,7 +1127,7 @@ for idx = 1:length(all_mat_files)
                 end
                 if ~ismember(varName, new_row_table.Properties.VariableNames)
                     % Add missing variable to new_row_table
-                    new_row_table.(varName) = {NaN};
+                    new_row_table.(varName) = NaN;
                 end
             end
             % Now append new_row_table to results_table
