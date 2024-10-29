@@ -2,14 +2,14 @@
 addpath(genpath('D:\Masterarbeit Jannick\scripts\2_Preprocessing\Feature extraction\Feature_extraction_functions'));
 addpath('D:\Masterarbeit Jannick\scripts\2_Preprocessing\eeglab2024.0');
 eeglab nogui;
-% py.importlib.import_module('yasa');
+py.importlib.import_module('yasa');
 
 %% load python
 pyenv('Version', 'C:\Users\janni\AppData\Local\Programs\Python\Python311\python.EXE');
 % pyrun("import yasa", "yasa");
 %% Define the base folder where the search should start
 base_folder = 'D:\Masterarbeit Jannick\Data';  % Replace with your folder path
-% Search for all files ending with '_preprocessed.mat' in all subdirectories
+% Search for all files ending with '_preprocessed_EOG.mat' in all subdirectories
 all_mat_files = dir(fullfile(base_folder, '**', '*_preprocessed_EOG.mat'));
 %% Load existing results_table if it exists
 results_table_file = fullfile(base_folder, 'results_table.mat');  % Save in base_folder
@@ -48,6 +48,11 @@ for idx = 1:length(all_mat_files)
         % Extract the study and participant variables
         study = split_parts{1};
         participant = split_parts{2};
+        % Check if the study is 'MOG'
+        if strcmp(study, 'MOG')
+            % Append split_parts{3} to participant
+            participant = strcat(participant, '_', split_parts{3});
+        end
 
         % Check if the file has already been processed
         if ~isempty(results_table)
@@ -322,6 +327,7 @@ for idx = 1:length(all_mat_files)
         results_row = addNestedFieldsToResultsRow(ECG_results.Cycle_First_Last_Differences, 'ECG_results.Cycle_First_Last_Differences', results_row);
         results_row = addNestedFieldsToResultsRow(ECG_results.Overall, 'ECG.Overall', results_row);
 
+        
 
         % Calculate complexity measures
         complexity_measures = extract_complexity_measures(EEG_clean, srate, delta_b, theta_b, alpha_b, beta_b, spindle_b);
@@ -1052,11 +1058,10 @@ for idx = 1:length(all_mat_files)
 
 
 
-        % Calculate Phase Locking Value, Modulation Index and Mean Vektor Length
+        % Calculate Phase Locking Value, Modulation Index and Mean Vektor Length for SW-Spindle-Coupling
         % PLV is a measure that quantifies the consistency of the phase relationship between two signals over time
         % MI tells you about the strength and specificity of the coupling
         % MVL provides insight into the directionality or phase preference of the amplitude modulation
-        % Initialize the main structure to store PAC results for each channel
         % Initialize the main structure to store PAC results for each channel
         disp('- Calculate Phase Locking values');
         pac_results = struct();
@@ -1161,7 +1166,23 @@ for idx = 1:length(all_mat_files)
 
 end
 
+% Compute arousals (stage shifts from non-zero to zero divided by the SPT)
+% Step 1: Convert SPT to hours
+SPT_column = results_table.SPT;  % Assuming 'SPT' is in minutes
+SPT_hours = SPT_column / 60;     % Convert SPT to hours
+% Step 2: Sum all 'count_X_to_0' columns, excluding 'count_0_to_0'
+count_columns = results_table{:, contains(results_table.Properties.VariableNames, 'count_') & ...
+                                     contains(results_table.Properties.VariableNames, '_to_0') & ...
+                                     ~contains(results_table.Properties.VariableNames, 'count_0_to_0')};
+total_count_X_to_0 = sum(count_columns, 2, 'omitnan');  % Sum across columns for each row (participant)
+% Step 3: Calculate wakeups per hour
+wakeups_per_hour = total_count_X_to_0 ./ SPT_hours;
+% Step 4: Append the new column to 'results_table'
+results_table.wakeups_per_hour = wakeups_per_hour;
+% Save the updated results_table
+save(results_table_file, 'results_table');
+
  % Write to CSV in base_folder
-        csv_filename = fullfile(base_folder, 'results_table.csv');
-        writetable(results_table, csv_filename);
+ csv_filename = fullfile(base_folder, 'results_table.csv');
+ writetable(results_table, csv_filename);
        

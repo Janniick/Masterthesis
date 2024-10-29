@@ -13,7 +13,7 @@
     %% Define path to data files
     %%% Add the path to your .edf files (if will find all .edf files in all
     %%% subfolders)
-    folderpath = 'D:\Masterarbeit Jannick\Data\PSS\PSS_EEG';
+    folderpath = 'D:\Masterarbeit Jannick\Data\GHB02\GHB02_EEG';
     clear edf_files web_files txt_files mat_files;
     edf_files = dir(fullfile(folderpath, '*\*.edf'));
     web_files = dir(fullfile(folderpath, '*\*.web'));
@@ -46,7 +46,7 @@
     % mat_files = dir(fullfile(folderpath, '*\*\*.mat'));
     %% Define parameters
     %%% define study name (avoid "/" and "_")
-    study = 'PSS';
+    study = 'GHB02';
     %%% define which channels to look at
     selected_channels = {'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2'};
     % selected_channels = {'CzF3', 'CzF4', 'CzC3', 'CzC4', 'CzP3', 'CzP4', 'CzO1', 'CzO2'};

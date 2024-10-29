@@ -3,7 +3,7 @@
     eeglab nogui; % Initialize EEGLAB (eeglab nogui; if you want no GUI)
 
 % Define the base folder where the search should start
-base_folder = 'D:\Masterarbeit Jannick\Data\DEX-FX_v2\DEX-FX_v2_EEG';
+base_folder = 'D:\Masterarbeit Jannick\Data\GHB_TRA\GHB_TRA_EEG';
 
 % Get a list of all .mat and .edf files in the base folder and its subfolders
 all_files = dir(fullfile(base_folder, '**', '*.*'));
@@ -27,7 +27,7 @@ for i = 1:length(unique_folders)
     edf_files_in_folder = dir(fullfile(folder, '*.edf'));
     
     % Find the _preprocessed.mat files
-    preprocessed_files = dir(fullfile(folder, '*_preprocessed.mat'));
+    preprocessed_files = dir(fullfile(folder, '*_preprocessed_EOG.mat'));
     
     % Loop through each _preprocessed.mat file and group with other .mat and .edf files in the same folder
     for j = 1:length(preprocessed_files)
@@ -57,7 +57,7 @@ end
 
 
 % Now process each group by loading the .mat and .edf files
-for k = 2:length(grouped_files)
+for k = 1:length(grouped_files)
     group = grouped_files{k};
     disp(['Processing Group ' num2str(k)]);
 
